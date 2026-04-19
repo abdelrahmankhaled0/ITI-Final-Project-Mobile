@@ -1,19 +1,38 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:taborq/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:taborq/features/auth/presentation/screens/login.dart';
 import 'package:taborq/features/auth/presentation/screens/register.dart';
 import 'package:taborq/features/widgets/bottom_nav.dart';
 
 class AppRoutes {
-  // static const String login = "/";
-  // static const String register = "/register";
-  static const String home = "/";
+  static const String login = "/";
+  static const String register = "/register";
+  static const String forgetPassword = "/forgetPassword";
+  static const String home = "/home";
 
   static final routes = GoRouter(
     routes: [
-      // GoRoute(path: login, builder: (context, state) => LoginScreen()),
-      // GoRoute(path: register, builder: (context, state) => RegisterScreen()),
+      GoRoute(
+        path: login,
+        builder: (context, state) => BlocProvider(
+          create: (context) => AuthCubit(),
+          child: LoginScreen(),
+        ),
+      ),
+      GoRoute(
+        path: register,
+        builder: (context, state) => BlocProvider(
+          create: (context) => AuthCubit(),
+          child: RegisterScreen(),
+        ),
+      ),
+      GoRoute(
+        path: forgetPassword,
+        builder: (context, state) => ForgetPasswordScreen(),
+      ),
       GoRoute(path: home, builder: (context, state) => BottomNav()),
-
     ],
   );
 }
