@@ -8,7 +8,6 @@ import 'package:taborq/features/widgets/clinic_card.dart';
 import 'package:taborq/features/widgets/hospital_status_card.dart';
 import 'package:taborq/features/widgets/section_header.dart';
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -26,13 +25,17 @@ class HomeScreen extends StatelessWidget {
               backgroundColor: AppColors.lightColor,
               surfaceTintColor: Colors.transparent,
               floating: true,
+              automaticallyImplyLeading: false,
               snap: true,
               elevation: 0,
               titleSpacing: 20,
               title: Row(
                 children: [
-                  const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: AppColors.primaryColor, size: 18),
+                  const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: AppColors.primaryColor,
+                    size: 18,
+                  ),
                   const SizedBox(width: 4),
                   RichText(
                     text: TextSpan(
@@ -60,8 +63,11 @@ class HomeScreen extends StatelessWidget {
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 20),
-                  child: Icon(Icons.search_rounded,
-                      color: AppColors.primaryColor, size: 24),
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: AppColors.primaryColor,
+                    size: 24,
+                  ),
                 ),
               ],
             ),
@@ -139,20 +145,24 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Large clinic cards (first 2)
-                  ...clinics.take(2).map(
+                  ...clinics
+                      .take(2)
+                      .map(
                         (clinic) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: ClinicCard(clinic: clinic),
-                    ),
-                  ),
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ClinicCard(clinic: clinic),
+                        ),
+                      ),
 
                   // List tile for remaining clinics
-                  ...clinics.skip(2).map(
+                  ...clinics
+                      .skip(2)
+                      .map(
                         (clinic) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ClinicListTile(clinic: clinic),
-                    ),
-                  ),
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: ClinicListTile(clinic: clinic),
+                        ),
+                      ),
 
                   const SizedBox(height: 16),
                 ]),
@@ -168,8 +178,11 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: AppColors.primaryColor,
         elevation: 4,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, color: AppColors.lightColor,
-            size: 28),
+        child: const Icon(
+          Icons.add_rounded,
+          color: AppColors.lightColor,
+          size: 28,
+        ),
       ),
     );
   }

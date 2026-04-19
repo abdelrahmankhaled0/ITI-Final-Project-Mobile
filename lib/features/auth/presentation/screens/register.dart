@@ -27,7 +27,9 @@ class RegisterScreen extends StatelessWidget {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (_) => Center(child: CircularProgressIndicator()),
+            builder: (_) => Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
+            ),
           );
         } else if (state is AuthSuccessState) {
           Navigator.pop(context);

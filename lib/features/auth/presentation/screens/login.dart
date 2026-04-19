@@ -39,7 +39,7 @@ class LoginScreen extends StatelessWidget {
               backgroundColor: AppColors.primaryColor,
             ),
           );
-          AppNavigations.pushReplacementTo(context, AppRoutes.forgetPassword);
+          AppNavigations.pushReplacementTo(context, AppRoutes.home);
         } else if (state is AuthErrorState) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
