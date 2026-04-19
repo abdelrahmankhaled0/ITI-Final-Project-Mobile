@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "757178833866",
+    "project_id": "queuesystem-a3ea1",
+    "storage_bucket": "queuesystem-a3ea1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757178833866:android:7157884ed7ae3d6d7f0d33",
+        "android_client_info": {
+          "package_name": "com.example.taborq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757178833866-laeqv3iloam8qsn51i5dhgunden9f1m3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvC3n4ZhGYUntvwRlCs30p6MUTqdax6ao"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757178833866-laeqv3iloam8qsn51i5dhgunden9f1m3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
