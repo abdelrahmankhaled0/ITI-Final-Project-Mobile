@@ -154,6 +154,7 @@ class LoginScreen extends StatelessWidget {
                     actionText: "Create one now",
 
                     onPressed: () {
+                      cubit.clearControllers();
                       AppNavigations.pushTo(context, AppRoutes.register);
                     },
                   ),

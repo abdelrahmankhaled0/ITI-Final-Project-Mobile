@@ -218,6 +218,7 @@ class RegisterScreen extends StatelessWidget {
                           actionText: "Log In",
 
                           onPressed: () {
+                            cubit.clearControllers();
                             AppNavigations.pushTo(context, AppRoutes.login);
                           },
                           // bgColor: AppColors.primaryColor1,
