@@ -15,6 +15,14 @@ class AuthCubit extends Cubit<AuthState> {
   var phoneController = TextEditingController();
   var confirmPasswordController = TextEditingController();
 
+  void clearControllers() {
+    emailController.clear();
+    passwordController.clear();
+    nameController.clear();
+    phoneController.clear();
+    confirmPasswordController.clear();
+  }
+
   Future<void> register() async {
     emit(AuthLoadingState());
 
@@ -101,10 +109,11 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> login() async {
     emit(AuthLoadingState());
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      final credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
       final user = credential.user;
       if (user == null) {

@@ -27,7 +27,9 @@ class RegisterScreen extends StatelessWidget {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
+            builder: (_) => Center(
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
+            ),
           );
         } else {
           Navigator.pop(context);
@@ -221,6 +223,7 @@ class RegisterScreen extends StatelessWidget {
                           actionText: "Log In",
 
                           onPressed: () {
+                            cubit.clearControllers();
                             AppNavigations.pushTo(context, AppRoutes.login);
                           },
                           // bgColor: AppColors.primaryColor1,
