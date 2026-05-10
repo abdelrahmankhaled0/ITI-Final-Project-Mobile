@@ -15,13 +15,21 @@ class AuthCubit extends Cubit<AuthState> {
   var phoneController = TextEditingController();
   var confirmPasswordController = TextEditingController();
 
+  void clearControllers() {
+    emailController.clear();
+    passwordController.clear();
+    nameController.clear();
+    phoneController.clear();
+    confirmPasswordController.clear();
+  }
+
   register() async {
     emit(AuthLoadingState());
     try {
       var credintial = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
           );
       User? user = credintial.user;
       await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
@@ -48,8 +56,8 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoadingState());
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
       emit(AuthSuccessState());
     } on FirebaseAuthException catch (e) {
