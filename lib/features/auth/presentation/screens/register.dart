@@ -31,17 +31,22 @@ class RegisterScreen extends StatelessWidget {
               child: CircularProgressIndicator(color: AppColors.primaryColor),
             ),
           );
-        } else if (state is AuthSuccessState) {
+        } else {
           Navigator.pop(context);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Sucessfully Sign In")));
-          AppNavigations.pushReplacementTo(context, AppRoutes.login);
-        } else if (state is AuthErrorState) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.error)));
+
+          if (state is AuthVerifyEmailState) {
+            AppNavigations.pushTo(context, AppRoutes.verifyEmail, extra: cubit);
+          } else if (state is AuthSuccessState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Successfully signed in")),
+            );
+
+            AppNavigations.pushReplacementTo(context, AppRoutes.login);
+          } else if (state is AuthErrorState) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.error)));
+          }
         }
       },
       child: Scaffold(
