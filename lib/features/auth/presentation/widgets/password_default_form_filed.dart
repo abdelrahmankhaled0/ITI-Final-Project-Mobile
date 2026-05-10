@@ -25,6 +25,8 @@ class _PasswordDefaultFormFiledState extends State<PasswordDefaultFormFiled> {
       obscureText: isPassword,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.lock),
+        errorMaxLines: 4,
+        errorStyle: TextStyle(fontSize: 10),
         hint: Text(
           "**********",
           style: AppTextStyles.textStyle12.copyWith(

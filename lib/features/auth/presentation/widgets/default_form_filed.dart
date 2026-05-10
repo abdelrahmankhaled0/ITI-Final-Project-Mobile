@@ -29,6 +29,7 @@ class DefaultFormFiled extends StatelessWidget {
         filled: true,
         fillColor: AppColors.neutralColor10,
         prefixIcon: prefixIcon,
+        errorStyle: TextStyle(fontSize: 10),
         hint: Text(
           style: AppTextStyles.textStyle12.copyWith(
             color: AppColors.neutralColor4,

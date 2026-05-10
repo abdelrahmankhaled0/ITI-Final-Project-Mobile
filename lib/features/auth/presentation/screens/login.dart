@@ -115,7 +115,10 @@ class LoginScreen extends StatelessWidget {
                         return "Please Enter Password";
                       }
                       if (!AppRegex.isPasswordValid(value)) {
-                        return "Password must be at least 8 characters long.\nIt must contain at least\none uppercase letter.\nlowercase letter.\nnumber.\nspecial character ! @ # \$ % &)";
+                        return "Password Must contain at least:\n"
+                            "• 8 characters\n"
+                            "• Uppercase & Lowercase letters\n"
+                            "• Number & Special character (!@#\$%)";
                       }
                       return null;
                     },
@@ -155,7 +158,10 @@ class LoginScreen extends StatelessWidget {
 
                     onPressed: () {
                       cubit.clearControllers();
-                      AppNavigations.pushTo(context, AppRoutes.register);
+                      AppNavigations.pushReplacementTo(
+                        context,
+                        AppRoutes.register,
+                      );
                     },
                   ),
                 ],
