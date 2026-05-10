@@ -15,42 +15,112 @@ class AuthCubit extends Cubit<AuthState> {
   var phoneController = TextEditingController();
   var confirmPasswordController = TextEditingController();
 
-  register() async {
+  Future<void> register() async {
     emit(AuthLoadingState());
+
     try {
-      var credintial = await FirebaseAuth.instance
+      final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
           );
-      User? user = credintial.user;
-      await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
-        "name": nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
-        'uid': user.uid,
-      });
-      emit(AuthSuccessState());
+
+      final user = credential.user;
+      if (user == null) {
+        emit(AuthErrorState(error: 'Failed to create user'));
+        return;
+      }
+
+      await user.sendEmailVerification();
+      emit(AuthVerifyEmailState());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        emit(AuthErrorState(error: 'weak password'));
+        emit(AuthErrorState(error: 'Weak password'));
       } else if (e.code == 'email-already-in-use') {
-        emit(AuthErrorState(error: 'this account already exist'));
+        emit(AuthErrorState(error: 'Email already exists'));
       } else {
-        emit(AuthErrorState(error: 'something went wrong'));
+        emit(AuthErrorState(error: 'Something went wrong'));
       }
     } catch (e) {
       emit(AuthErrorState(error: e.toString()));
     }
   }
 
-  login() async {
+  Future<void> checkEmailVerification() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      emit(AuthErrorState(error: 'No authenticated user'));
+      return;
+    }
+
+    await currentUser.reload();
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      emit(AuthErrorState(error: 'No authenticated user'));
+      return;
+    }
+
+    if (user.emailVerified) {
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+        "name": nameController.text.trim(),
+        "email": emailController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "uid": user.uid,
+      });
+
+      emit(AuthSuccessState());
+    } else {
+      emit(AuthErrorState(error: "Please verify your email"));
+    }
+  }
+
+  Future<void> resendVerificationEmail() async {
+    emit(AuthLoadingState());
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        emit(AuthErrorState(error: 'No signed in user'));
+        return;
+      }
+
+      await user.sendEmailVerification();
+      emit(AuthVerifyEmailState());
+    } on FirebaseAuthException catch (e) {
+      emit(
+        AuthErrorState(
+          error: e.message ?? 'Failed to resend verification email',
+        ),
+      );
+    } catch (e) {
+      emit(AuthErrorState(error: e.toString()));
+    }
+  }
+
+  Future<void> login() async {
     emit(AuthLoadingState());
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
+
+      final user = credential.user;
+      if (user == null) {
+        emit(AuthErrorState(error: 'Account not found'));
+        return;
+      }
+
+      await user.reload();
+      if (!user.emailVerified) {
+        await FirebaseAuth.instance.signOut();
+        emit(
+          AuthErrorState(error: 'Please verify your email before logging in'),
+        );
+        return;
+      }
+
       emit(AuthSuccessState());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

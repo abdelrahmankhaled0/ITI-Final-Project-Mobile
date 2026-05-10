@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "757178833866-nvttrl1amc49na3ardkdsvjmtfht74ln.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.taborq",
+            "certificate_hash": "d3860a3a5772e17fe38c2a27f3092003cd8e1171"
+          }
+        },
+        {
           "client_id": "757178833866-laeqv3iloam8qsn51i5dhgunden9f1m3.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "757178833866-laeqv3iloam8qsn51i5dhgunden9f1m3.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "757178833866-8bmj9t20afmnde1s4dd5ph522m2v7c6u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.taborq"
+              }
             }
           ]
         }
