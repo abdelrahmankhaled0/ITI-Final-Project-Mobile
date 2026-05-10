@@ -109,11 +109,10 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> login() async {
     emit(AuthLoadingState());
     try {
-      final credential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim(),
-          );
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
       final user = credential.user;
       if (user == null) {
