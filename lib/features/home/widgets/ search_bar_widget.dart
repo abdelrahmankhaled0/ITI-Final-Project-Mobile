@@ -3,7 +3,8 @@ import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 
 class SearchBarWidget extends StatelessWidget {
-  const SearchBarWidget({super.key});
+  final ValueChanged<String>? onChanged;
+  const SearchBarWidget({super.key , this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +15,7 @@ class SearchBarWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
+        onChanged: onChanged,
         decoration: InputDecoration(
           hintText: 'Search clinics, specialists...',
           hintStyle: AppTextStyles.textStyle14.copyWith(
