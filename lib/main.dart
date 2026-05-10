@@ -3,12 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taborq/core/routes/routes.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:taborq/features/home/cubit/home_cubit.dart';
 import 'package:taborq/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MultiBlocProvider(
+    providers: [
+      BlocProvider(create: (context) => AuthCubit()),
+      BlocProvider(create: (context) => HomeCubit()..getClinics()),
+    ],
+    child: const MyApp())
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,12 +23,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AuthCubit(),
-      child: MaterialApp.router(
-        routerConfig: AppRoutes.routes,
-        debugShowCheckedModeBanner: false,
-      ),
+    return MaterialApp.router(
+      routerConfig: AppRoutes.routes,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
