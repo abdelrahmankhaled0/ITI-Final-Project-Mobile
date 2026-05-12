@@ -12,7 +12,6 @@ import 'package:taborq/features/home/widgets/clinic_card.dart';
 import 'package:taborq/features/home/widgets/home_header.dart';
 
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -47,18 +46,25 @@ class HomeScreen extends StatelessWidget {
                 backgroundColor: AppColors.primaryColor,
                 automaticallyImplyLeading: false,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(48)),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(48),
+                  ),
                 ),
                 flexibleSpace: LayoutBuilder(
                   builder: (context, constraints) {
                     var top = constraints.biggest.height;
-                    bool isCollapsed = top <= (kToolbarHeight + MediaQuery.of(context).padding.top + 20);
+                    bool isCollapsed =
+                        top <=
+                        (kToolbarHeight +
+                            MediaQuery.of(context).padding.top +
+                            20);
 
                     return FlexibleSpaceBar(
                       centerTitle: false,
                       titlePadding: const EdgeInsets.only(left: 20, bottom: 20),
                       title: isCollapsed
                           ? Row(
+
                         children: [
                           CircleAvatar(
                             backgroundColor: AppColors.primaryColor5,
@@ -82,15 +88,19 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
+
               // 2. Search Bar
+
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 sliver: SliverToBoxAdapter(
                   child: SearchBarWidget(
-                    onChanged: (value) => context.read<HomeCubit>().searchClinics(value),
+                    onChanged: (value) =>
+                        context.read<HomeCubit>().searchClinics(value),
                   ),
                 ),
               ),
+
 
               // 3. Bloc Logic for Categories & List
               BlocBuilder<HomeCubit, HomeState>(
@@ -103,8 +113,11 @@ class HomeScreen extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                             child: CategoryChips(
+
                               categories: state.categories,
-                              selectedCategory: context.read<HomeCubit>().currentCategory,
+                              selectedCategory: context
+                                  .read<HomeCubit>()
+                                  .currentCategory,
                             ),
                           ),
                         ),
@@ -114,11 +127,13 @@ class HomeScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
                               children: [
+
                                 Text("Near you", style: TextStyle(color: AppColors.darkColor, fontSize: 20, fontWeight: FontWeight.bold)),
                                 const Spacer(),
                                 IconButton(onPressed: () {}, icon: Icon(Icons.location_on_outlined, color: AppColors.neutralColor5))
                               ],
                             ),
+
                           ),
                         ),
                         SliverPadding(
@@ -150,6 +165,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
-
