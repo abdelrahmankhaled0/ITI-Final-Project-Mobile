@@ -829,7 +829,7 @@ class ClinicCard extends StatelessWidget {
             ),
           ),
           child: Text(
-            'Check-in Now',
+            'Show Services',
             style: AppTextStyles.textStyle16.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -841,12 +841,12 @@ class ClinicCard extends StatelessWidget {
 
   Widget _buildImage() {
     return Image.network(
-      clinic.image,
-      height: 224,
+      clinic.imageUrl,
+      height: 200,
       width: double.infinity,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => Container(
-        height: 224,
+        height: 200,
         color: AppColors.neutralColor9,
         child: Icon(Icons.business, color: AppColors.neutralColor7),
       ),
