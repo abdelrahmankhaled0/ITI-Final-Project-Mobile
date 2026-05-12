@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
+import 'package:taborq/features/home/widgets/bottom_nav.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
@@ -15,7 +16,7 @@ class NotificationScreen extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: AppColors.lightColor),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => BottomNav.changeIndex(context, 0),
         ),
       ),
       body: const Center(
