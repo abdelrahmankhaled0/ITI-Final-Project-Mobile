@@ -11,9 +11,6 @@ import 'package:taborq/features/home/widgets/category_chips.dart';
 import 'package:taborq/features/home/widgets/clinic_card.dart';
 import 'package:taborq/features/home/widgets/home_header.dart';
 
-
-
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -47,12 +44,18 @@ class HomeScreen extends StatelessWidget {
                 backgroundColor: AppColors.primaryColor,
                 automaticallyImplyLeading: false,
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(48)),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(48),
+                  ),
                 ),
                 flexibleSpace: LayoutBuilder(
                   builder: (context, constraints) {
                     var top = constraints.biggest.height;
-                    bool isCollapsed = top <= (kToolbarHeight + MediaQuery.of(context).padding.top + 20);
+                    bool isCollapsed =
+                        top <=
+                        (kToolbarHeight +
+                            MediaQuery.of(context).padding.top +
+                            20);
 
                     return FlexibleSpaceBar(
                       centerTitle: false,
@@ -60,25 +63,38 @@ class HomeScreen extends StatelessWidget {
                       //  image و name
                       title: isCollapsed
                           ? Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: AppColors.primaryColor5,
-                            radius: 18,
-                            backgroundImage: image != null ? NetworkImage(image!) : null,
-                            child: image == null ? const Icon(Icons.person, size: 18 ,color: AppColors.lightColor,) : null,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            name,
-                            style: AppTextStyles.textStyle16.copyWith(color: AppColors.lightColor),
-                          ),
-                          const Spacer(),
-                          const Padding(
-                            padding: EdgeInsets.only(right: 20),
-                            child: Icon(Icons.notifications_none_rounded, color:AppColors.lightColor),
-                          ),
-                        ],
-                      )
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: AppColors.primaryColor5,
+                                  radius: 18,
+                                  backgroundImage: image != null
+                                      ? NetworkImage(image)
+                                      : null,
+                                  child: image == null
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 18,
+                                          color: AppColors.lightColor,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  name,
+                                  style: AppTextStyles.textStyle16.copyWith(
+                                    color: AppColors.lightColor,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Icon(
+                                    Icons.notifications_none_rounded,
+                                    color: AppColors.lightColor,
+                                  ),
+                                ),
+                              ],
+                            )
                           : null,
                       background: HomeHeader(
                         userName: name,
@@ -89,16 +105,15 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 sliver: SliverToBoxAdapter(
                   child: SearchBarWidget(
-                    onChanged: (value) => context.read<HomeCubit>().searchClinics(value),
+                    onChanged: (value) =>
+                        context.read<HomeCubit>().searchClinics(value),
                   ),
                 ),
               ),
-
 
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -111,25 +126,42 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 20),
                             CategoryChips(
                               categories: state.categories,
-                              selectedCategory: context.read<HomeCubit>().currentCategory,
+                              selectedCategory: context
+                                  .read<HomeCubit>()
+                                  .currentCategory,
                             ),
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                Text("Near you" , style: TextStyle(color: AppColors.darkColor,fontSize:20,fontWeight:FontWeight.bold )),
+                                Text(
+                                  "Near you",
+                                  style: TextStyle(
+                                    color: AppColors.darkColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 Spacer(),
-                                IconButton(onPressed:(){}, icon: Icon(Icons.location_on_outlined , color: AppColors.neutralColor5,))
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.location_on_outlined,
+                                    color: AppColors.neutralColor5,
+                                  ),
+                                ),
                               ],
                             ),
                             ListView.builder(
-                              padding: EdgeInsets.only(top:15),
+                              padding: EdgeInsets.only(top: 15),
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: state.clinics.length,
                               itemBuilder: (context, index) {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 16),
-                                  child: ClinicCard(clinic: state.clinics[index]),
+                                  child: ClinicCard(
+                                    clinic: state.clinics[index],
+                                  ),
                                 );
                               },
                             ),
@@ -139,7 +171,9 @@ class HomeScreen extends StatelessWidget {
                       return const Center(
                         child: Padding(
                           padding: EdgeInsets.only(top: 40),
-                          child: CircularProgressIndicator(color: AppColors.primaryColor),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                          ),
                         ),
                       );
                     },
@@ -153,8 +187,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
