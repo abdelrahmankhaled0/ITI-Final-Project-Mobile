@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taborq/core/utils/app_colors.dart';
-import 'package:taborq/core/utils/app_text_styles.dart';
-import 'package:taborq/features/data/%20dummy_data.dart';
 import 'package:taborq/features/home/cubit/home_cubit.dart';
 import 'package:taborq/features/home/cubit/home_state.dart';
 import 'package:taborq/features/home/widgets/%20search_bar_widget.dart';
@@ -10,7 +8,6 @@ import 'package:taborq/features/home/widgets/category_chips.dart';
 import 'package:taborq/features/home/widgets/clinic_card.dart';
 import 'package:taborq/features/home/widgets/hospital_status_card.dart';
 import 'package:taborq/features/home/widgets/section_header.dart';
-
 
 // class HomeScreen extends StatelessWidget {
 //   const HomeScreen({super.key});
@@ -192,8 +189,6 @@ import 'package:taborq/features/home/widgets/section_header.dart';
 //   }
 // }
 
-
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -204,15 +199,10 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-
-
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-
-
-
                   SearchBarWidget(
                     onChanged: (value) {
                       context.read<HomeCubit>().searchClinics(value);
@@ -223,7 +213,6 @@ class HomeScreen extends StatelessWidget {
                   const CategoryChips(),
                   const SizedBox(height: 20),
 
-
                   HospitalStatusCard(
                     hospitalName: "Main Hospital",
                     queueNumber: 12,
@@ -232,9 +221,11 @@ class HomeScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 28),
-                  SectionHeader(title: 'Nearby Clinics', actionLabel: 'View Map'),
+                  SectionHeader(
+                    title: 'Nearby Clinics',
+                    actionLabel: 'View Map',
+                  ),
                   const SizedBox(height: 16),
-
 
                   BlocBuilder<HomeCubit, HomeState>(
                     builder: (context, state) {
@@ -247,12 +238,14 @@ class HomeScreen extends StatelessWidget {
 
                         return Column(
                           children: [
-
-                            ...state.clinics.take(2).map((clinic) => Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: ClinicCard(clinic: clinic),
-                            )),
-
+                            ...state.clinics
+                                .take(2)
+                                .map(
+                                  (clinic) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: ClinicCard(clinic: clinic),
+                                  ),
+                                ),
 
                             // ...state.clinics.skip(2).map((clinic) => Padding(
                             //   padding: const EdgeInsets.only(bottom: 12),
@@ -273,7 +266,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-
     );
   }
 }
