@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
+import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
 
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
+  static void changeIndex(BuildContext context, int index) {
+    final state = context.findAncestorStateOfType<_BottomNavState>();
+    if (state != null) {
+      state.updateIndex(index);
+    }
+  }
 
   @override
   State<BottomNav> createState() => _BottomNavState();
@@ -14,16 +21,23 @@ class BottomNav extends StatefulWidget {
 class _BottomNavState extends State<BottomNav> {
   int _currentIndex = 0;
 
+  void updateIndex(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const Scaffold(body: Center(child: Text('Bookings'))),
-    const Scaffold(body: Center(child: Text('Alerts'))),
+    const NotificationScreen(),
     const Scaffold(body: Center(child: Text('Profile'))),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.lightColor,
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

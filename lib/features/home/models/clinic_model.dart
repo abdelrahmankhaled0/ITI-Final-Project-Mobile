@@ -4,7 +4,8 @@ class ClinicModel {
   final String address;
   final double rating;
   final int waitTime;
-  final String image;
+  final String imageUrl;
+  final String category;
 
   ClinicModel({
     required this.id,
@@ -12,10 +13,11 @@ class ClinicModel {
     required this.address,
     required this.rating,
     required this.waitTime,
-    required this.image,
+    required this.imageUrl,
+    required this.category
   });
 
-  // وظيفة لتحويل البيانات من Firebase (Map) إلى Model
+
   factory ClinicModel.fromFirestore(Map<String, dynamic> data, String documentId) {
     return ClinicModel(
       id: documentId,
@@ -23,7 +25,8 @@ class ClinicModel {
       address: data['address'] ?? '',
       rating: (data['rating'] ?? 0).toDouble(),
       waitTime: data['waitTime'] ?? 0,
-      image: data['image'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
+      category: data['category'] ?? 'General',
     );
   }
 }

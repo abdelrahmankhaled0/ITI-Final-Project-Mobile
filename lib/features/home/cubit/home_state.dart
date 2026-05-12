@@ -9,7 +9,8 @@ class HomeLoading extends HomeState {}
 
 class HomeSuccess extends HomeState {
   final List<ClinicModel> clinics;
-  HomeSuccess({required this.clinics});
+  final List<String> categories;
+  HomeSuccess({required this.clinics , required this.categories});
 }
 
 class HomeError extends HomeState {
