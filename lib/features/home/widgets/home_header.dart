@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/home/widgets/bottom_nav.dart';
@@ -63,7 +64,8 @@ class HomeHeader extends StatelessWidget {
   Widget _buildNotificationIcon(BuildContext context) {
     return InkWell(
       onTap: () {
-        BottomNav.changeIndex(context, 2);
+        // BottomNav.changeIndex(context, 2);
+        context.go('/notifications');
       },
       borderRadius: BorderRadius.circular(50),
       child: Container(

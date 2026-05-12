@@ -13,7 +13,6 @@ import 'package:taborq/features/home/widgets/home_header.dart';
 
 
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -40,6 +39,7 @@ class HomeScreen extends StatelessWidget {
 
           return CustomScrollView(
             slivers: [
+              // 1. AppBar
               SliverAppBar(
                 expandedHeight: 180,
                 pinned: true,
@@ -57,7 +57,6 @@ class HomeScreen extends StatelessWidget {
                     return FlexibleSpaceBar(
                       centerTitle: false,
                       titlePadding: const EdgeInsets.only(left: 20, bottom: 20),
-                      //  image و name
                       title: isCollapsed
                           ? Row(
                         children: [
@@ -65,31 +64,25 @@ class HomeScreen extends StatelessWidget {
                             backgroundColor: AppColors.primaryColor5,
                             radius: 18,
                             backgroundImage: image != null ? NetworkImage(image!) : null,
-                            child: image == null ? const Icon(Icons.person, size: 18 ,color: AppColors.lightColor,) : null,
+                            child: image == null ? const Icon(Icons.person, size: 18, color: AppColors.lightColor) : null,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            name,
-                            style: AppTextStyles.textStyle16.copyWith(color: AppColors.lightColor),
-                          ),
+                          Text(name, style: AppTextStyles.textStyle16.copyWith(color: AppColors.lightColor)),
                           const Spacer(),
                           const Padding(
                             padding: EdgeInsets.only(right: 20),
-                            child: Icon(Icons.notifications_none_rounded, color:AppColors.lightColor),
+                            child: Icon(Icons.notifications_none_rounded, color: AppColors.lightColor),
                           ),
                         ],
                       )
                           : null,
-                      background: HomeHeader(
-                        userName: name,
-                        profileImage: image,
-                      ),
+                      background: HomeHeader(userName: name, profileImage: image),
                     );
                   },
                 ),
               ),
 
-
+              // 2. Search Bar
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 sliver: SliverToBoxAdapter(
@@ -99,52 +92,56 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverToBoxAdapter(
-                  child: BlocBuilder<HomeCubit, HomeState>(
-                    builder: (context, state) {
-                      if (state is HomeSuccess) {
-                        return Column(
-                          children: [
-                            const SizedBox(height: 20),
-                            CategoryChips(
+              // 3. Bloc Logic for Categories & List
+              BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  if (state is HomeSuccess) {
+                    return SliverMainAxisGroup(
+                      slivers: [
+                        // Categories
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            child: CategoryChips(
                               categories: state.categories,
                               selectedCategory: context.read<HomeCubit>().currentCategory,
                             ),
-                            const SizedBox(height: 20),
-                            Row(
+                          ),
+                        ),
+                        // Title "Near you"
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
                               children: [
-                                Text("Near you" , style: TextStyle(color: AppColors.darkColor,fontSize:20,fontWeight:FontWeight.bold )),
-                                Spacer(),
-                                IconButton(onPressed:(){}, icon: Icon(Icons.location_on_outlined , color: AppColors.neutralColor5,))
+                                Text("Near you", style: TextStyle(color: AppColors.darkColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                                const Spacer(),
+                                IconButton(onPressed: () {}, icon: Icon(Icons.location_on_outlined, color: AppColors.neutralColor5))
                               ],
                             ),
-                            ListView.builder(
-                              padding: EdgeInsets.only(top:15),
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: state.clinics.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: ClinicCard(clinic: state.clinics[index]),
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      }
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 40),
-                          child: CircularProgressIndicator(color: AppColors.primaryColor),
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+                          sliver: SliverList.builder(
+                            itemCount: state.clinics.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: ClinicCard(clinic: state.clinics[index]),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  // Loading State
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: CircularProgressIndicator(color: AppColors.primaryColor)),
+                  );
+                },
               ),
             ],
           );
@@ -153,8 +150,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 
 

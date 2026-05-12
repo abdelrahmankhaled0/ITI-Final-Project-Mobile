@@ -661,6 +661,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/home/models/clinic_model.dart';
@@ -765,7 +766,7 @@ class ClinicCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                _buildActionButton(),
+                _buildActionButton(context, clinic),
               ],
             ),
           ),
@@ -813,13 +814,19 @@ class ClinicCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton() {
+  Widget _buildActionButton(BuildContext context, ClinicModel clinic) {
     return Center(
       child: SizedBox(
         width: double.infinity,
         height: 56,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () {context.push('/home/details', extra: {
+            'id': clinic.id,
+            'name': clinic.name,
+            'imageUrl': clinic.imageUrl,
+            'address': clinic.address,
+            'category': clinic.category,
+          });},
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
             foregroundColor: AppColors.lightColor,
