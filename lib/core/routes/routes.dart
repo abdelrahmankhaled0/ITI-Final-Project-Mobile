@@ -5,10 +5,7 @@ import 'package:taborq/features/auth/presentation/screens/forget_password_screen
 import 'package:taborq/features/auth/presentation/screens/login.dart';
 import 'package:taborq/features/auth/presentation/screens/register.dart';
 import 'package:taborq/features/home/widgets/bottom_nav.dart';
-import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
-
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
-import 'package:taborq/features/widgets/bottom_nav.dart';
 
 class AppRoutes {
   static const String login = "/";
