@@ -31,22 +31,20 @@ class RegisterScreen extends StatelessWidget {
               child: CircularProgressIndicator(color: AppColors.primaryColor),
             ),
           );
-        } else {
+        } else if (state is AuthVerifyEmailState) {
           Navigator.pop(context);
-
-          if (state is AuthVerifyEmailState) {
-            AppNavigations.pushTo(context, AppRoutes.verifyEmail, extra: cubit);
-          } else if (state is AuthSuccessState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Successfully signed in")),
-            );
-
-            AppNavigations.pushReplacementTo(context, AppRoutes.login);
-          } else if (state is AuthErrorState) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error)));
-          }
+          AppNavigations.pushTo(context, AppRoutes.verifyEmail, extra: cubit);
+        } else if (state is AuthSuccessState) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Successfully signed in")),
+          );
+          AppNavigations.pushReplacementTo(context, AppRoutes.login);
+        } else if (state is AuthErrorState) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       child: Scaffold(
@@ -193,7 +191,57 @@ class RegisterScreen extends StatelessWidget {
                             return null;
                           },
                         ),
-                        Gap(50),
+
+                        BlocBuilder<AuthCubit, AuthState>(
+                          builder: (context, state) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+
+                              children: [
+                                Checkbox(
+                                  activeColor: AppColors.primaryColor,
+                                  value: cubit.termsAccepted,
+                                  onChanged: (value) {
+                                    cubit.setTermsAccepted(value ?? false);
+                                  },
+                                ),
+                                Expanded(
+                                  child: Wrap(
+                                    children: [
+                                      Text(
+                                        "I agree to the ",
+                                        style: AppTextStyles.textStyle12
+                                            .copyWith(
+                                              color: AppColors.primaryColor1,
+                                            ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          AppNavigations.pushTo(
+                                            context,
+                                            AppRoutes.terms,
+                                            extra: cubit,
+                                          );
+                                        },
+                                        child: Text(
+                                          "Terms and Conditions",
+                                          style: AppTextStyles.textStyle12
+                                              .copyWith(
+                                                color: AppColors.primaryColor,
+                                                fontWeight: FontWeight.bold,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Gap(30),
                         DefaultButton(
                           text: "Sign Up",
                           onPressed: () {
@@ -219,7 +267,7 @@ class RegisterScreen extends StatelessWidget {
                           ],
                         ),
                         Gap(30),
-                        DefaultAnthorMethodsForLogin(),
+                        DefaultAnthorMethodsForLogin(cubit: cubit),
                         Gap(10),
                         DefaultSwapBetweenLoginAndRegister(
                           text: "Already have an account?",

@@ -26,12 +26,14 @@ class HomeScreen extends StatelessWidget {
             .doc(user?.uid)
             .snapshots(),
         builder: (context, snapshot) {
-          String name = "User";
+          String name = user?.displayName?.trim().isNotEmpty == true
+              ? user!.displayName!
+              : "User";
           String? image;
 
           if (snapshot.hasData && snapshot.data!.exists) {
             var data = snapshot.data!.data() as Map<String, dynamic>;
-            name = data['name'] ?? "User";
+            name = data['name'] ?? name;
             image = data['imageUrl'];
           }
 

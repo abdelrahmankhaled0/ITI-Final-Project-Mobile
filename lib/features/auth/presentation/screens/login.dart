@@ -150,7 +150,7 @@ class LoginScreen extends StatelessWidget {
                     ],
                   ),
                   Gap(30),
-                  DefaultAnthorMethodsForLogin(),
+                  DefaultAnthorMethodsForLogin(cubit: cubit),
                   Gap(20),
                   DefaultSwapBetweenLoginAndRegister(
                     text: "Don't have an account?",

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
+import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 
 class DefaultAnthorMethodsForLogin extends StatelessWidget {
-  const DefaultAnthorMethodsForLogin({super.key});
+  const DefaultAnthorMethodsForLogin({super.key, required this.cubit});
+
+  final AuthCubit cubit;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,9 @@ class DefaultAnthorMethodsForLogin extends StatelessWidget {
               backgroundColor: AppColors.neutralColor9,
               overlayColor: AppColors.lightColor,
             ),
-            onPressed: () {},
+            onPressed: () {
+              cubit.signInWithGoogle();
+            },
             child: Text(
               "Google",
               style: AppTextStyles.textStyle16.copyWith(
