@@ -1,50 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
-import 'package:taborq/features/home/screens/home_screen.dart';
-import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
+
+class BottomNav extends StatelessWidget {
+  final Widget child;
+  const BottomNav({super.key, required this.child});
 
 
-class BottomNav extends StatefulWidget {
-  const BottomNav({super.key});
-  static void changeIndex(BuildContext context, int index) {
-    final state = context.findAncestorStateOfType<_BottomNavState>();
-    if (state != null) {
-      state.updateIndex(index);
+  int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (location.startsWith('/home')) return 0;
+    if (location.startsWith('/bookings')) return 1;
+    if (location.startsWith('/notifications')) return 2;
+    if (location.startsWith('/profile')) return 3;
+    return 0;
+  }
+
+  void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 0: context.go('/home'); break;
+      case 1: context.go('/bookings'); break;
+      case 2: context.go('/notifications'); break;
+      case 3: context.go('/profile'); break;
     }
   }
 
   @override
-  State<BottomNav> createState() => _BottomNavState();
-}
-
-class _BottomNavState extends State<BottomNav> {
-  int _currentIndex = 0;
-
-  void updateIndex(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const Scaffold(body: Center(child: Text('Bookings'))),
-    const NotificationScreen(),
-    const Scaffold(body: Center(child: Text('Profile'))),
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    final int selectedIndex = _calculateSelectedIndex(context);
+
     return Scaffold(
       backgroundColor: AppColors.lightColor,
-      body: _screens[_currentIndex],
+      body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.lightColor,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(40),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
           boxShadow: [
             BoxShadow(
               color: AppColors.neutralColor.withOpacity(0.08),
@@ -62,26 +54,26 @@ class _BottomNavState extends State<BottomNav> {
                 _NavItem(
                   icon: Icons.home_rounded,
                   label: 'HOME',
-                  isSelected: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
+                  isSelected: selectedIndex == 0,
+                  onTap: () => _onItemTapped(0, context),
                 ),
                 _NavItem(
                   icon: Icons.calendar_today_rounded,
                   label: 'BOOKINGS',
-                  isSelected: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
+                  isSelected: selectedIndex == 1,
+                  onTap: () => _onItemTapped(1, context),
                 ),
                 _NavItem(
                   icon: Icons.notifications_none_rounded,
                   label: 'ALERTS',
-                  isSelected: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
+                  isSelected: selectedIndex == 2,
+                  onTap: () => _onItemTapped(2, context),
                 ),
                 _NavItem(
                   icon: Icons.person_outline_rounded,
                   label: 'PROFILE',
-                  isSelected: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
+                  isSelected: selectedIndex == 3,
+                  onTap: () => _onItemTapped(3, context),
                 ),
               ],
             ),
@@ -122,8 +114,7 @@ class _NavItem extends StatelessWidget {
           Text(
             label,
             style: AppTextStyles.textStyle10.copyWith(
-              color:
-              isSelected ? AppColors.primaryColor : AppColors.neutralColor5,
+              color: isSelected ? AppColors.primaryColor : AppColors.neutralColor5,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
               letterSpacing: 0.5,
             ),
