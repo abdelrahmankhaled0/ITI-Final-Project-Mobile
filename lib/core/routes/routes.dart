@@ -5,12 +5,9 @@ import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:taborq/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:taborq/features/auth/presentation/screens/login.dart';
 import 'package:taborq/features/auth/presentation/screens/register.dart';
-<<<<<<< HEAD
 import 'package:taborq/features/auth/presentation/screens/change_password_screen.dart';
 import 'package:taborq/features/auth/presentation/screens/terms_and_conditions_screen.dart';
-=======
 import 'package:taborq/features/business_datails/screens/business_derails_screen.dart';
->>>>>>> main
 import 'package:taborq/features/home/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
