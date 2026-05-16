@@ -26,6 +26,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: AppRoutes.routes,
       debugShowCheckedModeBanner: false,
+      
+      
     );
   }
 }

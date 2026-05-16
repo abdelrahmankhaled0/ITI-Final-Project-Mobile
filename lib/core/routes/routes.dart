@@ -5,12 +5,9 @@ import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:taborq/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:taborq/features/auth/presentation/screens/login.dart';
 import 'package:taborq/features/auth/presentation/screens/register.dart';
-<<<<<<< HEAD
 import 'package:taborq/features/auth/presentation/screens/change_password_screen.dart';
 import 'package:taborq/features/auth/presentation/screens/terms_and_conditions_screen.dart';
-=======
 import 'package:taborq/features/business_datails/screens/business_derails_screen.dart';
->>>>>>> main
 import 'package:taborq/features/home/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
@@ -29,11 +26,9 @@ class AppRoutes {
   static final routes = GoRouter(
     initialLocation: login,
     routes: [
-
       GoRoute(
-        path: '/__/auth/action', // ده المسار الافتراضي من فايربيز
+        path: '/__/auth/action',
         builder: (context, state) {
-          // بنسحب الكود السري من اللينك
           final code = state.uri.queryParameters['oobCode'];
           return ChangePasswordScreen(actionCode: code!);
         },
@@ -110,7 +105,8 @@ class AppRoutes {
           ),
           GoRoute(
             path: '/bookings',
-            builder: (context, state) => const Scaffold(body: Center(child: Text('Bookings'))),
+            builder: (context, state) =>
+                const Scaffold(body: Center(child: Text('Bookings'))),
           ),
           GoRoute(
             path: '/notifications',
@@ -118,7 +114,8 @@ class AppRoutes {
           ),
           GoRoute(
             path: '/profile',
-            builder: (context, state) => const Scaffold(body: Center(child: Text('Profile'))),
+            builder: (context, state) =>
+                const Scaffold(body: Center(child: Text('Profile'))),
           ),
         ],
       ),
