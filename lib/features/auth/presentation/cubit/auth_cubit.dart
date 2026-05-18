@@ -180,18 +180,13 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> signInWithGoogle() async {
-    // 1. Start with loading state to show a spinner in the UI
     emit(AuthLoadingState());
 
     try {
-      // 2. Initialize GoogleSignIn with scopes
       final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
 
-      // 3. Force the account selector by signing out first
-      // This ensures the user can pick a different account every time
       await googleSignIn.signOut();
 
-      // 4. Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser != null) {

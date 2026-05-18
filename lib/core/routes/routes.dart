@@ -29,7 +29,6 @@ class AppRoutes {
   static final routes = GoRouter(
     initialLocation: login,
     routes: [
-
       GoRoute(
         path: '/__/auth/action',
         builder: (context, state) {
@@ -127,7 +126,8 @@ class AppRoutes {
           ),
           GoRoute(
             path: '/bookings',
-            builder: (context, state) => const Scaffold(body: Center(child: Text('Bookings'))),
+            builder: (context, state) =>
+                const Scaffold(body: Center(child: Text('Bookings'))),
           ),
           GoRoute(
             path: '/notifications',
@@ -135,7 +135,8 @@ class AppRoutes {
           ),
           GoRoute(
             path: '/profile',
-            builder: (context, state) => const Scaffold(body: Center(child: Text('Profile'))),
+            builder: (context, state) =>
+                const Scaffold(body: Center(child: Text('Profile'))),
           ),
         ],
       ),
