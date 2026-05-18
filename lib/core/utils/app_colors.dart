@@ -4,6 +4,10 @@ class AppColors {
   static const Color lightColor = Color(0XFFFFFFFF);
   static const Color darkColor = Color(0XFF000000);
   static const Color lightgrey = Color(0XFFF2F3F7);
+
+  static const Color infoCardBg1 = Color(0XFFF3F4F9);
+  static const Color infoCardBg2 = Color(0XFFE0F7F6);
+  static const Color statusGreen = Color(0XFF2E7D32);
   ////////////////////////////////////////////////////////
   static const Color primaryColor = Color(0xFF2F6F6D);
   // static const Color primaryColor = Color(0xFF1A3E5C);

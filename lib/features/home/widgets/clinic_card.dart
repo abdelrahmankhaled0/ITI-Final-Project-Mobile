@@ -826,6 +826,8 @@ class ClinicCard extends StatelessWidget {
             'imageUrl': clinic.imageUrl,
             'address': clinic.address,
             'category': clinic.category,
+            'waitTime': clinic.waitTime,
+            'rating': clinic.rating,
           });},
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,

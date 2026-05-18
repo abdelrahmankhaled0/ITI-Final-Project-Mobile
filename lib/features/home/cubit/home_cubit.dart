@@ -25,11 +25,11 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void _applyFilter() {
-    // استخراج التصنيفات مع التأكد أنها ليست null
+
     List<String> dynamicCategories = ['All Care'];
     final uniqueCategories = _allClinics
         .map((e) => e.category)
-        .where((cat) => cat.isNotEmpty) // التأكد من أن التصنيف ليس فارغاً
+        .where((cat) => cat.isNotEmpty)
         .toSet()
         .toList();
 
@@ -37,20 +37,20 @@ class HomeCubit extends Cubit<HomeState> {
 
     List<ClinicModel> filtered = _allClinics;
 
-    // فلترة بالتصنيف
+
     if (_currentCategory != "All Care") {
       filtered = filtered.where((clinic) =>
       clinic.category.toLowerCase() == _currentCategory.toLowerCase()).toList();
     }
 
-    // فلترة بالبحث
+
     if (_currentQuery.isNotEmpty) {
       filtered = filtered.where((clinic) =>
       clinic.name.toLowerCase().contains(_currentQuery.toLowerCase()) ||
           clinic.address.toLowerCase().contains(_currentQuery.toLowerCase())).toList();
     }
 
-    // القوة هنا: نرسل دائماً القائمتين حتى لو فارغتين، المهم ليس null
+
     emit(HomeSuccess(
       clinics: List.from(filtered),
       categories: List.from(dynamicCategories),
