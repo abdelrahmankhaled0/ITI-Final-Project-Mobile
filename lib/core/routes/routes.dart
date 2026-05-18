@@ -7,11 +7,13 @@ import 'package:taborq/features/auth/presentation/screens/login.dart';
 import 'package:taborq/features/auth/presentation/screens/register.dart';
 import 'package:taborq/features/auth/presentation/screens/change_password_screen.dart';
 import 'package:taborq/features/auth/presentation/screens/terms_and_conditions_screen.dart';
+import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
 import 'package:taborq/features/business_datails/screens/business_derails_screen.dart';
 import 'package:taborq/features/home/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
 import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:taborq/features/subService_details/screens/sub_service_screen.dart';
 
 class AppRoutes {
   static const String login = "/";
@@ -22,15 +24,16 @@ class AppRoutes {
   static const String verifyEmail = "/verifyEmail";
   static const String home = "/home";
   static const String businessDetails = "/home/details";
+  static const String subServices = "sub-services";
 
   static final routes = GoRouter(
     initialLocation: login,
     routes: [
 
       GoRoute(
-        path: '/__/auth/action', // ده المسار الافتراضي من فايربيز
+        path: '/__/auth/action',
         builder: (context, state) {
-          // بنسحب الكود السري من اللينك
+
           final code = state.uri.queryParameters['oobCode'];
           return ChangePasswordScreen(actionCode: code!);
         },
@@ -99,9 +102,26 @@ class AppRoutes {
               GoRoute(
                 path: 'details',
                 builder: (context, state) {
-                  final businessData = state.extra as Map<String, dynamic>;
-                  return BusinessDetailsScreen(business: businessData);
+                  if (state.extra == null) return const Scaffold(body: Center(child: Text("Error: No Data")));
+                  return BusinessDetailsScreen(business: state.extra as Map<String, dynamic>);
                 },
+                routes: [
+                  GoRoute(
+                    path: subServices,
+                    builder: (context, state) {
+                      if (state.extra == null) return const Scaffold(body: Center(child: Text("Error: No Data")));
+                      final data = state.extra as Map<String, dynamic>;
+                      return BlocProvider(
+                        create: (context) => BusinessDetailsCubit(),
+                        child: SubServicesScreen(
+                          businessId: data['businessId'],
+                          serviceId: data['serviceId'],
+                          serviceName: data['serviceName'],
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

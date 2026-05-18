@@ -24,7 +24,7 @@ class ClinicModel {
       name: data['name'] ?? '',
       address: data['address'] ?? '',
       rating: (data['rating'] ?? 0).toDouble(),
-      waitTime: data['waitTime'] ?? 0,
+      waitTime: data['avgServiceTime'] ?? 0,
       imageUrl: data['imageUrl'] ?? '',
       category: data['category'] ?? 'General',
     );
