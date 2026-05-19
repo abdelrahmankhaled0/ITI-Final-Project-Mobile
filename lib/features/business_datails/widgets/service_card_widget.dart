@@ -90,7 +90,7 @@ class ServiceCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Next: 10:30 AM',
+                     isActive? 'Next: 10:30 AM' : "",
                     style: AppTextStyles.textStyle10.copyWith(color: Colors.grey),
                   ),
                 ],
