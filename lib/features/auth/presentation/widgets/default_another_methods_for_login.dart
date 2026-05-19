@@ -18,7 +18,7 @@ class DefaultAnthorMethodsForLogin extends StatelessWidget {
           flex: 1,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              fixedSize: Size(0, 50),
+              fixedSize: const Size(0, 50),
               backgroundColor: AppColors.neutralColor9,
               overlayColor: AppColors.lightColor,
             ),
@@ -38,7 +38,7 @@ class DefaultAnthorMethodsForLogin extends StatelessWidget {
           flex: 1,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              fixedSize: Size(0, 50),
+              fixedSize: const Size(0, 50),
               backgroundColor: AppColors.neutralColor9,
               overlayColor: AppColors.primaryColor4,
             ),

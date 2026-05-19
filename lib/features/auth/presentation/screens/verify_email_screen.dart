@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/routes/routes.dart';
 import 'package:taborq/core/utils/app_colors.dart';
@@ -16,30 +17,63 @@ class VerifyEmailScreen extends StatelessWidget {
     final cubit = AuthCubit.get(context);
     final email = cubit.emailController.text.trim();
 
+    // متغير محلي لمتابعة سياق (Context) الـ Dialog المفتوح فقط
+    BuildContext? dialogContext;
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
+        // 1. أول ما يبدأ تحميل.. نفتح الدايلوج ونخزن الـ Context بتاعه
         if (state is AuthLoadingState) {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
+            builder: (dContext) {
+              dialogContext = dContext; // حفظنا سياق الدايلوج هنا
+              return const Center(child: CircularProgressIndicator());
+            },
           );
         } else {
-          Navigator.of(context, rootNavigator: true).pop();
+          // 2. لو خرجنا من الـ Loading لأي حالة ثانية (خطأ أو نجاح) نقفل الدايلوج فوراً بشكل آمن
+          if (dialogContext != null) {
+            Navigator.pop(dialogContext!);
+            dialogContext = null; // تصفير المتغير للحماية
+          }
 
+          // 3. لو تم إعادة إرسال إيميل التفعيل
           if (state is AuthVerifyEmailState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Verification email sent')),
+            Fluttertoast.showToast(
+              msg: "Verification email sent",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: AppColors.primaryColor,
+              textColor: Colors.white,
+              fontSize: 14.0,
             );
-          } else if (state is AuthSuccessState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Email verified successfully!')),
+          }
+          // 4. لو اتأكد إنك عملت فيريفاي فعلاً (النجاح التام)
+          else if (state is AuthSuccessState) {
+            Fluttertoast.showToast(
+              msg: "Email verified successfully!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Colors.green, // التوست الأخضر الجميل
+              textColor: Colors.white,
+              fontSize: 14.0,
             );
+            // يروح لصفحة اللوجين فوراً
             AppNavigations.pushReplacementTo(context, AppRoutes.login);
-          } else if (state is AuthErrorState) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error)));
+          }
+          // 5. لو داس وهو لسه مفعّلش (حالة الخطأ)
+          else if (state is AuthErrorState) {
+            // هيفضل ثابت في مكانه في السكرين ويظهر التوست الأحمر بالإيرور
+            Fluttertoast.showToast(
+              msg: state.error,
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Colors.redAccent,
+              textColor: Colors.white,
+              fontSize: 14.0,
+            );
           }
         }
       },

@@ -78,7 +78,6 @@ class AuthCubit extends Cubit<AuthState> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       emit(AuthErrorState(error: 'No authenticated user'));
-
       return;
     }
 
@@ -119,7 +118,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // 1. إرسال إيميل إعادة التعيين
   Future<void> sendPasswordResetEmail(String email) async {
     emit(AuthLoadingState());
     try {
@@ -136,7 +134,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // 2. دالة استخراج الكود السري (Private)
   String _extractPasswordResetCode(String input) {
     final uri = Uri.tryParse(input.trim());
     if (uri != null && uri.queryParameters.containsKey('oobCode')) {
@@ -145,7 +142,6 @@ class AuthCubit extends Cubit<AuthState> {
     return input.trim();
   }
 
-  // 3. دالة تأكيد تغيير الباسورد النهائية
   Future<void> confirmPasswordReset({
     required String codeOrLink,
     required String newPassword,
@@ -154,10 +150,8 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final actionCode = _extractPasswordResetCode(codeOrLink);
 
-      // التأكد من صحة الكود قبل التغيير
       await FirebaseAuth.instance.verifyPasswordResetCode(actionCode);
 
-      // تنفيذ التغيير الفعلي
       await FirebaseAuth.instance.confirmPasswordReset(
         code: actionCode,
         newPassword: newPassword,
@@ -166,12 +160,15 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthPasswordResetSuccessState());
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'Failed to reset password';
-      if (e.code == 'expired-action-code')
+      if (e.code == 'expired-action-code') {
         errorMessage = 'Reset code has expired';
-      if (e.code == 'invalid-action-code')
+      }
+      if (e.code == 'invalid-action-code') {
         errorMessage = 'Invalid reset code or link';
-      if (e.code == 'weak-password')
+      }
+      if (e.code == 'weak-password') {
         errorMessage = 'The password provided is too weak';
+      }
 
       emit(AuthErrorState(error: errorMessage));
     } catch (e) {
@@ -190,72 +187,62 @@ class AuthCubit extends Cubit<AuthState> {
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser != null) {
-        // 5. Obtain the auth details from the request
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
 
-        // 6. Create a new credential for Firebase
         final AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
 
-        // 7. Sign in to Firebase with the credential
         await FirebaseAuth.instance.signInWithCredential(credential);
 
-        // 8. Success! Emit success state
         emit(AuthSuccessState());
       } else {
-        // User canceled the sign-in flow
         emit(AuthErrorState(error: "No account selected"));
       }
     } on FirebaseAuthException catch (e) {
-      // Handle Firebase specific errors
       emit(
         AuthErrorState(error: e.message ?? "Firebase Authentication Failed"),
       );
     } catch (e) {
-      // Handle any other errors
       emit(
         AuthErrorState(error: "An unexpected error occurred: ${e.toString()}"),
       );
     }
   }
 
-  Future<void> login() async {
+  Future<void> login({required String email, required String password}) async {
     emit(AuthLoadingState());
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+      // 1. محاولة تسجيل الدخول بالبيانات
+
+      var auth = FirebaseAuth.instance;
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      final user = credential.user;
-      if (user == null) {
-        emit(AuthErrorState(error: 'Account not found'));
-        return;
-      }
+      User? user = userCredential.user;
 
-      await user.reload();
-      if (!user.emailVerified) {
-        await FirebaseAuth.instance.signOut();
+      // 2. التشيك السحري: هل الإيميل متفعل في الفايربيز؟
+      if (user != null && !user.emailVerified) {
+        // ❌ لو مش متفعل، بنعمل تسجيل خروج فوراً ومبنخليهوش يدخل الأبليكيشن
+        await auth.signOut();
+
+        // ونبعت حالة إيرور تظهر في التوست للمستخدم
         emit(
-          AuthErrorState(error: 'Please verify your email before logging in'),
+          AuthErrorState(
+            error: "Please verify your email address before logging in.",
+          ),
         );
         return;
       }
 
+      //  لو متفعل تمام، ينقل على الشاشة الرئيسية بنجاح
       emit(AuthSuccessState());
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        emit(AuthErrorState(error: 'Account not found'));
-      } else if (e.code == 'wrong-password') {
-        emit(AuthErrorState(error: 'Wrong password'));
-      } else if (e.code == 'invalid-credential') {
-        emit(AuthErrorState(error: 'Invalid credentials'));
-      } else {
-        emit(AuthErrorState(error: e.message ?? 'Unexpected error'));
-      }
+      emit(AuthErrorState(error: e.message ?? "An error occurred"));
     } catch (e) {
       emit(AuthErrorState(error: e.toString()));
     }
