@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
-import 'package:taborq/features/home/widgets/bottom_nav.dart';
 
 class HomeHeader extends StatelessWidget {
   final String userName;
@@ -21,8 +20,12 @@ class HomeHeader extends StatelessWidget {
           CircleAvatar(
             radius: 25,
             backgroundColor: AppColors.primaryColor5,
-            backgroundImage: profileImage != null ? NetworkImage(profileImage!) : null,
-            child: profileImage == null ? const Icon(Icons.person, color: AppColors.lightColor) : null,
+            backgroundImage: profileImage != null
+                ? NetworkImage(profileImage!)
+                : null,
+            child: profileImage == null
+                ? const Icon(Icons.person, color: AppColors.lightColor)
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -38,7 +41,7 @@ class HomeHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "${userName.toUpperCase() }  👋",
+                  "${userName.toUpperCase()}  👋",
                   style: AppTextStyles.textStyle18.copyWith(
                     color: AppColors.lightColor,
                     fontWeight: FontWeight.w800,

@@ -76,7 +76,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                   children: [
                     Container(
                       width: double.infinity,
-                      height: MediaQuery.heightOf(context) * 0.5,
+                      height: MediaQuery.heightOf(context) * 0.7,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: AppColors.lightColor,
@@ -119,7 +119,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                               return null;
                             },
                           ),
-                          Gap(20),
+                          Gap(30),
                           DefaultButton(
                             text: "Send Reset Link",
                             onPressed: () {

@@ -11,7 +11,6 @@ import 'package:taborq/features/home/widgets/category_chips.dart';
 import 'package:taborq/features/home/widgets/clinic_card.dart';
 import 'package:taborq/features/home/widgets/home_header.dart';
 
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -66,33 +65,49 @@ class HomeScreen extends StatelessWidget {
                       titlePadding: const EdgeInsets.only(left: 20, bottom: 20),
                       title: isCollapsed
                           ? Row(
-
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: AppColors.primaryColor5,
-                            radius: 18,
-                            backgroundImage: image != null ? NetworkImage(image!) : null,
-                            child: image == null ? const Icon(Icons.person, size: 18, color: AppColors.lightColor) : null,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(name, style: AppTextStyles.textStyle16.copyWith(color: AppColors.lightColor)),
-                          const Spacer(),
-                          const Padding(
-                            padding: EdgeInsets.only(right: 20),
-                            child: Icon(Icons.notifications_none_rounded, color: AppColors.lightColor),
-                          ),
-                        ],
-                      )
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: AppColors.primaryColor5,
+                                  radius: 18,
+                                  backgroundImage: image != null
+                                      ? NetworkImage(image)
+                                      : null,
+                                  child: image == null
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 18,
+                                          color: AppColors.lightColor,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  name,
+                                  style: AppTextStyles.textStyle16.copyWith(
+                                    color: AppColors.lightColor,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Icon(
+                                    Icons.notifications_none_rounded,
+                                    color: AppColors.lightColor,
+                                  ),
+                                ),
+                              ],
+                            )
                           : null,
-                      background: HomeHeader(userName: name, profileImage: image),
+                      background: HomeHeader(
+                        userName: name,
+                        profileImage: image,
+                      ),
                     );
                   },
                 ),
               ),
 
-
               // 2. Search Bar
-
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 sliver: SliverToBoxAdapter(
@@ -103,7 +118,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-
               // 3. Bloc Logic for Categories & List
               BlocBuilder<HomeCubit, HomeState>(
                 builder: (context, state) {
@@ -113,9 +127,11 @@ class HomeScreen extends StatelessWidget {
                         // Categories
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 20,
+                            ),
                             child: CategoryChips(
-
                               categories: state.categories,
                               selectedCategory: context
                                   .read<HomeCubit>()
@@ -129,13 +145,24 @@ class HomeScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
                               children: [
-
-                                Text("Near you", style: TextStyle(color: AppColors.darkColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                                Text(
+                                  "Near you",
+                                  style: TextStyle(
+                                    color: AppColors.darkColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 const Spacer(),
-                                IconButton(onPressed: () {}, icon: Icon(Icons.location_on_outlined, color: AppColors.neutralColor5))
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.location_on_outlined,
+                                    color: AppColors.neutralColor5,
+                                  ),
+                                ),
                               ],
                             ),
-
                           ),
                         ),
                         SliverPadding(
@@ -156,7 +183,11 @@ class HomeScreen extends StatelessWidget {
                   // Loading State
                   return const SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(child: CircularProgressIndicator(color: AppColors.primaryColor)),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
                   );
                 },
               ),
