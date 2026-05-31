@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/routes/routes.dart';
+import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_images.dart';
 
 class SplachScreen extends StatefulWidget {
@@ -13,10 +14,21 @@ class SplachScreen extends StatefulWidget {
 }
 
 class _SplachScreenState extends State<SplachScreen> {
+  double scale = 0.0;
+  double opacity = 0.0;
   @override
   void initState() {
-    Timer(Duration(seconds: 2), () {
-      AppNavigations.pushReplacementTo(context, AppRoutes.onboarding);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        scale = 1.0;
+        opacity = 1.0;
+      });
+    });
+
+    Timer(Duration(seconds: 3), () {
+      if (mounted) {
+        AppNavigations.pushReplacementTo(context, AppRoutes.onboarding);
+      }
     });
     super.initState();
   }
@@ -24,12 +36,21 @@ class _SplachScreenState extends State<SplachScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: AppColors.primaryColor,
+      backgroundColor: AppColors.primaryColor,
       body: Center(
-        child: Image(
-          image: AssetImage(AppImages.logo),
-          fit: BoxFit.fill,
-          height: double.infinity,
+        child: AnimatedScale(
+          scale: scale,
+          duration: Duration(seconds: 6),
+          curve: Curves.elasticOut,
+          child: AnimatedOpacity(
+            opacity: opacity,
+            duration: Duration(seconds: 3),
+            child: Image(
+              image: AssetImage(AppImages.icon),
+              width: 200,
+              height: 200,
+            ),
+          ),
         ),
       ),
     );

@@ -15,6 +15,7 @@ import 'package:taborq/features/home/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
 import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:taborq/features/welcome/presentation/cubit/welcome_cubit.dart';
 import 'package:taborq/features/welcome/presentation/screens/onboarding_screen.dart';
 import 'package:taborq/features/welcome/presentation/screens/splach_screen.dart';
 
@@ -44,7 +45,10 @@ class AppRoutes {
       GoRoute(path: splash, builder: (context, state) => SplachScreen()),
       GoRoute(
         path: onboarding,
-        builder: (context, state) => OnboardingScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => WelcomeCubit(),
+          child: OnboardingScreen(),
+        ),
       ),
       GoRoute(
         path: login,

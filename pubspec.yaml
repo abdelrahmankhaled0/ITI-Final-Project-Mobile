@@ -44,6 +44,8 @@ dependencies:
   firebase_core: ^4.8.0
   fluttertoast: ^9.0.0
   smooth_page_indicator: ^2.0.1
+  conditional_builder_null_safety: ^0.0.6
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
