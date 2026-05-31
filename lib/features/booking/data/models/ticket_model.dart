@@ -5,10 +5,13 @@ class TicketModel {
   final String userId;
   final String businessId;
   final String serviceId;
-  final String serviceName; // الكاتيجوري أو اسم الخدمة (مثل: قسم الصدر / دكتور معين)
+  final String
+  serviceName; // الكاتيجوري أو اسم الخدمة (مثل: قسم الصدر / دكتور معين)
   final int ticketNumber;
   final DateTime bookingTime;
-  final String status; // pending, serving, completed, cancelled
+  final String status;
+  final String name;
+  final String phone; // pending, serving, completed, cancelled
 
   TicketModel({
     required this.ticketId,
@@ -19,6 +22,8 @@ class TicketModel {
     required this.ticketNumber,
     required this.bookingTime,
     required this.status,
+    required this.name,
+    required this.phone,
   });
 
   // تحويل الموديل لـ Map عشان نرفعه للفايربيز
@@ -32,6 +37,8 @@ class TicketModel {
       'ticketNumber': ticketNumber,
       'bookingTime': Timestamp.fromDate(bookingTime),
       'status': status,
+      'name': name,
+      'phone': phone,
     };
   }
 
@@ -46,6 +53,8 @@ class TicketModel {
       ticketNumber: (data['ticketNumber'] as num?)?.toInt() ?? 0,
       bookingTime: (data['bookingTime'] as Timestamp).toDate(),
       status: data['status'] ?? 'pending',
+      name: data["name"] ?? "",
+      phone: data["phone"],
     );
   }
 }

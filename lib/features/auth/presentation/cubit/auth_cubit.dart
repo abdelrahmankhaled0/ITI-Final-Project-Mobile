@@ -46,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
           );
 
       final user = credential.user;
+      await user?.updateDisplayName(nameController.text);
       if (user == null) {
         emit(AuthErrorState(error: 'Failed to create user'));
         return;

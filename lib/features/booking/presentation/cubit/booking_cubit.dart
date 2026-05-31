@@ -28,7 +28,20 @@ class BookingCubit extends Cubit<BookingState> {
         );
         return;
       }
-
+      String userName = "عميل جديد";
+      String userPhone = "";
+      try {
+        final userDoc = await _firestore.collection('users').doc(userId).get();
+        if (userDoc.exists && userDoc.data()?['name'] != null) {
+          userName = userDoc.data()?['name'];
+          userPhone = userDoc.data()?['phone'];
+        } else {
+          // حل احتياطي لو الفايرستور لسه مسمعش
+          userName = _auth.currentUser?.displayName ?? "عميل جديد";
+        }
+      } catch (e) {
+        userName = _auth.currentUser?.displayName ?? "عميل جديد";
+      }
       final String ticketDocId = "${userId}_$serviceId";
 
       debugPrint("================ BINDING DATA ================");
@@ -85,6 +98,7 @@ class BookingCubit extends Cubit<BookingState> {
 
         // إنشاء التذكرة
         final newTicket = TicketModel(
+          name: userName,
           ticketId: ticketDocId,
           userId: userId,
           businessId: businessId,
@@ -93,6 +107,7 @@ class BookingCubit extends Cubit<BookingState> {
           ticketNumber: updatedTicket,
           bookingTime: DateTime.now(),
           status: 'pending',
+          phone: userPhone,
         );
 
         // حفظ التذكرة في الفايربيز

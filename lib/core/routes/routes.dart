@@ -10,7 +10,7 @@ import 'package:taborq/features/auth/presentation/screens/terms_and_conditions_s
 import 'package:taborq/features/booking/presentation/screens/subServices_screen.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_cubit.dart'; // الـ Import الجديد
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
-import 'package:taborq/features/business_datails/screens/business_derails_screen.dart';
+import 'package:taborq/features/business_datails/screens/business_details_screen.dart';
 import 'package:taborq/features/home/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
