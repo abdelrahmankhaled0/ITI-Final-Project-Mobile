@@ -15,9 +15,13 @@ import 'package:taborq/features/home/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/screens/home_screen.dart';
 import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:taborq/features/welcome/presentation/screens/onboarding_screen.dart';
+import 'package:taborq/features/welcome/presentation/screens/splach_screen.dart';
 
 class AppRoutes {
-  static const String login = "/";
+  static const String splash = "/";
+  static const String onboarding = "/onboarding";
+  static const String login = "/login";
   static const String register = "/register";
   static const String forgetPassword = "/forgetPassword";
   static const String changePassword = "/changePassword";
@@ -28,7 +32,7 @@ class AppRoutes {
   static const String subServices = "sub-services";
 
   static final routes = GoRouter(
-    initialLocation: login,
+    initialLocation: splash,
     routes: [
       GoRoute(
         path: '/__/auth/action',
@@ -36,6 +40,11 @@ class AppRoutes {
           final code = state.uri.queryParameters['oobCode'];
           return ChangePasswordScreen(actionCode: code!);
         },
+      ),
+      GoRoute(path: splash, builder: (context, state) => SplachScreen()),
+      GoRoute(
+        path: onboarding,
+        builder: (context, state) => OnboardingScreen(),
       ),
       GoRoute(
         path: login,
