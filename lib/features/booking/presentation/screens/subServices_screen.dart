@@ -82,14 +82,14 @@ class SubServicesScreen extends StatelessWidget {
                   _showStatusSnackBar(
                     context,
                     message:
-                        "You already have an active booking! Your current number for ($serviceName) is: ${state.ticketNumber}",
+                        "You already have an active booking! Your current number for ($serviceName) is: ${state.ticketCode}",
                     backgroundColor: Colors.orange.shade800,
                   );
                 } else {
                   _showStatusSnackBar(
                     context,
                     message:
-                        "Successfully booked! Your number for ($serviceName) is: ${state.ticketNumber}",
+                        "Successfully booked! Your number for ($serviceName) is: ${state.ticketCode}",
                     backgroundColor: Colors.green.shade700,
                   );
                 }

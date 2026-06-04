@@ -664,7 +664,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
-import 'package:taborq/features/home/models/clinic_model.dart';
+import 'package:taborq/features/home/data/models/clinic_model.dart';
 
 class ClinicCard extends StatelessWidget {
   final ClinicModel clinic;

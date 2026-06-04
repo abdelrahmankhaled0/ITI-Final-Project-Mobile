@@ -28,29 +28,52 @@ class BookingCubit extends Cubit<BookingState> {
         );
         return;
       }
+
       String userName = "عميل جديد";
       String userPhone = "";
+      String businesseName = "";
+      String imageUri = "";
+
+      // 1️⃣ جلب بيانات البيزنس (تم تصليح اسم الكولكشن لـ businesses)
+      try {
+        final snapshot = await _firestore
+            .collection("businesses")
+            .doc(businessId)
+            .get();
+
+        if (snapshot.exists) {
+          final data = snapshot.data();
+          if (data != null) {
+            businesseName = data['name'] ?? "";
+            imageUri = data['imageUrl'] ?? "";
+          }
+        }
+      } catch (e) {
+        debugPrint("❌ Error fetching business data: ${e.toString()}");
+      }
+
+      // 2️⃣ جلب بيانات المستخدم
       try {
         final userDoc = await _firestore.collection('users').doc(userId).get();
         if (userDoc.exists && userDoc.data()?['name'] != null) {
           userName = userDoc.data()?['name'];
-          userPhone = userDoc.data()?['phone'];
+          userPhone = userDoc.data()?['phone'] ?? "";
         } else {
-          // حل احتياطي لو الفايرستور لسه مسمعش
           userName = _auth.currentUser?.displayName ?? "عميل جديد";
         }
       } catch (e) {
         userName = _auth.currentUser?.displayName ?? "عميل جديد";
       }
+
       final String ticketDocId = "${userId}_$serviceId";
 
       debugPrint("================ BINDING DATA ================");
       debugPrint("UserID: $userId");
       debugPrint("BusinessID: $businessId");
       debugPrint("ServiceID: $serviceId");
+
       debugPrint("==============================================");
 
-      // التعديل هنا: غيّرنا 'businesses' لـ 'Queues'
       final ticketRef = _firestore
           .collection('Queues')
           .doc(businessId)
@@ -65,19 +88,22 @@ class BookingCubit extends Cubit<BookingState> {
           .collection('services')
           .doc(serviceId);
 
-      // 1. التشيك إذا كان محجوز مسبقاً
+      // 3️⃣ التشيك إذا كان محجوز مسبقاً
       final existingTicket = await ticketRef.get();
       if (existingTicket.exists &&
           existingTicket.data()?['status'] == 'pending') {
-        int activeTicketNum = existingTicket.data()?['ticketNumber'] ?? 0;
+        // جلب رقم التذكرة الحالي كـ String أو تحويله لأمان الـ UI
+        String activeTicketNum =
+            existingTicket.data()?['ticketNumber']?.toString() ?? "A-000";
+
         emit(
-          BookingSuccess(ticketNumber: activeTicketNum, isAlreadyBooked: true),
+          BookingSuccess(ticketCode: activeTicketNum, isAlreadyBooked: true),
         );
         return;
       }
 
-      // 2. الـ Transaction لتحديث الـ Counter وحفظ التذكرة
-      int nextTicketNumber = await _firestore.runTransaction<int>((
+      // 4️⃣ الـ Transaction لتحديث الـ Counter وحفظ التذكرة (تم تعديل الـ Return لـ String)
+      String finalTicketCode = await _firestore.runTransaction<String>((
         transaction,
       ) async {
         DocumentSnapshot serviceSnapshot = await transaction.get(serviceRef);
@@ -91,12 +117,16 @@ class BookingCubit extends Cubit<BookingState> {
 
         int updatedTicket = currentLastTicket + 1;
 
-        // تحديث أو إنشاء الـ Counter في الخدمة
+        // توليد الكود المنسق بشكل بروفيشنال (مثال: A-014)
+        String formattedTicketCode =
+            'A-${updatedTicket.toString().padLeft(3, '0')}';
+
+        // تحديث الـ Counter بالأرقام النظيفة (int) في السيرفر عشان الـ Transaction اللي بعده
         transaction.set(serviceRef, {
           'lastGeneratedTicket': updatedTicket,
         }, SetOptions(merge: true));
 
-        // إنشاء التذكرة
+        // إنشاء موديل التذكرة بالكود الـ String المنسق
         final newTicket = TicketModel(
           name: userName,
           ticketId: ticketDocId,
@@ -104,24 +134,27 @@ class BookingCubit extends Cubit<BookingState> {
           businessId: businessId,
           serviceId: serviceId,
           serviceName: serviceName,
-          ticketNumber: updatedTicket,
+          ticketNumber: formattedTicketCode, // 🚀 مبعوثة كـ String منسق تماماً
           bookingTime: DateTime.now(),
           status: 'pending',
           phone: userPhone,
+          bussinessName: businesseName,
+          imageURI: imageUri,
         );
 
-        // حفظ التذكرة في الفايربيز
+        // حفظ التذكرة في الفايربيز جوه الـ Transaction
         transaction.set(ticketRef, newTicket.toFirestore());
 
-        return updatedTicket;
+        // نرجع الكود المنسق عشان الـ Cubit يستقبله بره
+        return formattedTicketCode;
       });
 
       debugPrint(
-        "✅ Ticket successfully saved in Firestore with Number: $nextTicketNumber",
+        "✅ Ticket successfully saved in Firestore with Code: $finalTicketCode",
       );
-      emit(
-        BookingSuccess(ticketNumber: nextTicketNumber, isAlreadyBooked: false),
-      );
+
+      // 5️⃣ إرسال حالة النجاح للـ UI بالكود المنسق الجديد
+      emit(BookingSuccess(ticketCode: finalTicketCode, isAlreadyBooked: false));
     } catch (e) {
       debugPrint("❌ Firestore Booking Error: ${e.toString()}");
       emit(BookingFailure(errorMessage: "Booking failed: ${e.toString()}"));

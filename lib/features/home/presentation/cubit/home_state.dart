@@ -1,4 +1,4 @@
-import 'package:taborq/features/home/models/clinic_model.dart';
+import 'package:taborq/features/home/data/models/clinic_model.dart';
 
 
 abstract class HomeState {}

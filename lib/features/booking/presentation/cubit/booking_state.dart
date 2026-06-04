@@ -5,11 +5,11 @@ class BookingInitial extends BookingState {}
 class BookingLoading extends BookingState {}
 
 class BookingSuccess extends BookingState {
-  final int ticketNumber;
+  final String ticketCode;
   final bool
   isAlreadyBooked; // true لو كان حاجز قبل كده، false لو حجز جديد فعلياً
 
-  BookingSuccess({required this.ticketNumber, required this.isAlreadyBooked});
+  BookingSuccess({required this.ticketCode, required this.isAlreadyBooked});
 }
 
 class BookingFailure extends BookingState {

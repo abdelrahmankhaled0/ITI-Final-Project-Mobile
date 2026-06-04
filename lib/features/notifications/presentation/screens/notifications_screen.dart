@@ -19,10 +19,10 @@ class NotificationScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.lightColor),
-          onPressed: () => context.go('/home'),
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back_ios, color: AppColors.lightColor),
+        //   onPressed: () => context.go('/home'),
+        // ),
       ),
       body: const Center(child: Text("No new notifications yet!")),
     );

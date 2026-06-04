@@ -351,7 +351,7 @@ import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_state.dart';
 import 'package:taborq/features/business_datails/widgets/service_card_widget.dart';
-import 'package:taborq/features/home/widgets/%20search_bar_widget.dart';
+import 'package:taborq/features/home/presentation/widgets/%20search_bar_widget.dart';
 
 
 class BusinessDetailsScreen extends StatelessWidget {

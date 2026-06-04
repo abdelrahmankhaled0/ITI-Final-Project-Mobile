@@ -7,11 +7,13 @@ class TicketModel {
   final String serviceId;
   final String
   serviceName; // الكاتيجوري أو اسم الخدمة (مثل: قسم الصدر / دكتور معين)
-  final int ticketNumber;
+  final String ticketNumber;
   final DateTime bookingTime;
   final String status;
   final String name;
-  final String phone; // pending, serving, completed, cancelled
+  final String phone;
+  final String bussinessName;
+  final String imageURI; // pending, serving, completed, cancelled
 
   TicketModel({
     required this.ticketId,
@@ -24,6 +26,8 @@ class TicketModel {
     required this.status,
     required this.name,
     required this.phone,
+    required this.bussinessName,
+    required this.imageURI,
   });
 
   // تحويل الموديل لـ Map عشان نرفعه للفايربيز
@@ -39,18 +43,22 @@ class TicketModel {
       'status': status,
       'name': name,
       'phone': phone,
+      'bussinessName': bussinessName,
+      'imageURI': imageURI,
     };
   }
 
   // تحويل الـ Map الراجع من الفايربيز لموديل نقدر نستخدمه في الابليكيشن
   factory TicketModel.fromFirestore(Map<String, dynamic> data) {
     return TicketModel(
+      bussinessName: data["bussinessName"],
+      imageURI: data["imageURI"],
       ticketId: data['ticketId'] ?? '',
       userId: data['userId'] ?? '',
       businessId: data['businessId'] ?? '',
       serviceId: data['serviceId'] ?? '',
       serviceName: data['serviceName'] ?? '',
-      ticketNumber: (data['ticketNumber'] as num?)?.toInt() ?? 0,
+      ticketNumber: data['ticketNumber']?.toString() ?? "",
       bookingTime: (data['bookingTime'] as Timestamp).toDate(),
       status: data['status'] ?? 'pending',
       name: data["name"] ?? "",

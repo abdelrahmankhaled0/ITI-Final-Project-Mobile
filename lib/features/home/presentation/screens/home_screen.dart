@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
-import 'package:taborq/features/home/cubit/home_cubit.dart';
-import 'package:taborq/features/home/cubit/home_state.dart';
-import 'package:taborq/features/home/widgets/%20search_bar_widget.dart';
-import 'package:taborq/features/home/widgets/category_chips.dart';
-import 'package:taborq/features/home/widgets/clinic_card.dart';
-import 'package:taborq/features/home/widgets/home_header.dart';
+import 'package:taborq/features/home/presentation/cubit/home_cubit.dart';
+import 'package:taborq/features/home/presentation/cubit/home_state.dart';
+import 'package:taborq/features/home/presentation/widgets/%20search_bar_widget.dart';
+import 'package:taborq/features/home/presentation/widgets/category_chips.dart';
+import 'package:taborq/features/home/presentation/widgets/clinic_card.dart';
+import 'package:taborq/features/home/presentation/widgets/home_header.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

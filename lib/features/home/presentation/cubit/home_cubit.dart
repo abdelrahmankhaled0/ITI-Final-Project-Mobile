@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:taborq/features/home/cubit/home_state.dart';
-import 'package:taborq/features/home/models/clinic_model.dart';
+import 'package:taborq/features/home/presentation/cubit/home_state.dart';
+import 'package:taborq/features/home/data/models/clinic_model.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(HomeInitial());
