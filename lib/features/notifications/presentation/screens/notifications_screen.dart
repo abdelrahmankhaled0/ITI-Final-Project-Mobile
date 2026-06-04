@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 
@@ -11,6 +10,7 @@ class NotificationScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.lightColor,
       appBar: AppBar(
+        
         backgroundColor: AppColors.primaryColor,
         title: Text(
           'Notifications',

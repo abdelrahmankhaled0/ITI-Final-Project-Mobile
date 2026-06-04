@@ -5,8 +5,8 @@ class AppRegex {
   }
 
   static bool isUsernameValid(String username) {
-    final regex = RegExp(r'^[a-zA-Z][a-zA-Z0-9_]{2,17}$');
-    return regex.hasMatch(username);
+    final regex = RegExp(r'^[A-Za-z]{2,20}\s[A-Za-z]{2,20}$');
+    return regex.hasMatch(username.trim());
   }
 
   static bool isPasswordValid(String password) {

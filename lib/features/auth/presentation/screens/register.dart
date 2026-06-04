@@ -116,7 +116,7 @@ class RegisterScreen extends StatelessWidget {
                               return "Please Enter Your Name";
                             }
                             if (!AppRegex.isUsernameValid(value)) {
-                              return "Please Enter a Valid Name";
+                              return 'Please enter your first and last name in English';
                             }
                             return null;
                           },
