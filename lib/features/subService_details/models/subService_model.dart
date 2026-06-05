@@ -31,7 +31,6 @@ class ServiceModel {
       lastGeneratedTicket: (data['lastGeneratedTicket'] as num?)?.toInt() ?? 0,
       imageUrl: data['imageUrl'] ?? '',
       isActive: data['isActive'] ?? false,
-
       subServiceNames: List<String>.from(data['subServiceNames'] ?? []),
     );
   }
