@@ -13,16 +13,15 @@ class DefaultButton extends StatelessWidget {
     return Center(
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          fixedSize: Size(400, 50),
+          fixedSize: const Size(400, 50),
           backgroundColor: AppColors.primaryColor,
         ),
-
         onPressed: onPressed,
         child: Text(
+          text,
           style: AppTextStyles.textStyle16.copyWith(
             color: AppColors.lightColor,
           ),
-          text,
         ),
       ),
     );

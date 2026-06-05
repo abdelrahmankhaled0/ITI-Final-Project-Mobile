@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "757178833866-nvttrl1amc49na3ardkdsvjmtfht74ln.apps.googleusercontent.com",
+          "client_id": "757178833866-v6mhen0322t794sv7o3cl6nqagvd7drf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.taborq",
-            "certificate_hash": "d3860a3a5772e17fe38c2a27f3092003cd8e1171"
+            "certificate_hash": "9816c4ed6ce0d22ea865c427e0fa289795c90020"
           }
         },
         {

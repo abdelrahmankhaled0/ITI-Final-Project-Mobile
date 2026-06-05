@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gap/flutter_gap.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/routes/routes.dart';
 import 'package:taborq/core/utils/app_colors.dart';
@@ -21,42 +22,64 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cubit = AuthCubit.get(context);
+
+    // متغير محلي لمتابعة سياق الـ Loading Dialog المفتوح
+    BuildContext? dialogContext;
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
+        // 1. حالة التحميل (Loading): نفتح الدايلوج ونحفظ الـ Context بتاعه
         if (state is AuthLoadingState) {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (_) => Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            ),
+            builder: (dContext) {
+              dialogContext = dContext;
+              return Center(
+                child: CircularProgressIndicator(color: AppColors.primaryColor),
+              );
+            },
           );
-        } else if (state is AuthSuccessState) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("success login"),
-              backgroundColor: AppColors.primaryColor,
-            ),
-          );
-          AppNavigations.pushReplacementTo(context, AppRoutes.home);
-        } else if (state is AuthErrorState) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
-          );
+        } else {
+          // 2. قفل دايلوج التحميل فوراً بشكل آمن لو رجعنا لأي حالة تانية
+          if (dialogContext != null) {
+            Navigator.pop(dialogContext!);
+            dialogContext = null; // تصفير المتغير للحماية
+          }
+
+          // 3. حالة النجاح (Success Login)
+          if (state is AuthSuccessState) {
+            Fluttertoast.showToast(
+              msg: "Logged in successfully!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Colors.green, // التوست الأخضر الجميل عند النجاح
+              textColor: Colors.white,
+              fontSize: 14.0,
+            );
+            // الانتقال لصفحة الهوم بنجاح
+            AppNavigations.pushReplacementTo(context, AppRoutes.home);
+          }
+          // 4. حالة الخطأ (Error)
+          else if (state is AuthErrorState) {
+            Fluttertoast.showToast(
+              msg: state.error,
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Colors.redAccent, // توست أحمر عند حدوث خطأ
+              textColor: Colors.white,
+              fontSize: 14.0,
+            );
+          }
         }
       },
-
       child: Scaffold(
-        // backgroundColor: AppColors.lightColor,
         body: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           child: Container(
             width: double.infinity,
-            // height: double.infinity,
-            padding: EdgeInsets.all(20),
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 100),
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
             decoration: BoxDecoration(
               boxShadow: [BoxShadow(color: AppColors.lightColor)],
               borderRadius: BorderRadius.circular(24),
@@ -66,16 +89,15 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(style: AppTextStyles.headStyle, "Welcome back"),
-                  Gap(10),
+                  Text("Welcome back", style: AppTextStyles.headStyle),
+                  const Gap(10),
                   Text(
+                    "Please enter your details to continue.",
                     style: AppTextStyles.textStyle16.copyWith(
                       color: AppColors.neutralColor6,
                     ),
-
-                    "Please enter your details to continue.",
                   ),
-                  Gap(50),
+                  const Gap(50),
                   Text(
                     "Email address",
                     style: AppTextStyles.textStyle12.copyWith(
@@ -83,11 +105,11 @@ class LoginScreen extends StatelessWidget {
                       color: AppColors.primaryColor1,
                     ),
                   ),
-                  Gap(10),
+                  const Gap(10),
                   DefaultFormFiled(
                     controller: cubit.emailController,
                     hintText: "name@gmail.com",
-                    prefixIcon: Icon(Icons.email),
+                    prefixIcon: const Icon(Icons.email),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -99,7 +121,7 @@ class LoginScreen extends StatelessWidget {
                       return null;
                     },
                   ),
-                  Gap(20),
+                  const Gap(20),
                   Text(
                     "Password",
                     style: AppTextStyles.textStyle12.copyWith(
@@ -107,7 +129,7 @@ class LoginScreen extends StatelessWidget {
                       color: AppColors.primaryColor1,
                     ),
                   ),
-                  Gap(10),
+                  const Gap(10),
                   PasswordDefaultFormFiled(
                     controller: cubit.passwordController,
                     validator: (value) {
@@ -123,21 +145,24 @@ class LoginScreen extends StatelessWidget {
                       return null;
                     },
                   ),
-                  DefaultForgetPasswordRow(),
-                  Gap(20),
+                  const DefaultForgetPasswordRow(),
+                  const Gap(20),
                   DefaultButton(
                     text: "Login",
                     onPressed: () {
                       if (cubit.formKey.currentState!.validate()) {
-                        cubit.login();
+                        cubit.login(
+                          email: cubit.emailController.text.trim(),
+                          password: cubit.passwordController.text,
+                        );
                       }
                     },
                   ),
-                  Gap(50),
+                  const Gap(50),
                   Row(
                     children: [
-                      Expanded(child: Divider()),
-                      Gap(5),
+                      const Expanded(child: Divider()),
+                      const Gap(5),
                       Text(
                         "Or continue with",
                         style: AppTextStyles.textStyle12.copyWith(
@@ -145,17 +170,16 @@ class LoginScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Gap(5),
-                      Expanded(child: Divider()),
+                      const Gap(5),
+                      const Expanded(child: Divider()),
                     ],
                   ),
-                  Gap(30),
+                  const Gap(30),
                   DefaultAnthorMethodsForLogin(cubit: cubit),
-                  Gap(20),
+                  const Gap(20),
                   DefaultSwapBetweenLoginAndRegister(
                     text: "Don't have an account?",
                     actionText: "Create one now",
-
                     onPressed: () {
                       cubit.clearControllers();
                       AppNavigations.pushReplacementTo(

@@ -11,18 +11,18 @@ class DefaultForgetPasswordRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Spacer(),
+        const Spacer(),
         TextButton(
-          style: TextButton.styleFrom(padding: EdgeInsets.all(0)),
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
           onPressed: () {
             AppNavigations.pushTo(context, AppRoutes.forgetPassword);
           },
           child: Text(
+            "Forget Password?",
             style: AppTextStyles.textStyle12.copyWith(
               color: AppColors.neutralColor2,
               fontWeight: FontWeight.bold,
             ),
-            "Forget Password?",
           ),
         ),
       ],

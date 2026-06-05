@@ -1,9 +1,12 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class AppColors {
   static const Color lightColor = Color(0XFFFFFFFF);
   static const Color darkColor = Color(0XFF000000);
   static const Color lightgrey = Color(0XFFF2F3F7);
+  static const Color grayColor = Colors.grey;
 
   static const Color infoCardBg1 = Color(0XFFF3F4F9);
   static const Color infoCardBg2 = Color(0XFFE0F7F6);

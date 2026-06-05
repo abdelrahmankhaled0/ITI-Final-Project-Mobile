@@ -28,7 +28,6 @@ class DefaultSwapBetweenLoginAndRegister extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(text, style: textStyle ?? defaultTextStyle),
-
           TextButton(
             onPressed: onPressed,
             style: TextButton.styleFrom(

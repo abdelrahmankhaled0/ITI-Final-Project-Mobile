@@ -24,14 +24,12 @@ class _PasswordDefaultFormFiledState extends State<PasswordDefaultFormFiled> {
       keyboardType: TextInputType.visiblePassword,
       obscureText: isPassword,
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.lock),
+        prefixIcon: const Icon(Icons.lock),
         errorMaxLines: 4,
-        errorStyle: TextStyle(fontSize: 10),
-        hint: Text(
-          "**********",
-          style: AppTextStyles.textStyle12.copyWith(
-            color: AppColors.neutralColor4,
-          ),
+        errorStyle: const TextStyle(fontSize: 10),
+        hintText: "**********",
+        hintStyle: AppTextStyles.textStyle12.copyWith(
+          color: AppColors.neutralColor4,
         ),
         suffixIcon: IconButton(
           onPressed: () {
@@ -40,11 +38,10 @@ class _PasswordDefaultFormFiledState extends State<PasswordDefaultFormFiled> {
             });
           },
           icon: isPassword
-              ? Icon(Icons.visibility)
-              : Icon(Icons.visibility_off),
+              ? const Icon(Icons.visibility)
+              : const Icon(Icons.visibility_off),
         ),
         filled: true,
-
         fillColor: AppColors.neutralColor10,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
