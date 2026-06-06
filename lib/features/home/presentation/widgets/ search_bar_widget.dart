@@ -15,6 +15,7 @@ class SearchBarWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
+        
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: 'Search clinics, specialists...',

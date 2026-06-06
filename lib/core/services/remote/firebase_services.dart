@@ -19,4 +19,19 @@ class FirebaseServices {
         .orderBy("bookingTime", descending: true)
         .get();
   }
+
+  static Future<void> deleteQueueById({
+    required String ticketId,
+    required String queuesId,
+    required String servicesId,
+  }) {
+    return FirebaseFirestore.instance
+        .collection("Queues")
+        .doc(queuesId)
+        .collection("services")
+        .doc(servicesId)
+        .collection("tickets")
+        .doc(ticketId)
+        .delete();
+  }
 }

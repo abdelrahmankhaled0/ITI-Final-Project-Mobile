@@ -63,7 +63,7 @@ class LoginScreen extends StatelessWidget {
           // 4. حالة الخطأ (Error)
           else if (state is AuthErrorState) {
             Fluttertoast.showToast(
-              msg: state.error,
+              msg: "Email or Password is uncorrect",
               toastLength: Toast.LENGTH_LONG,
               gravity: ToastGravity.BOTTOM,
               backgroundColor: Colors.redAccent, // توست أحمر عند حدوث خطأ

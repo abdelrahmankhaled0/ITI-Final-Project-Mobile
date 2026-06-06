@@ -26,4 +26,19 @@ class BookingViewCubit extends Cubit<BookingViewStates> {
       emit(BookingViewErrorState(e.toString()));
     }
   }
+
+  deleteTicketById(BookingViewModel ticket) async {
+    try {
+      emit(BookingViewLoadingState());
+      await FirebaseServices.deleteQueueById(
+        ticketId: ticket.ticId,
+        queuesId: ticket.businessId,
+        servicesId: ticket.serviceId,
+      );
+      tickets.removeWhere((item) => item.ticId == ticket.ticId);
+      emit(BookingViewSuccessState(tickets));
+    } on Exception catch (e) {
+      emit(BookingViewErrorState(e.toString()));
+    }
+  }
 }

@@ -21,6 +21,8 @@ class DefaultFormFiled extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      keyboardAppearance: Brightness.light,
+      
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,

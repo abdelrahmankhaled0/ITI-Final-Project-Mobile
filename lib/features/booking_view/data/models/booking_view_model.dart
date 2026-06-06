@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BookingViewModel {
+  final String businessId;
+  final String serviceId;
+  final String ticId;
   final String uri;
   final DateTime date;
   final String ticketNumber;
@@ -15,6 +18,9 @@ class BookingViewModel {
     required this.bussinessName,
     required this.serviceName,
     required this.status,
+    required this.ticId,
+    required this.businessId,
+    required this.serviceId,
   });
 
   factory BookingViewModel.fromJson(Map<String, dynamic> data) {
@@ -27,6 +33,9 @@ class BookingViewModel {
       bussinessName: data["bussinessName"] ?? "",
       serviceName: data["serviceName"] ?? "",
       status: data["status"] ?? "",
+      ticId: data['ticketId'] ?? "",
+      businessId: data["businessId"] ?? "",
+      serviceId: data["serviceId"] ?? "",
     );
   }
 
@@ -36,9 +45,11 @@ class BookingViewModel {
       "bookingTime": date,
       "ticketNumber": ticketNumber,
       "bussinessName": bussinessName,
-
+      "ticketId": ticId,
       "serviceName": serviceName,
       "status": status,
+      "businessId": businessId,
+      "serviceId": serviceId,
     };
   }
 }
