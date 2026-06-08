@@ -339,8 +339,6 @@
 //   }
 // }
 
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -353,10 +351,8 @@ import 'package:taborq/features/business_datails/cubit/business_details_state.da
 import 'package:taborq/features/business_datails/widgets/service_card_widget.dart';
 import 'package:taborq/features/home/presentation/widgets/%20search_bar_widget.dart';
 
-
 class BusinessDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> business;
-
 
   const BusinessDetailsScreen({super.key, required this.business});
 
@@ -364,10 +360,7 @@ class BusinessDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => BusinessDetailsCubit(),
-      child: Scaffold(
-        backgroundColor: AppColors.lightColor,
-        body: _BusinessDetailsContent(business: business),
-      ),
+      child: Scaffold(body: _BusinessDetailsContent(business: business)),
     );
   }
 }
@@ -382,7 +375,6 @@ class _BusinessDetailsContent extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-
         SliverAppBar(
           expandedHeight: 240,
           pinned: true,
@@ -403,7 +395,6 @@ class _BusinessDetailsContent extends StatelessWidget {
           ),
         ),
 
-
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -416,30 +407,38 @@ class _BusinessDetailsContent extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Name & Status
-                _buildHeader(business['name']),
+                _buildHeader(business['name'], context),
                 const SizedBox(height: 8),
 
                 // Rating & Location
-                _buildRatingAndLocation(business['rating'], business['address']),
+                _buildRatingAndLocation(
+                  business['rating'],
+                  business['address'],
+                  context,
+                ),
                 const SizedBox(height: 24),
-
 
                 _buildInfoBox(business),
                 const SizedBox(height: 24),
 
-
                 SearchBarWidget(
-                  onChanged: (value) => context.read<BusinessDetailsCubit>().updateSearchQuery(value),
+                  onChanged: (value) => context
+                      .read<BusinessDetailsCubit>()
+                      .updateSearchQuery(value),
                 ),
 
                 const SizedBox(height: 24),
-                Text("Available Services", style: AppTextStyles.textStyle18.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  "Available Services",
+                  style: AppTextStyles.textStyle18.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 10),
               ],
             ),
           ),
         ),
-
 
         BlocBuilder<BusinessDetailsCubit, BusinessDetailsState>(
           builder: (context, state) {
@@ -456,47 +455,56 @@ class _BusinessDetailsContent extends StatelessWidget {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: AppColors.primaryColor,)));
+                  return const SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  );
                 }
-
 
                 var filteredServices = snapshot.data!.docs.where((doc) {
                   var data = doc.data() as Map<String, dynamic>;
-                  String name = (data['serviceName'] ?? "").toString().toLowerCase();
+                  String name = (data['serviceName'] ?? "")
+                      .toString()
+                      .toLowerCase();
                   return name.contains(searchTerm.toLowerCase());
                 }).toList();
 
                 if (filteredServices.isEmpty) {
-                  return const SliverToBoxAdapter(child: Center(child: Text("No services match your search")));
+                  return const SliverToBoxAdapter(
+                    child: Center(child: Text("No services match your search")),
+                  );
                 }
 
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            var serviceDoc = filteredServices[index];
-                            var serviceData = serviceDoc.data() as Map<String, dynamic>;
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      var serviceDoc = filteredServices[index];
+                      var serviceData =
+                          serviceDoc.data() as Map<String, dynamic>;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: ServiceCard(
-                            serviceName: serviceData['serviceName'],
-                            isActive: serviceData['isActive'],
-                            currentTicket: serviceData['currentTicket'],
-                            onBookTap: () => {context.push(
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ServiceCard(
+                          serviceName: serviceData['serviceName'],
+                          isActive: serviceData['isActive'],
+                          currentTicket: serviceData['currentTicket'],
+                          onBookTap: () => {
+                            context.push(
                               '${AppRoutes.businessDetails}/${AppRoutes.subServices}',
                               extra: {
                                 'businessId': businessId,
                                 'serviceId': serviceDoc.id,
                                 'serviceName': serviceData['serviceName'],
                               },
-                            )}
-                          ),
-                        );
-                      },
-                      childCount: filteredServices.length,
-                    ),
+                            ),
+                          },
+                        ),
+                      );
+                    }, childCount: filteredServices.length),
                   ),
                 );
               },
@@ -506,8 +514,6 @@ class _BusinessDetailsContent extends StatelessWidget {
       ],
     );
   }
-
-
 
   Widget _buildTag(String category) {
     return Container(
@@ -519,19 +525,30 @@ class _BusinessDetailsContent extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.local_hospital_outlined, size: 14, color: AppColors.primaryColor),
+          const Icon(
+            Icons.local_hospital_outlined,
+            size: 14,
+            color: AppColors.primaryColor,
+          ),
           const SizedBox(width: 4),
-          Text(category, style: AppTextStyles.textStyle12.copyWith(color: AppColors.primaryColor)),
+          Text(
+            category,
+            style: AppTextStyles.textStyle12.copyWith(
+              color: AppColors.primaryColor,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(String name) {
+  Widget _buildHeader(String name, context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: Text(name, style: AppTextStyles.textStyle24.copyWith(fontWeight: FontWeight.bold))),
+        Expanded(
+          child: Text(name, style: Theme.of(context).textTheme.headlineLarge),
+        ),
         _buildStatusTag(),
       ],
     );
@@ -540,27 +557,48 @@ class _BusinessDetailsContent extends StatelessWidget {
   Widget _buildStatusTag() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-      child: Text("Open Now", style: AppTextStyles.textStyle10.copyWith(color: Colors.green, fontWeight: FontWeight.bold)),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        "Open Now",
+        style: AppTextStyles.textStyle10.copyWith(
+          color: Colors.green,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
-  Widget _buildRatingAndLocation(dynamic rating, String address) {
+  Widget _buildRatingAndLocation(dynamic rating, String address, context) {
     return Column(
       children: [
         Row(
           children: [
             const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
             const SizedBox(width: 4),
-            Text("$rating (2,341 reviews)", style: AppTextStyles.textStyle12.copyWith(color: AppColors.neutralColor5)),
+            Text(
+              "$rating (2,341 reviews)",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(Icons.location_on_outlined, color: AppColors.neutralColor5, size: 18),
+            Icon(
+              Icons.location_on_outlined,
+              color: AppColors.neutralColor5,
+              size: 18,
+            ),
             const SizedBox(width: 4),
-            Expanded(child: Text("$address • 1.2 km away", style: AppTextStyles.textStyle12.copyWith(color: AppColors.neutralColor5))),
+            Expanded(
+              child: Text(
+                "$address • 1.2 km away",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
           ],
         ),
       ],
@@ -570,13 +608,24 @@ class _BusinessDetailsContent extends StatelessWidget {
   Widget _buildInfoBox(Map<String, dynamic> business) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildInfoItem(Icons.access_time_rounded, "Wait Time", "${business['waitTime'] ?? '0'} min"),
+          _buildInfoItem(
+            Icons.access_time_rounded,
+            "Wait Time",
+            "${business['waitTime'] ?? '0'} min",
+          ),
           _buildDivider(),
-          _buildInfoItem(Icons.medical_services_outlined, "Category", business['category']),
+          _buildInfoItem(
+            Icons.medical_services_outlined,
+            "Category",
+            business['category'],
+          ),
           _buildDivider(),
           _buildInfoItem(Icons.local_parking_rounded, "Parking", "Available"),
         ],
@@ -584,15 +633,26 @@ class _BusinessDetailsContent extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() => Container(width: 1, height: 40, color: Colors.grey.shade200);
+  Widget _buildDivider() =>
+      Container(width: 1, height: 40, color: Colors.grey.shade200);
 
   Widget _buildInfoItem(IconData icon, String label, String value) {
     return Column(
       children: [
         Icon(icon, color: AppColors.primaryColor, size: 24),
         const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.textStyle10.copyWith(color: AppColors.neutralColor5)),
-        Text(value, style: AppTextStyles.textStyle12.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: AppTextStyles.textStyle10.copyWith(
+            color: AppColors.neutralColor5,
+          ),
+        ),
+        Text(
+          value,
+          style: AppTextStyles.textStyle12.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }

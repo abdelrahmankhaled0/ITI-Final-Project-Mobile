@@ -19,7 +19,6 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: AppColors.lightColor,
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')
@@ -88,6 +87,7 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const Spacer(),
+
                                 const Padding(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Icon(
@@ -147,11 +147,11 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   "Near you",
-                                  style: TextStyle(
-                                    color: AppColors.darkColor,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24,
+                                      ),
                                 ),
                                 const Spacer(),
                                 IconButton(

@@ -6,7 +6,6 @@ import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/routes/routes.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_regex.dart';
-import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_state.dart';
 import 'package:taborq/features/auth/presentation/widgets/default_another_methods_for_login.dart';
@@ -35,9 +34,7 @@ class LoginScreen extends StatelessWidget {
             barrierDismissible: false,
             builder: (dContext) {
               dialogContext = dContext;
-              return Center(
-                child: CircularProgressIndicator(color: AppColors.primaryColor),
-              );
+              return Center(child: CircularProgressIndicator());
             },
           );
         } else {
@@ -81,29 +78,34 @@ class LoginScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 100),
             decoration: BoxDecoration(
-              boxShadow: [BoxShadow(color: AppColors.lightColor)],
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.darkColor.withAlpha(40),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Form(
               key: cubit.formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Welcome back", style: AppTextStyles.headStyle),
+                  Text(
+                    "Welcome back",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
                   const Gap(10),
                   Text(
                     "Please enter your details to continue.",
-                    style: AppTextStyles.textStyle16.copyWith(
-                      color: AppColors.neutralColor6,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const Gap(50),
                   Text(
                     "Email address",
-                    style: AppTextStyles.textStyle12.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor1,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const Gap(10),
                   DefaultFormFiled(
@@ -124,10 +126,7 @@ class LoginScreen extends StatelessWidget {
                   const Gap(20),
                   Text(
                     "Password",
-                    style: AppTextStyles.textStyle12.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor1,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const Gap(10),
                   PasswordDefaultFormFiled(
@@ -165,10 +164,7 @@ class LoginScreen extends StatelessWidget {
                       const Gap(5),
                       Text(
                         "Or continue with",
-                        style: AppTextStyles.textStyle12.copyWith(
-                          color: AppColors.primaryColor1,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const Gap(5),
                       const Expanded(child: Divider()),

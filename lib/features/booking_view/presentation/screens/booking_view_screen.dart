@@ -23,9 +23,6 @@ class BookingViewScreen extends StatelessWidget {
 
           // 🚀 خلينا الـ Scaffold هو الأساس دايماً عشان الـ AppBar يفضل ثابت وشكل الأبلكيشن احترافي
           return Scaffold(
-            backgroundColor: const Color(
-              0xFFF8F9FA,
-            ), // خلفية رمادي فاتح مريحة جداً للعين
             appBar: AppBar(
               backgroundColor: AppColors.primaryColor,
               elevation: 0,
@@ -52,12 +49,7 @@ class BookingViewScreen extends StatelessWidget {
     BookingViewCubit cubit,
   ) {
     if (state is BookingViewLoadingState) {
-      return Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primaryColor,
-          strokeWidth: 3,
-        ),
-      );
+      return Center(child: CircularProgressIndicator(strokeWidth: 3));
     }
 
     if (cubit.tickets.isEmpty) {
@@ -70,7 +62,7 @@ class BookingViewScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).cardColor,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -121,11 +113,11 @@ class BookingViewScreen extends StatelessWidget {
             onTap: () => _showDeleteDialog(context, cubit, ticket),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: AppColors.darkColor.withAlpha(40),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

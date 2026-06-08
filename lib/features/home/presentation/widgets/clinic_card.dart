@@ -673,12 +673,12 @@ class ClinicCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.lightColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(48),
         boxShadow: [
           BoxShadow(
-            color: AppColors.neutralColor.withOpacity(0.07),
-            blurRadius: 16,
+            color: AppColors.darkColor.withAlpha(40),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
@@ -743,10 +743,11 @@ class ClinicCard extends StatelessWidget {
                         children: [
                           Text(
                             clinic.name,
-                            style: AppTextStyles.textStyle16.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor1,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           Row(
@@ -762,9 +763,7 @@ class ClinicCard extends StatelessWidget {
                                   clinic.address,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.textStyle13.copyWith(
-                                    color: AppColors.neutralColor5,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ),
                             ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:taborq/core/utils/app_colors.dart';
 
 class DefaultSwapBetweenLoginAndRegister extends StatelessWidget {
   const DefaultSwapBetweenLoginAndRegister({
@@ -34,15 +33,14 @@ class DefaultSwapBetweenLoginAndRegister extends StatelessWidget {
               padding: EdgeInsets.zero,
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              backgroundColor: Colors.transparent,
             ),
             child: Text(
               actionText,
-              style:
-                  actionStyle ??
-                  defaultTextStyle?.copyWith(
-                    color: AppColors.primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
         ],
