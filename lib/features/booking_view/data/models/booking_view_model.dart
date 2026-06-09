@@ -23,6 +23,8 @@ class BookingViewModel {
     required this.serviceId,
   });
 
+  
+
   factory BookingViewModel.fromJson(Map<String, dynamic> data) {
     return BookingViewModel(
       uri: data["imageURI"] ?? "",

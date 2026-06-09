@@ -6,6 +6,9 @@ class FirebaseServices {
       .instance
       .collectionGroup("tickets");
 
+  static CollectionReference<Map<String, dynamic>> usersCollection =
+      FirebaseFirestore.instance.collection("users");
+
   static Future<QuerySnapshot<Map<String, dynamic>>>
   getTicketsByUserId() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -18,6 +21,10 @@ class FirebaseServices {
         .where("userId", isEqualTo: userId)
         .orderBy("bookingTime", descending: true)
         .get();
+  }
+
+  static deleteUserById(String userId) {
+    return usersCollection.doc(userId).delete();
   }
 
   static Future<void> deleteQueueById({

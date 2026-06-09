@@ -174,7 +174,7 @@ class BookingViewScreen extends StatelessWidget {
                                 ),
                                 const Gap(4),
                                 Text(
-                                  ticket.ticketNumber,
+                                  'Q-${ticket.ticketNumber.toString().padLeft(3, '0')}',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:taborq/core/services/remote/firebase_services.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -245,6 +247,17 @@ class AuthCubit extends Cubit<AuthState> {
     } on FirebaseAuthException catch (e) {
       emit(AuthErrorState(error: e.message ?? "An error occurred"));
     } catch (e) {
+      emit(AuthErrorState(error: e.toString()));
+    }
+  }
+
+  deleteUserById() async {
+    try {
+      emit(AuthLoadingState());
+      var currentuser = FirebaseAuth.instance.currentUser;
+      await currentuser?.delete();
+      emit(AuthSuccessState());
+    } on Exception catch (e) {
       emit(AuthErrorState(error: e.toString()));
     }
   }
