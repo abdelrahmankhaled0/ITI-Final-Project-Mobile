@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:taborq/core/services/remote/notification_service.dart';
+import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
 import '../../data/models/ticket_model.dart';
 import 'booking_state.dart';
 
@@ -119,7 +121,7 @@ class BookingCubit extends Cubit<BookingState> {
 
         // توليد الكود المنسق بشكل بروفيشنال (مثال: A-014)
         String formattedTicketCode =
-            'A-${updatedTicket.toString().padLeft(3, '0')}';
+            'Q-${updatedTicket.toString().padLeft(3, '0')}';
 
         // تحديث الـ Counter بالأرقام النظيفة (int) في السيرفر عشان الـ Transaction اللي بعده
         transaction.set(serviceRef, {
@@ -134,7 +136,7 @@ class BookingCubit extends Cubit<BookingState> {
           businessId: businessId,
           serviceId: serviceId,
           serviceName: serviceName,
-          ticketNumber: formattedTicketCode, // 🚀 مبعوثة كـ String منسق تماماً
+          ticketNumber: updatedTicket, // 🚀 مبعوثة كـ String منسق تماماً
           bookingTime: DateTime.now(),
           status: 'pending',
           phone: userPhone,
@@ -159,5 +161,59 @@ class BookingCubit extends Cubit<BookingState> {
       debugPrint("❌ Firestore Booking Error: ${e.toString()}");
       emit(BookingFailure(errorMessage: "Booking failed: ${e.toString()}"));
     }
+  }
+
+  // 🚀 ضيف الدالة دي جوه الكيوبت المسؤول عن شاشة الحجز أو الطابور (وليس كيو بت الإشعارات)
+  // 🚀 النسخة المتطابقة 100% مع بنية الفايرستور بتاعتك
+  void startQueueListener({
+    required String businessId, // محتاجينه للمسار
+    required String serviceId, // محتاجينه للمسار
+    required int userTurnNumber,
+    required NotificationCubit notificationCubit,
+  }) {
+    FirebaseFirestore.instance
+        .collection('Queues') // 🎯 Q كابيتال زي الفايرستور
+        .doc(businessId)
+        .collection('services')
+        .doc(
+          serviceId,
+        ) // 🎯 هنا المكان الصح اللي جواه الـ currentTurn والـ counter
+        .snapshots()
+        .listen((snapshot) {
+          if (snapshot.exists) {
+            // 🎯 تعديل اسم الفيلد لـ currentTurn ليطابق السيرفر
+            int currentServing = snapshot.data()?['currentTurn'] ?? 0;
+
+            // الحسبة السحرية
+            int peopleAhead = userTurnNumber - currentServing;
+
+            // 1. حالة: لو فاضل 3 أشخاص أو أقل ودور اليوزر لسه مجاش
+            if (peopleAhead > 0 && peopleAhead <= 3) {
+              String title = "Your turn is approaching! 🏃‍♂️";
+              String body =
+                  "Current turn: $currentServing. Your number: $userTurnNumber. There are $peopleAhead people ahead of you.";
+
+              NotificationService().showNotification(
+                id: 1,
+                title: title,
+                body: body,
+              );
+
+              notificationCubit.addNotification(title: title, body: body);
+            }
+            // 2. حالة: جه دور اليوزر بالظبط
+            else if (peopleAhead == 0) {
+              String title = "It's your turn! 🎉";
+              String body = "Please proceed immediately, you are being called.";
+
+              NotificationService().showNotification(
+                id: 2,
+                title: title,
+                body: body,
+              );
+              notificationCubit.addNotification(title: title, body: body);
+            }
+          }
+        });
   }
 }

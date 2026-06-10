@@ -336,7 +336,6 @@
 //   }
 // }
 
-
 // import 'package:flutter/material.dart';
 // import 'package:taborq/core/utils/app_colors.dart';
 // import 'package:taborq/core/utils/app_text_styles.dart';
@@ -659,7 +658,6 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
@@ -675,12 +673,12 @@ class ClinicCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.lightColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(48),
         boxShadow: [
           BoxShadow(
-            color: AppColors.neutralColor.withOpacity(0.07),
-            blurRadius: 16,
+            color: AppColors.darkColor.withAlpha(40),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
@@ -691,7 +689,9 @@ class ClinicCard extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(48)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(48),
+                ),
                 child: _buildImage(),
               ),
               // Rating Badge
@@ -699,7 +699,10 @@ class ClinicCard extends StatelessWidget {
                 top: 16,
                 right: 16,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.lightColor,
                     borderRadius: BorderRadius.circular(20),
@@ -707,7 +710,11 @@ class ClinicCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 16),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFFFC107),
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         clinic.rating.toString(),
@@ -736,25 +743,27 @@ class ClinicCard extends StatelessWidget {
                         children: [
                           Text(
                             clinic.name,
-                            style: AppTextStyles.textStyle16.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor1,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              Icon(Icons.location_on_rounded,
-                                  size: 14, color: AppColors.neutralColor5),
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 14,
+                                color: AppColors.neutralColor5,
+                              ),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   clinic.address,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.textStyle13.copyWith(
-                                    color: AppColors.neutralColor5,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ),
                             ],
@@ -776,7 +785,6 @@ class ClinicCard extends StatelessWidget {
   }
 
   Widget _buildWaitTimeInfo() {
-
     final Color waitTimeColor = clinic.waitTime > 30
         ? const Color(0xFFE53935)
         : AppColors.primaryColor;
@@ -820,15 +828,20 @@ class ClinicCard extends StatelessWidget {
         width: double.infinity,
         height: 56,
         child: ElevatedButton(
-          onPressed: () {context.push('/home/details', extra: {
-            'id': clinic.id,
-            'name': clinic.name,
-            'imageUrl': clinic.imageUrl,
-            'address': clinic.address,
-            'category': clinic.category,
-            'waitTime': clinic.waitTime,
-            'rating': clinic.rating,
-          });},
+          onPressed: () {
+            context.push(
+              '/home/details',
+              extra: {
+                'id': clinic.id,
+                'name': clinic.name,
+                'imageUrl': clinic.imageUrl,
+                'address': clinic.address,
+                'category': clinic.category,
+                'waitTime': clinic.waitTime,
+                'rating': clinic.rating,
+              },
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
             foregroundColor: AppColors.lightColor,

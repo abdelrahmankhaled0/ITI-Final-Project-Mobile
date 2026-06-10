@@ -14,12 +14,14 @@ android {
     ndkVersion = "30.0.14904198"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
+        
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+       jvmTarget = "1.8"
     }
 
     defaultConfig {
@@ -44,4 +46,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // ... الأكواد القديمة بتاعتك سيبها وضبط السطر ده كدة:
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

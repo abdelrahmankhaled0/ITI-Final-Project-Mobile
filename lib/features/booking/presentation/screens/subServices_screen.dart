@@ -6,6 +6,7 @@ import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_state.dart';
+import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart'; // 🎯 ضفنا امبورت كيوبت الإشعارات
 
 class SubServicesScreen extends StatelessWidget {
   final String businessId;
@@ -19,7 +20,6 @@ class SubServicesScreen extends StatelessWidget {
     required this.serviceName,
   });
 
-  // دالة مساعدة لعرض رسائل الـ Toast/SnackBar لليوزر
   void _showStatusSnackBar(
     BuildContext context, {
     required String message,
@@ -70,14 +70,20 @@ class SubServicesScreen extends StatelessWidget {
             .trim();
 
         return Scaffold(
-          backgroundColor: AppColors.lightColor,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
 
-          // تعديل الرسائل هنا للغة الإنجليزية بالكامل داخل الـ Listener
           floatingActionButton: BlocConsumer<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
+                // 🚀 تشغيل الـ Listener ديناميكياً فور نجاح الحجز
+                context.read<BookingCubit>().startQueueListener(
+                  businessId: businessId,
+                  serviceId: serviceId,
+                  userTurnNumber: int.tryParse(state.ticketCode) ?? 0,
+                  notificationCubit: context.read<NotificationCubit>(),
+                );
+
                 if (state.isAlreadyBooked) {
                   _showStatusSnackBar(
                     context,
@@ -120,10 +126,9 @@ class SubServicesScreen extends StatelessWidget {
                       shadowColor: AppColors.darkColor.withOpacity(0.3),
                     ),
                     onPressed: state is BookingLoading
-                        ? null // لمنع الـ Double Click أثناء العملية الـ Async
+                        ? null
                         : () {
                             if (serviceData.isNotEmpty) {
-                              // استدعاء دالة الحجز وتمرير الكاتيجوري والبيانات
                               context.read<BookingCubit>().bookQueuePlace(
                                 businessId: businessId,
                                 serviceId: serviceId,
@@ -156,7 +161,7 @@ class SubServicesScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
-                backgroundColor: AppColors.lightColor,
+                backgroundColor: AppColors.primaryColor,
                 elevation: 0,
                 pinned: true,
                 leading: IconButton(
@@ -168,10 +173,7 @@ class SubServicesScreen extends StatelessWidget {
                 ),
                 title: Text(
                   serviceName,
-                  style: AppTextStyles.textStyle24.copyWith(
-                    color: AppColors.primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 centerTitle: true,
                 actions: [
@@ -207,8 +209,7 @@ class SubServicesScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       Text(
                         "PREMIUM WELLNESS",
-                        style: AppTextStyles.textStyle10.copyWith(
-                          color: AppColors.neutralColor4,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
                         ),
@@ -216,10 +217,7 @@ class SubServicesScreen extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         serviceName,
-                        style: AppTextStyles.textStyle24.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.neutralColor,
-                        ),
+                        style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -248,10 +246,8 @@ class SubServicesScreen extends StatelessWidget {
                       if (chips.isNotEmpty) ...[
                         Text(
                           "Available Services",
-                          style: AppTextStyles.textStyle16.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.neutralColor,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
                         Wrap(
@@ -264,7 +260,7 @@ class SubServicesScreen extends StatelessWidget {
                                 vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.lightColor,
+                                // color: AppColors.lightColor,
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
                                   color: AppColors.neutralColor9,
@@ -281,10 +277,12 @@ class SubServicesScreen extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Text(
                                     treatmentName,
-                                    style: AppTextStyles.textStyle12.copyWith(
-                                      color: AppColors.neutralColor2,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: AppColors.primaryColor,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -296,26 +294,22 @@ class SubServicesScreen extends StatelessWidget {
                       if (aboutText.isNotEmpty) ...[
                         Text(
                           "About the Clinic",
-                          style: AppTextStyles.textStyle16.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.neutralColor,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           aboutText,
-                          style: AppTextStyles.textStyle14.copyWith(
-                            color: AppColors.neutralColor3,
-                            height: 1.5,
-                          ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(fontSize: 14),
                         ),
                         const SizedBox(height: 24),
                       ],
                       Text(
                         "Location Map",
-                        style: AppTextStyles.textStyle16.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppColors.neutralColor,
                         ),
                       ),
                       const SizedBox(height: 12),

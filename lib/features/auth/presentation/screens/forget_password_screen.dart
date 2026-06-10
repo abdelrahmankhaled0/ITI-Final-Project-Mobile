@@ -5,7 +5,6 @@ import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/routes/routes.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_regex.dart';
-import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_state.dart';
 import 'package:taborq/features/auth/presentation/widgets/default_button.dart';
@@ -79,32 +78,35 @@ class ForgetPasswordScreen extends StatelessWidget {
                       height: MediaQuery.heightOf(context) * 0.7,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.lightColor,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.darkColor.withAlpha(40),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             "Forgot Password?",
-                            style: AppTextStyles.headStyle,
+                            style: Theme.of(context).textTheme.headlineLarge,
                           ),
                           Gap(10),
                           Text(
                             "Enter the email address linked to your account. We will send a secure password reset link to your email.",
-                            style: AppTextStyles.textStyle14.copyWith(
-                              color: AppColors.primaryColor1,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          Gap(20),
+                          Spacer(flex: 1),
                           Text(
                             "Email Address",
-                            style: AppTextStyles.textStyle12.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor1,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          Gap(10),
+                          Gap(5),
                           DefaultFormFiled(
                             controller: cubit.emailController,
                             hintText: "name@gmail.com",
@@ -119,7 +121,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                               return null;
                             },
                           ),
-                          Gap(30),
+                          Gap(20),
                           DefaultButton(
                             text: "Send Reset Link",
                             onPressed: () {
@@ -130,7 +132,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                               }
                             },
                           ),
-                          Spacer(),
+                          Spacer(flex: 1),
                           DefaultSwapBetweenLoginAndRegister(
                             text: "Remembered your password?",
                             actionText: "Sign In",

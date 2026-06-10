@@ -12,10 +12,7 @@ class DefaultButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          fixedSize: const Size(400, 50),
-          backgroundColor: AppColors.primaryColor,
-        ),
+        style: ElevatedButton.styleFrom(fixedSize: const Size(400, 50)),
         onPressed: onPressed,
         child: Text(
           text,

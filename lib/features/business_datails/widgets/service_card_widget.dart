@@ -22,7 +22,7 @@ class ServiceCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.lightColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -50,27 +50,22 @@ class ServiceCard extends StatelessWidget {
           ),
           const SizedBox(width: 16),
 
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   serviceName,
-                  style: AppTextStyles.textStyle18.copyWith(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkColor,
+                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Current Ticket: $currentTicket',
-                  style: AppTextStyles.textStyle12.copyWith(
-                    color: AppColors.neutralColor5,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
-
-
               ],
             ),
           ),
@@ -90,20 +85,25 @@ class ServiceCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                     isActive? 'Next: 10:30 AM' : "",
-                    style: AppTextStyles.textStyle10.copyWith(color: Colors.grey),
+                    isActive ? 'Next: 10:30 AM' : "",
+                    style: AppTextStyles.textStyle10.copyWith(
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
               ElevatedButton(
                 onPressed: isActive ? onBookTap : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  foregroundColor: AppColors.lightColor,
+                  // backgroundColor: AppColors.primaryColor,
+                  // foregroundColor: AppColors.lightColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   elevation: 0,
                 ),
                 child: const Text('Book Now', style: TextStyle(fontSize: 12)),
@@ -115,10 +115,10 @@ class ServiceCard extends StatelessWidget {
     );
   }
 
-
   IconData _getServiceIcon(String name) {
     if (name.toLowerCase().contains('hair')) return Icons.content_cut_rounded;
-    if (name.toLowerCase().contains('skin')) return Icons.face_retouching_natural;
+    if (name.toLowerCase().contains('skin'))
+      return Icons.face_retouching_natural;
     if (name.toLowerCase().contains('cardio')) return Icons.favorite_rounded;
     return Icons.medical_services_outlined;
   }

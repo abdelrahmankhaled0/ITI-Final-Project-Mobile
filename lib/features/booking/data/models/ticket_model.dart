@@ -7,7 +7,7 @@ class TicketModel {
   final String serviceId;
   final String
   serviceName; // الكاتيجوري أو اسم الخدمة (مثل: قسم الصدر / دكتور معين)
-  final String ticketNumber;
+  final int ticketNumber;
   final DateTime bookingTime;
   final String status;
   final String name;
@@ -58,7 +58,7 @@ class TicketModel {
       businessId: data['businessId'] ?? '',
       serviceId: data['serviceId'] ?? '',
       serviceName: data['serviceName'] ?? '',
-      ticketNumber: data['ticketNumber']?.toString() ?? "",
+      ticketNumber: data['ticketNumber'],
       bookingTime: (data['bookingTime'] as Timestamp).toDate(),
       status: data['status'] ?? 'pending',
       name: data["name"] ?? "",

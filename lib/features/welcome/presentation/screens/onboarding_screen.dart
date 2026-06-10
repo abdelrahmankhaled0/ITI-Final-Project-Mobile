@@ -31,140 +31,124 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<WelcomeCubit, WelcomeStates>(
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppColors.lightColor,
-          appBar: AppBar(
-            backgroundColor: AppColors.lightColor,
-            elevation: 0,
-            actions: [
-              TextButton(
-                onPressed: () {
-                  AppNavigations.pushReplacementTo(context, AppRoutes.login);
-                },
-                child: Text(
-                  "Skip",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.darkColor,
+        return SafeArea(
+          child: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Spacer(),
+                      TextButton(
+                        style: TextButton.styleFrom(),
+                        onPressed: () {
+                          AppNavigations.pushReplacementTo(
+                            context,
+                            AppRoutes.login,
+                          );
+                        },
+                        child: Text(
+                          "Skip",
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: PageView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    controller: pageController,
-                    itemCount: onboardingModel.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        currentIndex = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      var item = onboardingModel[index];
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Image(
-                              image: AssetImage(item.imageURL),
-                              fit: BoxFit.contain,
+                  Gap(10),
+                  Expanded(
+                    flex: 3,
+                    child: PageView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      controller: pageController,
+                      itemCount: onboardingModel.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          currentIndex = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        var item = onboardingModel[index];
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image(image: AssetImage(item.imageURL)),
+                              ),
                             ),
-                          ),
-                          const Gap(20),
-                          Text(
-                            item.title,
-                            style: TextStyle(
-                              color: AppColors.primaryColor3,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
+                            const Gap(20),
+                            Text(
+                              item.title,
+                              style: Theme.of(context).textTheme.headlineLarge,
                             ),
-                          ),
-                          const Gap(10),
-                          Text(
-                            item.description,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.darkColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
+                            const Gap(10),
+                            Text(
+                              item.description,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-
-                const Gap(30),
-
-                SmoothPageIndicator(
-                  effect: WormEffect(
-                    dotWidth: 20,
-                    dotHeight: 5,
-                    activeDotColor: AppColors.primaryColor,
-                  ),
-                  controller: pageController,
-                  count: onboardingModel.length,
-                ),
-
-                const Gap(40),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(MediaQuery.widthOf(context) * 0.8, 45),
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: AppColors.lightColor,
-                    textStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                          ],
+                        );
+                      },
                     ),
                   ),
-                  onPressed: () {
-                    if (state is WelcomeLoadingState) return;
 
-                    if (currentIndex == onboardingModel.length - 1) {
-                      AppNavigations.pushReplacementTo(
-                        context,
-                        AppRoutes.login,
-                      );
-                    } else {
-                      pageController.nextPage(
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
-                  child: ConditionalBuilder(
-                    condition: state is WelcomeLoadingState,
-                    builder: (context) {
-                      return SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: AppColors.lightColor,
-                          strokeWidth: 2,
-                        ),
-                      );
-                    },
-                    fallback: (context) {
-                      return Text(
-                        currentIndex == onboardingModel.length - 1
-                            ? "Get Started"
-                            : "Next",
-                      );
-                    },
+                  const Gap(30),
+
+                  SmoothPageIndicator(
+                    effect: WormEffect(
+                      dotWidth: 20,
+                      dotHeight: 5,
+                      activeDotColor: AppColors.primaryColor,
+                    ),
+                    controller: pageController,
+                    count: onboardingModel.length,
                   ),
-                ),
-                const Gap(20),
-              ],
+
+                  const Gap(40),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(400, 50),
+                    ),
+                    onPressed: () {
+                      if (state is WelcomeLoadingState) return;
+
+                      if (currentIndex == onboardingModel.length - 1) {
+                        AppNavigations.pushReplacementTo(
+                          context,
+                          AppRoutes.login,
+                        );
+                      } else {
+                        pageController.nextPage(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    child: ConditionalBuilder(
+                      condition: state is WelcomeLoadingState,
+                      builder: (context) {
+                        return SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                      fallback: (context) {
+                        return Text(
+                          currentIndex == onboardingModel.length - 1
+                              ? "Get Started"
+                              : "Next",
+                        );
+                      },
+                    ),
+                  ),
+                  const Gap(20),
+                ],
+              ),
             ),
           ),
         );

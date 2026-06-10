@@ -7,7 +7,6 @@ class BottomNav extends StatelessWidget {
   final Widget child;
   const BottomNav({super.key, required this.child});
 
-
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/home')) return 0;
@@ -19,10 +18,18 @@ class BottomNav extends StatelessWidget {
 
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
-      case 0: context.go('/home'); break;
-      case 1: context.go('/bookings'); break;
-      case 2: context.go('/notifications'); break;
-      case 3: context.go('/profile'); break;
+      case 0:
+        context.go('/home');
+        break;
+      case 1:
+        context.go('/bookings');
+        break;
+      case 2:
+        context.go('/notifications');
+        break;
+      case 3:
+        context.go('/profile');
+        break;
     }
   }
 
@@ -31,11 +38,11 @@ class BottomNav extends StatelessWidget {
     final int selectedIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
-      backgroundColor: AppColors.lightColor,
+      // backgroundColor: AppColors.lightColor,
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.lightColor,
+          color: Theme.of(context).cardColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
           boxShadow: [
             BoxShadow(
@@ -108,13 +115,17 @@ class _NavItem extends StatelessWidget {
           Icon(
             icon,
             size: 24,
-            color: isSelected ? AppColors.primaryColor : AppColors.neutralColor5,
+            color: isSelected
+                ? AppColors.primaryColor
+                : AppColors.neutralColor5,
           ),
           const SizedBox(height: 3),
           Text(
             label,
             style: AppTextStyles.textStyle10.copyWith(
-              color: isSelected ? AppColors.primaryColor : AppColors.neutralColor5,
+              color: isSelected
+                  ? AppColors.primaryColor
+                  : AppColors.neutralColor5,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
               letterSpacing: 0.5,
             ),

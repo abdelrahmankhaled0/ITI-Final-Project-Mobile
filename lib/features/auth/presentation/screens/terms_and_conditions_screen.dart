@@ -10,12 +10,7 @@ class TermsAndConditionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightColor,
-      appBar: AppBar(
-        title: const Text('Terms & Conditions'),
-        elevation: 0,
-        backgroundColor: AppColors.primaryColor,
-      ),
+      appBar: AppBar(title: const Text('Terms & Conditions'), elevation: 0),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
@@ -23,15 +18,13 @@ class TermsAndConditionsScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.lightColor,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryColor1.withAlpha(
-                        (0.1 * 255).round(),
-                      ),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+                      color: AppColors.darkColor.withAlpha(40),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -42,76 +35,72 @@ class TermsAndConditionsScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Terms & Conditions',
-                        style: AppTextStyles.headStyle.copyWith(fontSize: 24),
+                        style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Before you create your account, please read and agree to the terms below. Your privacy and data security are our top priorities.',
-                        style: AppTextStyles.textStyle14.copyWith(
-                          color: AppColors.primaryColor1.withAlpha(
-                            (0.9 * 255).round(),
-                          ),
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 24),
                       Text(
                         '1. Account Use',
-                        style: AppTextStyles.textStyle16.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'You agree to use the app for legitimate purposes only. Please keep your login details secure and do not share them with others.',
-                        style: AppTextStyles.textStyle14,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 18),
                       Text(
                         '2. Privacy',
-                        style: AppTextStyles.textStyle16.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'We collect your account information to personalize your experience. We do not sell your data to third parties.',
-                        style: AppTextStyles.textStyle14,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 18),
                       Text(
                         '3. Email Verification',
-                        style: AppTextStyles.textStyle16.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'You must verify your email address before your account is fully activated. This helps protect you from unauthorized access.',
-                        style: AppTextStyles.textStyle14,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 18),
                       Text(
                         '4. Password Reset',
-                        style: AppTextStyles.textStyle16.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'If you forget your password, we will send a reset link to your email. Follow the instructions to safely update your password.',
-                        style: AppTextStyles.textStyle14,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 18),
                       Text(
                         '5. Contact',
-                        style: AppTextStyles.textStyle16.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'If you have questions, contact support through the app or the email address provided in the help section.',
-                        style: AppTextStyles.textStyle14,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),
