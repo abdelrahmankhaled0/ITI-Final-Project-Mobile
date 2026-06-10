@@ -14,6 +14,7 @@ import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/booking_view/presentation/cubit/booking_view_cubit.dart';
 import 'package:taborq/features/booking_view/presentation/cubit/booking_view_states.dart';
+import 'package:taborq/features/profile/presentation/cubit/theme-cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -468,10 +469,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: Text("Theme: Dark/Light Mode", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold)),
           subtitle: Text("Adjust visual appearance", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
           trailing: Switch(
-            value: _isDarkMode,
+
+            value: Theme.of(context).brightness == Brightness.dark,
             activeColor: AppColors.primaryColor,
             onChanged: (val) {
-              setState(() => _isDarkMode = val);
+
+              BlocProvider.of<ThemeCubit>(context).toggleTheme(val);
             },
           ),
         ),
