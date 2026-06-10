@@ -17,6 +17,7 @@ import 'package:taborq/features/home/presentation/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/presentation/screens/home_screen.dart';
 import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:taborq/features/profile/presentation/screens/profile_screen.dart';
 import 'package:taborq/features/welcome/presentation/cubit/welcome_cubit.dart';
 import 'package:taborq/features/welcome/presentation/screens/onboarding_screen.dart';
 import 'package:taborq/features/welcome/presentation/screens/splach_screen.dart';
@@ -33,6 +34,8 @@ class AppRoutes {
   static const String home = "/home";
   static const String businessDetails = "/home/details";
   static const String subServices = "sub-services";
+  static const String profile = "/profile";
+  static const String bookings = '/bookings';
 
   static final routes = GoRouter(
     initialLocation: splash,
@@ -171,8 +174,10 @@ class AppRoutes {
           ),
           GoRoute(
             path: '/profile',
-            builder: (context, state) =>
-                const Scaffold(body: Center(child: Text('Profile'))),
+            builder: (context, state) => BlocProvider(
+              create: (_) => BookingViewCubit()..getTicketsByUserId(),
+              child: const ProfileScreen(),
+            ),
           ),
         ],
       ),
