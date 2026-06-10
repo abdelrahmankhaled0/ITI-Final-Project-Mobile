@@ -154,6 +154,7 @@ class AppRoutes {
                           businessId: data['businessId'],
                           serviceId: data['serviceId'],
                           serviceName: data['serviceName'],
+                          
                         ),
                       );
                     },
@@ -171,10 +172,8 @@ class AppRoutes {
           ),
           GoRoute(
             path: '/notifications',
-            builder: (context, state) => BlocProvider(
-              create: (context) => NotificationCubit()..fetchNotifications(),
-              child: const NotificationScreen(),
-            ),
+            builder: (context, state) =>
+                const NotificationsScreen(), // 🎯 شاشة عادية خالص بدون أي تعقيد
           ),
           GoRoute(
             path: '/profile',

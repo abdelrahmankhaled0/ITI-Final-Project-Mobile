@@ -8,7 +8,7 @@ class TicketModel {
   final String
   serviceName; // الكاتيجوري أو اسم الخدمة (مثل: قسم الصدر / دكتور معين)
   final int ticketNumber;
-  final DateTime bookingTime;
+  final DateTime bookingTime; 
   final String status;
   final String name;
   final String phone;

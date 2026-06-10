@@ -6,7 +6,7 @@ import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_state.dart';
-import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart'; // 🎯 ضفنا امبورت كيوبت الإشعارات
+import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
 
 class SubServicesScreen extends StatelessWidget {
   final String businessId;
@@ -70,19 +70,23 @@ class SubServicesScreen extends StatelessWidget {
             .trim();
 
         return Scaffold(
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
-
           floatingActionButton: BlocConsumer<BookingCubit, BookingState>(
             listener: (context, state) {
+              // 🎯 هنا نقوم بعمل Cast صريح للحالة للتأكد من قراءة البيانات بنجاح
               if (state is BookingSuccess) {
-                // 🚀 تشغيل الـ Listener ديناميكياً فور نجاح الحجز
+                // 🚀 تشغيل الـ Listener ديناميكياً فور نجاح الحجز وببيانات دقيقة
                 context.read<BookingCubit>().startQueueListener(
+                  notificationCubit: context.read<NotificationCubit>(),
                   businessId: businessId,
                   serviceId: serviceId,
-                  userTurnNumber: int.tryParse(state.ticketCode) ?? 0,
-                  notificationCubit: context.read<NotificationCubit>(),
+                  userTurnNumber: state
+                      .ticketCode, // ✅ تم الإصلاح: يقرأ الآن من الـ Success State مباشرة
+                  avgServiceTime:
+                      waitTime, // ✅ تم الإصلاح: يمرر القيمة المستخرجة من الـ Stream (15 دقيقة)
                 );
+
+                // يمكنك أيضاً تمرير اسم البيزنس واسم الخدمة لكي يتم حفظهما في الـ Notification Local Cubit
+                // عبر تعديل بسيط في الدالة الخاصة بك بالكيوبت إذا لزم الأمر.
 
                 if (state.isAlreadyBooked) {
                   _showStatusSnackBar(
