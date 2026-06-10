@@ -9,6 +9,7 @@ import 'package:taborq/core/utils/app_theme.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:taborq/features/home/presentation/cubit/home_cubit.dart';
 import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
+import 'package:taborq/features/profile/presentation/cubit/theme-cubit.dart';
 import 'package:taborq/firebase_options.dart';
 
 void main() async {
@@ -26,6 +27,7 @@ void main() async {
           create: (context) =>
               NotificationCubit(), // 🎯 كده بقى متوفر في كل الأبلكيشن ومستحيل يرجع Null
         ),
+        BlocProvider(create: (context) => ThemeCubit()),
       ],
       child: const MyApp(),
     ),
@@ -37,10 +39,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      theme: AppTheme.darkTheme,
-      routerConfig: AppRoutes.routes,
-      debugShowCheckedModeBanner: false,
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, themeMode) {
+        return MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          routerConfig: AppRoutes.routes,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
