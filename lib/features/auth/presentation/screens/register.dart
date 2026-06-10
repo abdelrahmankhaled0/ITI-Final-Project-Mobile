@@ -56,7 +56,7 @@ class RegisterScreen extends StatelessWidget {
             AppNavigations.pushReplacementTo(context, AppRoutes.login);
           } else if (state is AuthErrorState) {
             Fluttertoast.showToast(
-              msg: "state.error",
+              msg: state.error,
               toastLength: Toast.LENGTH_LONG,
               gravity: ToastGravity.BOTTOM,
               backgroundColor: Colors.redAccent,

@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taborq/core/routes/routes.dart';
@@ -13,12 +14,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService().initNotification();
+  await FirebaseMessaging.instance.requestPermission();
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => AuthCubit()),
         BlocProvider(create: (context) => HomeCubit()..getClinics()),
-        BlocProvider(create: (context) => NotificationCubit()),
+        BlocProvider<NotificationCubit>(
+          create: (context) =>
+              NotificationCubit(), // 🎯 كده بقى متوفر في كل الأبلكيشن ومستحيل يرجع Null
+        ),
       ],
       child: const MyApp(),
     ),

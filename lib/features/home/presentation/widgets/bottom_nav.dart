@@ -28,7 +28,7 @@ class BottomNav extends StatelessWidget {
         context.go('/notifications');
         break;
       case 3:
-        context.go('/profile');
+        context.push('/notifications'); // 🚀 استدعاء نظيف مباشر بدون أي تعقيد
         break;
     }
   }

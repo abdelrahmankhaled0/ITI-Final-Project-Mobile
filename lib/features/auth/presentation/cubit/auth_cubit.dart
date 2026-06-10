@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:taborq/core/services/remote/firebase_services.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -30,6 +29,26 @@ class AuthCubit extends Cubit<AuthState> {
   void setTermsAccepted(bool accepted) {
     termsAccepted = accepted;
     emit(AuthTermsState(accepted: accepted));
+  }
+
+  Future<void> saveUserData(User user) async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+
+      print("FCM TOKEN => $fcmToken");
+
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+        "uid": user.uid,
+        "name": user.displayName ?? nameController.text.trim(),
+        "email": user.email ?? emailController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "fcmToken": fcmToken ?? "",
+        "platform": "android",
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print("SAVE USER ERROR => $e");
+      rethrow;
+    }
   }
 
   Future<void> register() async {
@@ -70,31 +89,34 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> checkEmailVerification() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      emit(AuthErrorState(error: 'No authenticated user'));
-      return;
-    }
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
 
-    await currentUser.reload();
+      if (currentUser == null) {
+        emit(AuthErrorState(error: 'No authenticated user'));
+        return;
+      }
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      emit(AuthErrorState(error: 'No authenticated user'));
-      return;
-    }
+      await currentUser.reload();
 
-    if (user.emailVerified) {
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
-        "name": nameController.text.trim(),
-        "email": emailController.text.trim(),
-        "phone": phoneController.text.trim(),
-        "uid": user.uid,
-      });
+      final user = FirebaseAuth.instance.currentUser;
 
-      emit(AuthSuccessState());
-    } else {
-      emit(AuthErrorState(error: "Please verify your email"));
+      if (user == null) {
+        emit(AuthErrorState(error: 'No authenticated user'));
+        return;
+      }
+
+      print("EMAIL VERIFIED => ${user.emailVerified}");
+
+      if (user.emailVerified) {
+        await saveUserData(user);
+
+        emit(AuthSuccessState());
+      } else {
+        emit(AuthErrorState(error: "Please verify your email"));
+      }
+    } catch (e) {
+      emit(AuthErrorState(error: e.toString()));
     }
   }
 
@@ -189,29 +211,34 @@ class AuthCubit extends Cubit<AuthState> {
 
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
-      if (googleUser != null) {
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-        emit(AuthSuccessState());
-      } else {
+      if (googleUser == null) {
         emit(AuthErrorState(error: "No account selected"));
+        return;
       }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+
+      final user = userCredential.user;
+
+      if (user != null) {
+        await saveUserData(user);
+      }
+
+      emit(AuthSuccessState());
     } on FirebaseAuthException catch (e) {
-      emit(
-        AuthErrorState(error: e.message ?? "Firebase Authentication Failed"),
-      );
+      emit(AuthErrorState(error: e.message ?? "Google Sign In Failed"));
     } catch (e) {
-      emit(
-        AuthErrorState(error: "An unexpected error occurred: ${e.toString()}"),
-      );
+      emit(AuthErrorState(error: e.toString()));
     }
   }
 
@@ -241,7 +268,9 @@ class AuthCubit extends Cubit<AuthState> {
         );
         return;
       }
-
+      if (user != null) {
+        await saveUserData(user);
+      }
       //  لو متفعل تمام، ينقل على الشاشة الرئيسية بنجاح
       emit(AuthSuccessState());
     } on FirebaseAuthException catch (e) {
