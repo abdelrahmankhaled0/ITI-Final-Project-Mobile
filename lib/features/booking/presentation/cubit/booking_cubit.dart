@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,20 +34,19 @@ class BookingCubit extends Cubit<BookingState> {
 
       String userName = "عميل جديد";
       String userPhone = "";
-      String businesseName = "";
+      String businessName = ""; // ✅ تم إصلاح الإسبيلنج
       String imageUri = "";
 
-      // 1️⃣ جلب بيانات البيزنس (تم تصليح اسم الكولكشن لـ businesses)
+      // 1️⃣ جلب بيانات البيزنس
       try {
         final snapshot = await _firestore
             .collection("businesses")
             .doc(businessId)
             .get();
-
         if (snapshot.exists) {
           final data = snapshot.data();
           if (data != null) {
-            businesseName = data['name'] ?? "";
+            businessName = data['name'] ?? "";
             imageUri = data['imageUrl'] ?? "";
           }
         }
@@ -69,13 +69,6 @@ class BookingCubit extends Cubit<BookingState> {
 
       final String ticketDocId = "${userId}_$serviceId";
 
-      debugPrint("================ BINDING DATA ================");
-      debugPrint("UserID: $userId");
-      debugPrint("BusinessID: $businessId");
-      debugPrint("ServiceID: $serviceId");
-
-      debugPrint("==============================================");
-
       final ticketRef = _firestore
           .collection('Queues')
           .doc(businessId)
@@ -94,18 +87,15 @@ class BookingCubit extends Cubit<BookingState> {
       final existingTicket = await ticketRef.get();
       if (existingTicket.exists &&
           existingTicket.data()?['status'] == 'pending') {
-        // جلب رقم التذكرة الحالي كـ String أو تحويله لأمان الـ UI
-        String activeTicketNum =
-            existingTicket.data()?['ticketNumber']?.toString() ?? "A-000";
-
+        int activeTicketNum = existingTicket.data()?['ticketNumber'];
         emit(
           BookingSuccess(ticketCode: activeTicketNum, isAlreadyBooked: true),
         );
         return;
       }
 
-      // 4️⃣ الـ Transaction لتحديث الـ Counter وحفظ التذكرة (تم تعديل الـ Return لـ String)
-      String finalTicketCode = await _firestore.runTransaction<String>((
+      // 4️⃣ الـ Transaction لتحديث الـ Counter وحفظ التذكرة
+      int finalTicketCode = await _firestore.runTransaction<int>((
         transaction,
       ) async {
         DocumentSnapshot serviceSnapshot = await transaction.get(serviceRef);
@@ -119,16 +109,10 @@ class BookingCubit extends Cubit<BookingState> {
 
         int updatedTicket = currentLastTicket + 1;
 
-        // توليد الكود المنسق بشكل بروفيشنال (مثال: A-014)
-        String formattedTicketCode =
-            'Q-${updatedTicket.toString().padLeft(3, '0')}';
-
-        // تحديث الـ Counter بالأرقام النظيفة (int) في السيرفر عشان الـ Transaction اللي بعده
         transaction.set(serviceRef, {
           'lastGeneratedTicket': updatedTicket,
         }, SetOptions(merge: true));
 
-        // إنشاء موديل التذكرة بالكود الـ String المنسق
         final newTicket = TicketModel(
           name: userName,
           ticketId: ticketDocId,
@@ -136,84 +120,149 @@ class BookingCubit extends Cubit<BookingState> {
           businessId: businessId,
           serviceId: serviceId,
           serviceName: serviceName,
-          ticketNumber: updatedTicket, // 🚀 مبعوثة كـ String منسق تماماً
+          ticketNumber: updatedTicket,
           bookingTime: DateTime.now(),
           status: 'pending',
           phone: userPhone,
-          bussinessName: businesseName,
+          bussinessName: businessName, // ✅ متناسق مع المتغير المعدل
           imageURI: imageUri,
         );
 
-        // حفظ التذكرة في الفايربيز جوه الـ Transaction
         transaction.set(ticketRef, newTicket.toFirestore());
-
-        // نرجع الكود المنسق عشان الـ Cubit يستقبله بره
-        return formattedTicketCode;
+        return updatedTicket;
       });
 
-      debugPrint(
-        "✅ Ticket successfully saved in Firestore with Code: $finalTicketCode",
-      );
-
-      // 5️⃣ إرسال حالة النجاح للـ UI بالكود المنسق الجديد
       emit(BookingSuccess(ticketCode: finalTicketCode, isAlreadyBooked: false));
     } catch (e) {
-      debugPrint("❌ Firestore Booking Error: ${e.toString()}");
       emit(BookingFailure(errorMessage: "Booking failed: ${e.toString()}"));
     }
   }
 
-  // 🚀 ضيف الدالة دي جوه الكيوبت المسؤول عن شاشة الحجز أو الطابور (وليس كيو بت الإشعارات)
-  // 🚀 النسخة المتطابقة 100% مع بنية الفايرستور بتاعتك
+  StreamSubscription? _queueSubscription;
+
+  // Flags لمنع تكرار الإشعارات بشكل مزعج
+  bool _isMovementNotified = false;
+  bool _isCompletedNotified = false;
+  int _lastNotifiedActiveTurn = -1; // 🎯 لمنع تكرار الإشعار الدوري لنفس الرقم
+
   void startQueueListener({
-    required String businessId, // محتاجينه للمسار
-    required String serviceId, // محتاجينه للمسار
+    required String businessId,
+    required String serviceId,
     required int userTurnNumber,
+    required int avgServiceTime,
     required NotificationCubit notificationCubit,
   }) {
-    FirebaseFirestore.instance
-        .collection('Queues') // 🎯 Q كابيتال زي الفايرستور
+    _isMovementNotified = false;
+    _isCompletedNotified = false;
+    _lastNotifiedActiveTurn = -1;
+    _queueSubscription?.cancel();
+
+    _queueSubscription = _firestore
+        .collection('Queues')
         .doc(businessId)
         .collection('services')
-        .doc(
-          serviceId,
-        ) // 🎯 هنا المكان الصح اللي جواه الـ currentTurn والـ counter
+        .doc(serviceId)
         .snapshots()
         .listen((snapshot) {
-          if (snapshot.exists) {
-            // 🎯 تعديل اسم الفيلد لـ currentTurn ليطابق السيرفر
-            int currentServing = snapshot.data()?['currentTurn'] ?? 0;
+          if (snapshot.exists && snapshot.data() != null) {
+            int currentlyInService =
+                snapshot.data()?['currentlyInService'] ?? 0;
 
-            // الحسبة السحرية
-            int peopleAhead = userTurnNumber - currentServing;
+            int peopleAhead = userTurnNumber - currentlyInService;
+            int estimatedWaitingTime = peopleAhead * avgServiceTime;
 
-            // 1. حالة: لو فاضل 3 أشخاص أو أقل ودور اليوزر لسه مجاش
-            if (peopleAhead > 0 && peopleAhead <= 3) {
-              String title = "Your turn is approaching! 🏃‍♂️";
-              String body =
-                  "Current turn: $currentServing. Your number: $userTurnNumber. There are $peopleAhead people ahead of you.";
-
-              NotificationService().showNotification(
-                id: 1,
-                title: title,
-                body: body,
-              );
-
-              notificationCubit.addNotification(title: title, body: body);
+            // 🛑 حالة اكتمال الخدمة (اليوزر عدى دوره)
+            if (peopleAhead < 0) {
+              _triggerCompletedNotification(notificationCubit);
+              emit(
+                BookingQueueCompleted(),
+              ); // 🎯 تبلغ الـ UI إن الخدمة خلصت عشان يقفل الشاشة
+              _queueSubscription?.cancel();
+              return;
             }
-            // 2. حالة: جه دور اليوزر بالظبط
-            else if (peopleAhead == 0) {
-              String title = "It's your turn! 🎉";
-              String body = "Please proceed immediately, you are being called.";
 
-              NotificationService().showNotification(
-                id: 2,
-                title: title,
-                body: body,
+            // 🎯 تحديث الـ UI بالداتا الجديدة فوراً (أهم إضافة)
+            emit(
+              BookingQueueUpdated(
+                currentlyInService: currentlyInService,
+                peopleAhead: peopleAhead,
+                estimatedWaitingTime: estimatedWaitingTime,
+              ),
+            );
+
+            // 1️⃣ إشعار التحديث الدوري (يشتغل فقط لو الرقم الفعلي جوه السيرفر اتغير)
+            if (peopleAhead > 0 &&
+                currentlyInService != _lastNotifiedActiveTurn) {
+              _triggerQueueUpdateNotification(
+                ticketNumber: userTurnNumber,
+                currentActive: currentlyInService,
+                ahead: peopleAhead,
+                waitingTime: estimatedWaitingTime,
+                notificationCubit: notificationCubit,
               );
-              notificationCubit.addNotification(title: title, body: body);
+              _lastNotifiedActiveTurn =
+                  currentlyInService; // حفظ الرقم لمنع التكرار
+            }
+
+            // 2️⃣ إشعار اقتراب الوقت والتحرك (بين الـ 30 والـ 60 دقيقة)
+            if (estimatedWaitingTime <= 60 &&
+                estimatedWaitingTime > 30 &&
+                !_isMovementNotified) {
+              _triggerMovementAlertNotification(
+                waitingTime: estimatedWaitingTime,
+              );
+              _isMovementNotified = true;
+            }
+
+            // 3️⃣ إشعار "دورك الآن" بالملي
+            if (peopleAhead == 0 && !_isCompletedNotified) {
+              _triggerYourTurnNotification();
+              // يمكنك هنا عمل إيميت لحالة خاصة بالوصول إذا أحببت تلوين الشاشة بالأخضر مثلاً
             }
           }
         });
+  }
+
+  void _triggerQueueUpdateNotification({
+    required int ticketNumber,
+    required int currentActive,
+    required int ahead,
+    required int waitingTime,
+    required NotificationCubit notificationCubit,
+  }) {
+    String title = "Queue Update - Ticket Q-$ticketNumber";
+    String body =
+        "Current turn: $currentActive. There are $ahead people ahead of you. Waiting time: $waitingTime mins.";
+    NotificationService().showNotification(id: 101, title: title, body: body);
+  }
+
+  void _triggerMovementAlertNotification({required int waitingTime}) {
+    String title = "Time to move! 🏃‍♂️";
+    String body =
+        "Only $waitingTime minutes left. Please start moving now to arrive on time!";
+    NotificationService().showNotification(id: 102, title: title, body: body);
+  }
+
+  void _triggerYourTurnNotification() {
+    String title = "It's your turn! 🎉";
+    String body =
+        "Please proceed immediately to the counter, you are being called now.";
+    NotificationService().showNotification(id: 103, title: title, body: body);
+  }
+
+  void _triggerCompletedNotification(NotificationCubit notificationCubit) {
+    if (!_isCompletedNotified) {
+      String title = "Service Completed! 🎉";
+      String body =
+          "Thank you for using Taborq! Your service has been completed successfully.";
+      NotificationService().showNotification(id: 104, title: title, body: body);
+      _isCompletedNotified = true;
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _queueSubscription?.cancel();
+    return super.close();
   }
 }
