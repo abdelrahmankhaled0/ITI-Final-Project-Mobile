@@ -18,7 +18,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     // 🚀 مناداة الفيتش مرة واحدة فقط عند فتح الشاشة
-    context.read<NotificationCubit>().getNotifications();
+    context.read<NotificationCubit>().fetchNotifications();
   }
 
   @override

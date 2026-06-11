@@ -71,43 +71,29 @@ class SubServicesScreen extends StatelessWidget {
 
         return Scaffold(
           floatingActionButton: BlocConsumer<BookingCubit, BookingState>(
+            // جوه الـ BlocConsumer للـ BookingCubit في شاشة الـ SubServicesScreen وتحديداً الـ listener:
             listener: (context, state) {
-              // 🎯 هنا نقوم بعمل Cast صريح للحالة للتأكد من قراءة البيانات بنجاح
               if (state is BookingSuccess) {
-                // 🚀 تشغيل الـ Listener ديناميكياً فور نجاح الحجز وببيانات دقيقة
+                final globalNotificationCubit = context
+                    .read<NotificationCubit>();
+
+                // استدعاء التشغيل الفوري والربط العالمي للـ Cubits
                 context.read<BookingCubit>().startQueueListener(
-                  notificationCubit: context.read<NotificationCubit>(),
+                  notificationCubit: globalNotificationCubit,
                   businessId: businessId,
                   serviceId: serviceId,
-                  userTurnNumber: state
-                      .ticketCode, // ✅ تم الإصلاح: يقرأ الآن من الـ Success State مباشرة
-                  avgServiceTime:
-                      waitTime, // ✅ تم الإصلاح: يمرر القيمة المستخرجة من الـ Stream (15 دقيقة)
+                  serviceName: serviceName,
+                  businessName:
+                      "EverGlow", // حط هنا اسم المحل الديناميكي اللي عندك
+                  userTurnNumber: state.ticketCode,
+                  avgServiceTime: 10, // متوسط وقت الخدمة بالدقائق
                 );
 
-                // يمكنك أيضاً تمرير اسم البيزنس واسم الخدمة لكي يتم حفظهما في الـ Notification Local Cubit
-                // عبر تعديل بسيط في الدالة الخاصة بك بالكيوبت إذا لزم الأمر.
-
-                if (state.isAlreadyBooked) {
-                  _showStatusSnackBar(
-                    context,
-                    message:
-                        "You already have an active booking! Your current number for ($serviceName) is: ${state.ticketCode}",
-                    backgroundColor: Colors.orange.shade800,
-                  );
-                } else {
-                  _showStatusSnackBar(
-                    context,
-                    message:
-                        "Successfully booked! Your number for ($serviceName) is: ${state.ticketCode}",
-                    backgroundColor: Colors.green.shade700,
-                  );
-                }
-              } else if (state is BookingFailure) {
                 _showStatusSnackBar(
                   context,
-                  message: state.errorMessage,
-                  backgroundColor: Colors.red.shade700,
+                  message:
+                      "Successfully booked! Your number is: Q-${state.ticketCode}",
+                  backgroundColor: Colors.green.shade700,
                 );
               }
             },

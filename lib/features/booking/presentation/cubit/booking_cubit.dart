@@ -138,12 +138,12 @@ class BookingCubit extends Cubit<BookingState> {
     }
   }
 
-  StreamSubscription? _queueSubscription;
+  // استبدل أو ضيف دالة الـ Listener دي والـ Functions المساعدة اللي تحتها جوه الـ BookingCubit بتاعك:
 
-  // Flags لمنع تكرار الإشعارات بشكل مزعج
+  StreamSubscription? _queueSubscription;
   bool _isMovementNotified = false;
   bool _isCompletedNotified = false;
-  int _lastNotifiedActiveTurn = -1; // 🎯 لمنع تكرار الإشعار الدوري لنفس الرقم
+  int _lastNotifiedActiveTurn = -1;
 
   void startQueueListener({
     required String businessId,
@@ -151,11 +151,15 @@ class BookingCubit extends Cubit<BookingState> {
     required int userTurnNumber,
     required int avgServiceTime,
     required NotificationCubit notificationCubit,
+    required String serviceName,
+    required String businessName,
   }) {
     _isMovementNotified = false;
     _isCompletedNotified = false;
     _lastNotifiedActiveTurn = -1;
     _queueSubscription?.cancel();
+
+    print("🎯 startQueueListener Started for Ticket Q-$userTurnNumber");
 
     _queueSubscription = _firestore
         .collection('Queues')
@@ -164,24 +168,25 @@ class BookingCubit extends Cubit<BookingState> {
         .doc(serviceId)
         .snapshots()
         .listen((snapshot) {
+          print("⚡ Stream triggered! Snapshot exists: ${snapshot.exists}");
+
           if (snapshot.exists && snapshot.data() != null) {
             int currentlyInService =
                 snapshot.data()?['currentlyInService'] ?? 0;
-
             int peopleAhead = userTurnNumber - currentlyInService;
             int estimatedWaitingTime = peopleAhead * avgServiceTime;
 
-            // 🛑 حالة اكتمال الخدمة (اليوزر عدى دوره)
             if (peopleAhead < 0) {
-              _triggerCompletedNotification(notificationCubit);
-              emit(
-                BookingQueueCompleted(),
-              ); // 🎯 تبلغ الـ UI إن الخدمة خلصت عشان يقفل الشاشة
+              _triggerCompletedNotification(
+                notificationCubit: notificationCubit,
+                businessName: businessName,
+                serviceName: serviceName,
+              );
+              emit(BookingQueueCompleted());
               _queueSubscription?.cancel();
               return;
             }
 
-            // 🎯 تحديث الـ UI بالداتا الجديدة فوراً (أهم إضافة)
             emit(
               BookingQueueUpdated(
                 currentlyInService: currentlyInService,
@@ -190,34 +195,38 @@ class BookingCubit extends Cubit<BookingState> {
               ),
             );
 
-            // 1️⃣ إشعار التحديث الدوري (يشتغل فقط لو الرقم الفعلي جوه السيرفر اتغير)
-            if (peopleAhead > 0 &&
-                currentlyInService != _lastNotifiedActiveTurn) {
+            if (currentlyInService != _lastNotifiedActiveTurn) {
+              print("🔔 Triggering notification for Ticket Q-$userTurnNumber");
               _triggerQueueUpdateNotification(
+                businessName: businessName,
+                serviceName: serviceName,
                 ticketNumber: userTurnNumber,
                 currentActive: currentlyInService,
                 ahead: peopleAhead,
                 waitingTime: estimatedWaitingTime,
                 notificationCubit: notificationCubit,
               );
-              _lastNotifiedActiveTurn =
-                  currentlyInService; // حفظ الرقم لمنع التكرار
+              _lastNotifiedActiveTurn = currentlyInService;
             }
 
-            // 2️⃣ إشعار اقتراب الوقت والتحرك (بين الـ 30 والـ 60 دقيقة)
             if (estimatedWaitingTime <= 60 &&
                 estimatedWaitingTime > 30 &&
                 !_isMovementNotified) {
               _triggerMovementAlertNotification(
                 waitingTime: estimatedWaitingTime,
+                notificationCubit: notificationCubit,
+                businessName: businessName,
+                serviceName: serviceName,
               );
               _isMovementNotified = true;
             }
 
-            // 3️⃣ إشعار "دورك الآن" بالملي
             if (peopleAhead == 0 && !_isCompletedNotified) {
-              _triggerYourTurnNotification();
-              // يمكنك هنا عمل إيميت لحالة خاصة بالوصول إذا أحببت تلوين الشاشة بالأخضر مثلاً
+              _triggerYourTurnNotification(
+                notificationCubit: notificationCubit,
+                businessName: businessName,
+                serviceName: serviceName,
+              );
             }
           }
         });
@@ -229,33 +238,76 @@ class BookingCubit extends Cubit<BookingState> {
     required int ahead,
     required int waitingTime,
     required NotificationCubit notificationCubit,
+    required String businessName,
+    required String serviceName,
   }) {
     String title = "Queue Update - Ticket Q-$ticketNumber";
     String body =
-        "Current turn: $currentActive. There are $ahead people ahead of you. Waiting time: $waitingTime mins.";
+        "Current turn: $currentActive. There are $ahead people ahead of you for $serviceName at $businessName. Waiting time: $waitingTime mins.";
+
     NotificationService().showNotification(id: 101, title: title, body: body);
+    notificationCubit.addNotification(
+      title: title,
+      body: body,
+      serviceName: serviceName,
+      businessName: businessName,
+    );
   }
 
-  void _triggerMovementAlertNotification({required int waitingTime}) {
+  void _triggerMovementAlertNotification({
+    required int waitingTime,
+    required NotificationCubit notificationCubit,
+    required String businessName,
+    required String serviceName,
+  }) {
     String title = "Time to move! 🏃‍♂️";
     String body =
-        "Only $waitingTime minutes left. Please start moving now to arrive on time!";
+        "Only $waitingTime minutes left for $serviceName at $businessName. Please start moving now to arrive on time!";
+
     NotificationService().showNotification(id: 102, title: title, body: body);
+    notificationCubit.addNotification(
+      title: title,
+      body: body,
+      serviceName: serviceName,
+      businessName: businessName,
+    );
   }
 
-  void _triggerYourTurnNotification() {
+  void _triggerYourTurnNotification({
+    required NotificationCubit notificationCubit,
+    required String businessName,
+    required String serviceName,
+  }) {
     String title = "It's your turn! 🎉";
     String body =
-        "Please proceed immediately to the counter, you are being called now.";
+        "Please proceed immediately to $serviceName at $businessName, you are being called now.";
+
     NotificationService().showNotification(id: 103, title: title, body: body);
+    notificationCubit.addNotification(
+      title: title,
+      body: body,
+      serviceName: serviceName,
+      businessName: businessName,
+    );
   }
 
-  void _triggerCompletedNotification(NotificationCubit notificationCubit) {
+  void _triggerCompletedNotification({
+    required NotificationCubit notificationCubit,
+    required String businessName,
+    required String serviceName,
+  }) {
     if (!_isCompletedNotified) {
       String title = "Service Completed! 🎉";
       String body =
-          "Thank you for using Taborq! Your service has been completed successfully.";
+          "Thank you for using Taborq! Your service for $serviceName at $businessName has been completed successfully.";
+
       NotificationService().showNotification(id: 104, title: title, body: body);
+      notificationCubit.addNotification(
+        title: title,
+        body: body,
+        serviceName: serviceName,
+        businessName: businessName,
+      );
       _isCompletedNotified = true;
     }
   }

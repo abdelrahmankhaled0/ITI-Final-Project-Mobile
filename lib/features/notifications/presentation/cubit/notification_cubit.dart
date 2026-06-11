@@ -1,53 +1,36 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:taborq/core/services/remote/notification_service.dart';
 import 'package:taborq/features/notifications/data/notification_model.dart';
-import 'package:taborq/features/notifications/presentation/cubit/notification_state.dart';
+import 'package:taborq/features/notifications/presentation/cubit/notification_state.dart'; // تأكد من اسم ملف الـ state عندك
 
 class NotificationCubit extends Cubit<NotificationStates> {
   NotificationCubit() : super(NotificationInitialState());
 
-  StreamSubscription? _notificationsSubscription;
+  final List<NotificationModel> notificationsList = [];
 
-  List<NotificationModel> notifications = [];
-
-  void getNotifications() {
+  void fetchNotifications() {
     emit(NotificationLoadingState());
+    emit(NotificationSuccessState(List.from(notificationsList)));
+  }
 
-    _notificationsSubscription?.cancel();
-
-    _notificationsSubscription =
-        NotificationFirebaseService.getNotifications().listen(
-      (snapshot) {
-        notifications = snapshot.docs.map((doc) {
-          return NotificationModel.fromJson(
-            doc.id,
-            doc.data(),
-          );
-        }).toList();
-
-        emit(NotificationSuccessState(notifications));
-      },
-      onError: (error) {
-        emit(NotificationErrorState(error.toString()));
-      },
+  void addNotification({
+    required String title,
+    required String body,
+    required String serviceName,
+    required String businessName,
+  }) {
+    final newNotification = NotificationModel(
+      title: title,
+      body: body,
+      serviceName: serviceName,
+      businessName: businessName,
+      dateTime: DateTime.now(),
     );
-  }
 
-  Future<void> markAsRead(String notificationId) async {
-    try {
-      await NotificationFirebaseService.markAsRead(
-        notificationId,
-      );
-    } catch (e) {
-      emit(NotificationErrorState(e.toString()));
-    }
-  }
+    notificationsList.add(newNotification);
+    
+    // الطباعة اللي هتأكد لك في الترمينال إن كله تمام
+    print("🚀 Cubit: Notification Added! Total count: ${notificationsList.length}");
 
-  @override
-  Future<void> close() {
-    _notificationsSubscription?.cancel();
-    return super.close();
+    emit(NotificationSuccessState(List.from(notificationsList)));
   }
 }
