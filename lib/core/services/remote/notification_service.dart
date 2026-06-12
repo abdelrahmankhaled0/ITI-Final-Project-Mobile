@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:taborq/features/notifications/data/notification_model.dart';
 
 // دالة الخلفية: يجب أن تكون Top-Level أو Static لتشتغل والفون مقفول
 @pragma('vm:entry-point')
@@ -13,15 +14,31 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class NotificationFirebaseService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static String get userId => FirebaseAuth.instance.currentUser!.uid;
+  static String? get userId => FirebaseAuth.instance.currentUser?.uid;
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> getNotifications() {
+    final uid = userId;
+    if (uid == null) {
+      return Stream<QuerySnapshot<Map<String, dynamic>>>.empty();
+    }
+
     return _firestore
         .collection("users")
-        .doc(userId)
+        .doc(uid)
         .collection("notifications")
-        .orderBy("createdAt", descending: true)
+        .orderBy("dateTime", descending: true)
         .snapshots();
+  }
+
+  static Future<void> saveNotification(NotificationModel notification) async {
+    final uid = userId;
+    if (uid == null) return;
+
+    await _firestore
+        .collection("users")
+        .doc(uid)
+        .collection("notifications")
+        .add(notification.toJson());
   }
 
   static Future<void> markAsRead(String notificationId) async {
@@ -93,7 +110,7 @@ class NotificationService {
     );
 
     await _localNotificationsPlugin.show(
-      id: 1,
+      id: id,
       title: title,
       body: body,
       notificationDetails: platformChannelSpecifics,

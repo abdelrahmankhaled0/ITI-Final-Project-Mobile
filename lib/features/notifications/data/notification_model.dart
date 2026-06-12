@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class NotificationModel {
   final String title;
   final String body;
@@ -14,14 +16,21 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    DateTime parsedDate;
+    if (json['dateTime'] is Timestamp) {
+      parsedDate = (json['dateTime'] as Timestamp).toDate();
+    } else if (json['dateTime'] is String) {
+      parsedDate = DateTime.tryParse(json['dateTime']) ?? DateTime.now();
+    } else {
+      parsedDate = DateTime.now();
+    }
+
     return NotificationModel(
       title: json['title'] ?? '',
       body: json['body'] ?? '',
       serviceName: json['serviceName'] ?? '',
       businessName: json['businessName'] ?? '',
-      dateTime: json['dateTime'] != null
-          ? DateTime.parse(json['dateTime'])
-          : DateTime.now(),
+      dateTime: parsedDate,
     );
   }
 
@@ -31,7 +40,7 @@ class NotificationModel {
       'body': body,
       'serviceName': serviceName,
       'businessName': businessName,
-      'dateTime': dateTime.toIso8601String(),
+      'dateTime': Timestamp.fromDate(dateTime),
     };
   }
 }

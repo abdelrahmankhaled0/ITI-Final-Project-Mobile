@@ -147,14 +147,16 @@ class AppRoutes {
                             create: (context) => BusinessDetailsCubit(),
                           ),
                           BlocProvider<BookingCubit>(
-                            create: (context) => BookingCubit(),
+                            create: (context) => BookingCubit(
+                              notificationCubit: context
+                                  .read<NotificationCubit>(),
+                            ),
                           ),
                         ],
                         child: SubServicesScreen(
                           businessId: data['businessId'],
                           serviceId: data['serviceId'],
                           serviceName: data['serviceName'],
-                          
                         ),
                       );
                     },

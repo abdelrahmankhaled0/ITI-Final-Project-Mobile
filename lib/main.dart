@@ -8,6 +8,7 @@ import 'package:taborq/core/services/remote/notification_service.dart';
 import 'package:taborq/core/utils/app_theme.dart';
 import 'package:taborq/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:taborq/features/home/presentation/cubit/home_cubit.dart';
+import 'package:taborq/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:taborq/features/profile/presentation/cubit/theme-cubit.dart';
 import 'package:taborq/firebase_options.dart';
@@ -26,6 +27,11 @@ void main() async {
         BlocProvider<NotificationCubit>(
           create: (context) =>
               NotificationCubit(), // 🎯 كده بقى متوفر في كل الأبلكيشن ومستحيل يرجع Null
+        ),
+        BlocProvider<BookingCubit>(
+          create: (context) => BookingCubit(
+            notificationCubit: context.read<NotificationCubit>(),
+          ),
         ),
         BlocProvider(create: (context) => ThemeCubit()),
       ],

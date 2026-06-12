@@ -4,12 +4,35 @@ class BookingInitial extends BookingState {}
 
 class BookingLoading extends BookingState {}
 
+class BookingAlreadyBookedState extends BookingState {
+  final int ticketCode;
+  final String businessName;
+  final String serviceName;
+  final int avgServiceTime;
+
+  BookingAlreadyBookedState({
+    required this.ticketCode,
+    required this.businessName,
+    required this.serviceName,
+    required this.avgServiceTime,
+  });
+}
+
 class BookingSuccess extends BookingState {
   final int ticketCode;
   final bool
   isAlreadyBooked; // true لو كان حاجز قبل كده، false لو حجز جديد فعلياً
+  final String businessName;
+  final String serviceName;
+  final int avgServiceTime;
 
-  BookingSuccess({required this.ticketCode, required this.isAlreadyBooked});
+  BookingSuccess({
+    required this.ticketCode,
+    required this.isAlreadyBooked,
+    required this.businessName,
+    required this.serviceName,
+    required this.avgServiceTime,
+  });
 }
 
 class BookingFailure extends BookingState {

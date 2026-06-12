@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
@@ -20,26 +21,17 @@ class SubServicesScreen extends StatelessWidget {
     required this.serviceName,
   });
 
-  void _showStatusSnackBar(
-    BuildContext context, {
+  void _showStatusToast({
     required String message,
     required Color backgroundColor,
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 4),
-      ),
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: backgroundColor,
+      textColor: Colors.white,
+      fontSize: 14.0,
     );
   }
 
@@ -70,79 +62,99 @@ class SubServicesScreen extends StatelessWidget {
             .trim();
 
         return Scaffold(
-          floatingActionButton: BlocConsumer<BookingCubit, BookingState>(
-            // جوه الـ BlocConsumer للـ BookingCubit في شاشة الـ SubServicesScreen وتحديداً الـ listener:
+          bottomNavigationBar: BlocConsumer<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
-                final globalNotificationCubit = context
-                    .read<NotificationCubit>();
-
-                // استدعاء التشغيل الفوري والربط العالمي للـ Cubits
                 context.read<BookingCubit>().startQueueListener(
-                  notificationCubit: globalNotificationCubit,
                   businessId: businessId,
                   serviceId: serviceId,
-                  serviceName: serviceName,
-                  businessName:
-                      "EverGlow", // حط هنا اسم المحل الديناميكي اللي عندك
                   userTurnNumber: state.ticketCode,
-                  avgServiceTime: 10, // متوسط وقت الخدمة بالدقائق
+                  avgServiceTime: state.avgServiceTime,
+                  notificationCubit: context.read<NotificationCubit>(),
+                  serviceName: state.serviceName,
+                  businessName: state.businessName,
                 );
 
-                _showStatusSnackBar(
-                  context,
+                _showStatusToast(
                   message:
                       "Successfully booked! Your number is: Q-${state.ticketCode}",
                   backgroundColor: Colors.green.shade700,
                 );
               }
+
+              if (state is BookingAlreadyBookedState) {
+                context.read<BookingCubit>().startQueueListener(
+                  businessId: businessId,
+                  serviceId: serviceId,
+                  userTurnNumber: state.ticketCode,
+                  avgServiceTime: state.avgServiceTime,
+                  notificationCubit: context.read<NotificationCubit>(),
+                  serviceName: state.serviceName,
+                  businessName: state.businessName,
+                );
+
+                _showStatusToast(
+                  message:
+                      "You already have an active booking. Your ticket is Q-${state.ticketCode}.",
+                  backgroundColor: Colors.orange.shade800,
+                );
+              }
             },
             builder: (context, state) {
-              return Padding(
+              return Container(
+                color: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 10.0,
+                  horizontal: 18.0,
+                  vertical: 12.0,
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      elevation: 4,
-                      shadowColor: AppColors.darkColor.withOpacity(0.3),
-                    ),
-                    onPressed: state is BookingLoading
-                        ? null
-                        : () {
-                            if (serviceData.isNotEmpty) {
-                              context.read<BookingCubit>().bookQueuePlace(
-                                businessId: businessId,
-                                serviceId: serviceId,
-                                serviceName: serviceName,
-                              );
-                            }
-                          },
-                    child: state is BookingLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
                             ),
-                          )
-                        : Text(
-                            "Book Now",
-                            style: AppTextStyles.textStyle16.copyWith(
-                              color: AppColors.lightColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            elevation: 6,
+                            shadowColor: AppColors.darkColor.withOpacity(0.25),
                           ),
-                  ),
+                          onPressed: state is BookingLoading
+                              ? null
+                              : () {
+                                  if (serviceData.isNotEmpty) {
+                                    context.read<BookingCubit>().bookQueuePlace(
+                                      businessId: businessId,
+                                      serviceId: serviceId,
+                                      serviceName: serviceName,
+                                      avgServiceTime: waitTime,
+                                      notificationCubit: context
+                                          .read<NotificationCubit>(),
+                                    );
+                                  }
+                                },
+                          child: state is BookingLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Text(
+                                  "Book Now",
+                                  style: AppTextStyles.textStyle16.copyWith(
+                                    color: AppColors.lightColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

@@ -145,13 +145,37 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  if ((item.serviceName ?? '').isNotEmpty ||
+                      (item.businessName ?? '').isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if ((item.serviceName ?? '').isNotEmpty)
+                          Text(
+                            'Service: ${item.serviceName}',
+                            style: AppTextStyles.textStyle12.copyWith(
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        if ((item.businessName ?? '').isNotEmpty)
+                          Text(
+                            'Business: ${item.businessName}',
+                            style: AppTextStyles.textStyle12.copyWith(
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   Align(
                     alignment: Alignment.bottomRight,
                     key: const Key('time_align'),
                     child: Text(
                       item.dateTime is String
                           ? item.dateTime
-                          : DateFormat('hh:mm a').format(item.dateTime),
+                          : DateFormat(
+                              'EEE, MMM d • hh:mm a',
+                            ).format(item.dateTime),
                       style: TextStyle(
                         fontSize: 10,
                         color: Colors.grey.shade400,

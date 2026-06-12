@@ -28,10 +28,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isUploading = false;
   bool _isDarkMode = false; // حالة افتراضية لتغيير الثيم
 
-
   String get joinedDate {
     if (user?.metadata.creationTime != null) {
-      return DateFormat.yMMMMd() .format(user!.metadata.creationTime!);
+      return DateFormat.yMMMMd().format(user!.metadata.creationTime!);
     }
     return "Unknown";
   }
@@ -48,10 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     await user.updateDisplayName(newName);
 
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(user.uid)
-        .update({
+    await FirebaseFirestore.instance.collection("users").doc(user.uid).update({
       "name": newName,
     });
   }
@@ -66,14 +62,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text("Edit Name"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: "Enter new name",
-          ),
+          decoration: const InputDecoration(hintText: "Enter new name"),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel" , style: TextStyle(color: Colors.red),),
+            child: const Text("Cancel", style: TextStyle(color: Colors.red)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -83,7 +77,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await updateUserName(controller.text);
               Navigator.pop(context);
             },
-            child: const Text("Save" , style: TextStyle(color: AppColors.lightColor),),
+            child: const Text(
+              "Save",
+              style: TextStyle(color: AppColors.lightColor),
+            ),
           ),
         ],
       ),
@@ -114,7 +111,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ListTile(
                   leading: const CircleAvatar(
                     backgroundColor: AppColors.primaryColor9,
-                    child: Icon(Icons.camera_alt_outlined, color: AppColors.primaryColor),
+                    child: Icon(
+                      Icons.camera_alt_outlined,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   title: Text('Take a photo', style: AppTextStyles.textStyle16),
                   onTap: () {
@@ -125,9 +125,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ListTile(
                   leading: const CircleAvatar(
                     backgroundColor: AppColors.primaryColor9,
-                    child: Icon(Icons.photo_library_outlined, color: AppColors.primaryColor),
+                    child: Icon(
+                      Icons.photo_library_outlined,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
-                  title: Text('Choose from gallery', style: AppTextStyles.textStyle16),
+                  title: Text(
+                    'Choose from gallery',
+                    style: AppTextStyles.textStyle16,
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _pickAndUploadImage(ImageSource.gallery); // فتح الاستوديو
@@ -147,7 +153,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final ImagePicker picker = ImagePicker();
     // تقليل جودة الصورة لتسريع الرفع وتوفير الباقة
-    final XFile? image = await picker.pickImage(source: source, imageQuality: 60);
+    final XFile? image = await picker.pickImage(
+      source: source,
+      imageQuality: 60,
+    );
 
     if (image == null) return;
 
@@ -155,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       // 🔴 ضعي مفتاح الـ API الخاص بك من موقع ImgBB هنا
-       final imgbbApiKey = dotenv.env['IMGBB_API_KEY'];
+      final imgbbApiKey = dotenv.env['IMGBB_API_KEY'];
 
       // تجهيز الـ Request لرفع الصورة كـ Multipart File
       var request = http.MultipartRequest(
@@ -183,16 +192,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile picture updated successfully!'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Profile picture updated successfully!'),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       } else {
-        throw Exception("Failed to upload image. Status code: ${response.statusCode}");
+        throw Exception(
+          "Failed to upload image. Status code: ${response.statusCode}",
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading image: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error uploading image: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -215,8 +232,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-            "Profile",
-            style: AppTextStyles.textStyle18.copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor)
+          "Profile",
+          style: AppTextStyles.textStyle18.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryColor,
+          ),
         ),
         actions: [
           IconButton(
@@ -226,7 +246,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').doc(user?.uid).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(user?.uid)
+            .snapshots(),
         builder: (context, snapshot) {
           String name = user?.displayName ?? "User";
           String email = user?.email ?? "No Email";
@@ -253,7 +276,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(name, style: AppTextStyles.textStyle24.copyWith(fontWeight: FontWeight.bold)),
+                    Flexible(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.textStyle24.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: showEditNameDialog,
@@ -261,22 +293,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(email, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                Text(
+                  email,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
                 const SizedBox(height: 24),
 
                 // العضوية
                 _buildMembershipRow(),
                 const SizedBox(height: 32),
 
-                _buildSectionHeader("Booking History", onViewAll: () {context.go(AppRoutes.bookings);}),
+                _buildSectionHeader(
+                  "Booking History",
+                  onViewAll: () {
+                    context.go(AppRoutes.bookings);
+                  },
+                ),
                 const SizedBox(height: 16),
 
                 // الحجوزات السابقة
                 BlocBuilder<BookingViewCubit, BookingViewStates>(
                   builder: (context, state) {
-
                     if (state is BookingViewLoadingState) {
-                      return const CircularProgressIndicator(color: AppColors.primaryColor,);
+                      return const CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      );
                     }
 
                     if (bookingCubit.tickets.isEmpty) {
@@ -306,7 +347,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // الإعدادات
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Settings", style: AppTextStyles.textStyle18.copyWith(fontWeight: FontWeight.bold)),
+                  child: Text(
+                    "Settings",
+                    style: AppTextStyles.textStyle18.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _buildSettingsList(),
@@ -338,8 +384,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: _isUploading
                   ? const CircularProgressIndicator(color: AppColors.lightColor)
                   : (imageUrl == null
-                  ? const Icon(Icons.person, size: 50, color: AppColors.primaryColor)
-                  : null),
+                        ? const Icon(
+                            Icons.person,
+                            size: 50,
+                            color: AppColors.primaryColor,
+                          )
+                        : null),
             ),
           ),
           Positioned(
@@ -347,7 +397,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             right: 4,
             child: GestureDetector(
               // 🔴 فتح قائمة الخيارات بدلاً من الاستوديو مباشرة
-              onTap: _isUploading ? null : () => _showImageSourceActionSheet(context),
+              onTap: _isUploading
+                  ? null
+                  : () => _showImageSourceActionSheet(context),
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -355,7 +407,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.lightColor, width: 2),
                 ),
-                child: const Icon(Icons.camera_alt_outlined, color: AppColors.lightColor, size: 16),
+                child: const Icon(
+                  Icons.camera_alt_outlined,
+                  color: AppColors.lightColor,
+                  size: 16,
+                ),
               ),
             ),
           ),
@@ -371,21 +427,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Column(
           children: [
-            const Icon(Icons.verified_user_outlined, color: AppColors.primaryColor, size: 20),
+            const Icon(
+              Icons.verified_user_outlined,
+              color: AppColors.primaryColor,
+              size: 20,
+            ),
             const SizedBox(height: 4),
-            Text("MEMBERSHIP", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500], letterSpacing: 1)),
+            Text(
+              "MEMBERSHIP",
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[500],
+                letterSpacing: 1,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text("Tabouraq", textAlign: TextAlign.center, style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              "Tabouraq",
+              textAlign: TextAlign.center,
+              style: AppTextStyles.textStyle14.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         Container(height: 40, width: 1, color: AppColors.neutralColor9),
         Column(
           children: [
-            const Icon(Icons.calendar_today_outlined, color: AppColors.primaryColor, size: 20),
+            const Icon(
+              Icons.calendar_today_outlined,
+              color: AppColors.primaryColor,
+              size: 20,
+            ),
             const SizedBox(height: 4),
-            Text("JOINED", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500], letterSpacing: 1)),
+            Text(
+              "JOINED",
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[500],
+                letterSpacing: 1,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(joinedDate, style: AppTextStyles.textStyle16.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              joinedDate,
+              style: AppTextStyles.textStyle16.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ],
@@ -396,17 +487,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: AppTextStyles.textStyle18.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: AppTextStyles.textStyle18.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         GestureDetector(
           onTap: onViewAll,
-          child: const Text("View All", style: TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
+          child: const Text(
+            "View All",
+            style: TextStyle(
+              color: AppColors.primaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
         ),
       ],
     );
   }
 
-
-  Widget _buildHistoryCard({required String title, required String subtitle, required String date, required IconData icon , required String status}) {
+  Widget _buildHistoryCard({
+    required String title,
+    required String subtitle,
+    required String date,
+    required IconData icon,
+    required String status,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -425,35 +533,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: AppTextStyles.textStyle14.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(date, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(
+                date,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: status == "completed"
-                ? Colors.green.withAlpha(40)
-                    : status == "pending"
-                ? Colors.orange.withAlpha(40)
-                    : Colors.red.withAlpha(40),
+                      ? Colors.green.withAlpha(40)
+                      : status == "pending"
+                      ? Colors.orange.withAlpha(40)
+                      : Colors.red.withAlpha(40),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child:  Text(status , style: TextStyle(color: status == "completed"
-                    ? Colors.green
-                    : status == "pending"
-                    ? Colors.orange
-                    : Colors.red, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: status == "completed"
+                        ? Colors.green
+                        : status == "pending"
+                        ? Colors.orange
+                        : Colors.red,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -465,15 +595,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const CircleAvatar(backgroundColor: AppColors.neutralColor10, child: Icon(Icons.dark_mode_outlined, color: AppColors.darkColor)),
-          title: Text("Theme: Dark/Light Mode", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold)),
-          subtitle: Text("Adjust visual appearance", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          leading: const CircleAvatar(
+            backgroundColor: AppColors.neutralColor10,
+            child: Icon(Icons.dark_mode_outlined, color: AppColors.darkColor),
+          ),
+          title: Text(
+            "Theme: Dark/Light Mode",
+            style: AppTextStyles.textStyle14.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            "Adjust visual appearance",
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
           trailing: Switch(
-
             value: Theme.of(context).brightness == Brightness.dark,
             activeColor: AppColors.primaryColor,
             onChanged: (val) {
-
               BlocProvider.of<ThemeCubit>(context).toggleTheme(val);
             },
           ),
@@ -481,20 +620,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Divider(height: 24, color: AppColors.neutralColor9),
         _buildSettingsTile(title: "Privacy", icon: Icons.lock_outline),
         const Divider(height: 24, color: AppColors.neutralColor9),
-        _buildSettingsTile(title: "Terms of Service", icon: Icons.description_outlined),
+        _buildSettingsTile(
+          title: "Terms of Service",
+          icon: Icons.description_outlined,
+        ),
         const Divider(height: 24, color: AppColors.neutralColor9),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: CircleAvatar(backgroundColor: Colors.red.withOpacity(0.1), child: const Icon(Icons.logout, color: Colors.red)),
-          title: Text("Log out", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold, color: Colors.red)),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.red),
-            onTap: () async {
-              await logout();
+          leading: CircleAvatar(
+            backgroundColor: Colors.red.withOpacity(0.1),
+            child: const Icon(Icons.logout, color: Colors.red),
+          ),
+          title: Text(
+            "Log out",
+            style: AppTextStyles.textStyle14.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          ),
+          trailing: const Icon(
+            Icons.arrow_forward_ios,
+            size: 14,
+            color: Colors.red,
+          ),
+          onTap: () async {
+            await logout();
 
-              if (context.mounted) {
-                context.go(AppRoutes.login);
-              }
+            if (context.mounted) {
+              context.go(AppRoutes.login);
             }
+          },
         ),
       ],
     );
@@ -503,9 +658,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSettingsTile({required String title, required IconData icon}) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(backgroundColor: AppColors.neutralColor10, child: Icon(icon, color: AppColors.darkColor)),
-      title: Text(title, style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.neutralColor5),
+      leading: CircleAvatar(
+        backgroundColor: AppColors.neutralColor10,
+        child: Icon(icon, color: AppColors.darkColor),
+      ),
+      title: Text(
+        title,
+        style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 14,
+        color: AppColors.neutralColor5,
+      ),
       onTap: () {},
     );
   }
