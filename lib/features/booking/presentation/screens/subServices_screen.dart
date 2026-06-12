@@ -65,16 +65,6 @@ class SubServicesScreen extends StatelessWidget {
           bottomNavigationBar: BlocConsumer<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
-                context.read<BookingCubit>().startQueueListener(
-                  businessId: businessId,
-                  serviceId: serviceId,
-                  userTurnNumber: state.ticketCode,
-                  avgServiceTime: state.avgServiceTime,
-                  notificationCubit: context.read<NotificationCubit>(),
-                  serviceName: state.serviceName,
-                  businessName: state.businessName,
-                );
-
                 _showStatusToast(
                   message:
                       "Successfully booked! Your number is: Q-${state.ticketCode}",

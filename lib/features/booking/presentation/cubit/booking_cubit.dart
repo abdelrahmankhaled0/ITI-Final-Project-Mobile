@@ -121,6 +121,7 @@ class BookingCubit extends Cubit<BookingState> {
       }
 
       // 4️⃣ الـ Transaction لتحديث الـ Counter وحفظ التذكرة
+      int currentInService = 0;
       int finalTicketCode = await _firestore.runTransaction<int>((
         transaction,
       ) async {
@@ -131,6 +132,9 @@ class BookingCubit extends Cubit<BookingState> {
           Map<String, dynamic> serviceData =
               serviceSnapshot.data() as Map<String, dynamic>;
           currentLastTicket = serviceData['lastGeneratedTicket'] ?? 0;
+          currentInService = _toInt(
+            serviceData['currentTicket'] ?? serviceData['currentlyInService'],
+          );
         }
 
         int updatedTicket = currentLastTicket + 1;
@@ -174,6 +178,7 @@ class BookingCubit extends Cubit<BookingState> {
         serviceName: serviceName,
         ticketNumber: finalTicketCode,
         avgServiceTime: avgServiceTime,
+        currentInService: currentInService,
       );
 
       // Start listening for queue updates for the newly booked ticket
@@ -205,16 +210,21 @@ class BookingCubit extends Cubit<BookingState> {
     required String serviceName,
     required int ticketNumber,
     required int avgServiceTime,
+    required int currentInService,
   }) {
+    final peopleAhead = ticketNumber - currentInService;
     final estimatedStartTime = _estimatedServiceStartTime(
       ticketNumber,
       avgServiceTime,
     );
     final formattedTime = DateFormat('h:mm a').format(estimatedStartTime);
+    final waitDurationText = _formatDuration(
+      Duration(minutes: peopleAhead * avgServiceTime),
+    );
 
     final String title = 'Booking confirmed for $serviceName';
     final String body =
-        'Your ticket Q-$ticketNumber at $businessName is confirmed. Estimated service start from 9:00 AM is $formattedTime.';
+        'Current serving: Q-$currentInService. There are $peopleAhead people ahead of you. Your ticket Q-$ticketNumber at $businessName is confirmed. Expected around $formattedTime starting from 9:00 AM ($waitDurationText from opening).';
 
     NotificationService().showNotification(id: 100, title: title, body: body);
     notificationCubit.addNotification(
@@ -228,9 +238,18 @@ class BookingCubit extends Cubit<BookingState> {
   DateTime _estimatedServiceStartTime(int ticketNumber, int avgServiceTime) {
     final now = DateTime.now();
     final workStart = DateTime(now.year, now.month, now.day, 9);
-    return workStart.add(
-      Duration(minutes: (ticketNumber - 1) * avgServiceTime),
-    );
+    return workStart.add(Duration(minutes: ticketNumber * avgServiceTime));
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    if (hours > 0 && minutes > 0) {
+      return '$hours h $minutes min';
+    } else if (hours > 0) {
+      return '$hours h';
+    }
+    return '$minutes min';
   }
 
   void startQueueListener({
@@ -270,6 +289,7 @@ class BookingCubit extends Cubit<BookingState> {
             );
             int peopleAhead = userTurnNumber - currentlyInService;
             int estimatedWaitingTime = peopleAhead * avgServiceTime;
+            final isInitialSnapshot = _lastNotifiedActiveTurnMap[key] == -1;
 
             if (peopleAhead < 0) {
               _triggerCompletedNotification(
@@ -291,7 +311,10 @@ class BookingCubit extends Cubit<BookingState> {
               ),
             );
 
-            if (currentlyInService != (_lastNotifiedActiveTurnMap[key] ?? -1)) {
+            if (isInitialSnapshot) {
+              _lastNotifiedActiveTurnMap[key] = currentlyInService;
+            } else if (currentlyInService !=
+                (_lastNotifiedActiveTurnMap[key] ?? -1)) {
               debugPrint(
                 "🔔 Triggering notification for Ticket Q-$userTurnNumber (key=$key)",
               );
@@ -353,15 +376,17 @@ class BookingCubit extends Cubit<BookingState> {
     required String businessName,
     required String serviceName,
   }) {
-    final estimatedStartTime = _estimatedServiceStartTime(
-      ticketNumber,
-      avgServiceTime,
+    final now = DateTime.now();
+    final workStart = DateTime(now.year, now.month, now.day, 9);
+    final turnDateTime = workStart.add(
+      Duration(minutes: ticketNumber * avgServiceTime),
     );
-    final formattedTime = DateFormat('h:mm a').format(estimatedStartTime);
+    final formattedTime = DateFormat('h:mm a').format(turnDateTime);
+    final waitDurationText = _formatDuration(Duration(minutes: waitingTime));
 
     String title = "Queue Update - Ticket Q-$ticketNumber";
     String body =
-        "Current turn: $currentActive. There are $ahead people ahead of you for $serviceName at $businessName. Estimated start time from 9:00 AM is $formattedTime.";
+        "Current turn: $currentActive. There are $ahead people ahead of you for $serviceName at $businessName. Your turn is expected in about $waitDurationText, around $formattedTime.";
 
     NotificationService().showNotification(id: 101, title: title, body: body);
     notificationCubit.addNotification(
