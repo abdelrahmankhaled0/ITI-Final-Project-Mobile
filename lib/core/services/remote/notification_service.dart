@@ -1,14 +1,61 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:taborq/features/notifications/data/notification_model.dart';
 
+const String _queueChannelId = 'taborq_queue_channel';
+const String _queueChannelName = 'Queue Updates';
+const String _queueChannelDescription =
+    'Notifications for queue position and updates';
+
+final FlutterLocalNotificationsPlugin _backgroundLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 // دالة الخلفية: يجب أن تكون Top-Level أو Static لتشتغل والفون مقفول
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // هنا الـ OS بيستقبل الرسالة من السيرفر مباشرة ويعرضها تلقائياً لو تحتوي على notification object
+  WidgetsFlutterBinding.ensureInitialized();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+
+  await _backgroundLocalNotificationsPlugin.initialize(
+    settings: initializationSettings,
+  );
+
+  final title =
+      message.notification?.title ?? message.data['title'] ?? 'Taborq';
+  final body = message.notification?.body ?? message.data['body'] ?? '';
+
+  if (title.isEmpty && body.isEmpty) {
+    return;
+  }
+
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    _queueChannelId,
+    _queueChannelName,
+    channelDescription: _queueChannelDescription,
+    importance: Importance.max,
+    priority: Priority.high,
+    playSound: true,
+  );
+  const NotificationDetails platformDetails = NotificationDetails(
+    android: androidDetails,
+  );
+
+  await _backgroundLocalNotificationsPlugin.show(
+    body: body,
+    id: message.hashCode,
+
+    title: title,
+    payload: body,
+    notificationDetails: platformDetails,
+  );
 }
 
 class NotificationFirebaseService {
@@ -80,12 +127,11 @@ class NotificationService {
 
     // 4. معالجة الإشعارات والتطبيق مفتوح في الـ Foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (message.notification != null) {
-        showNotification(
-          id: message.hashCode,
-          title: message.notification!.title ?? '',
-          body: message.notification!.body ?? '',
-        );
+      final title = message.notification?.title ?? message.data['title'] ?? '';
+      final body = message.notification?.body ?? message.data['body'] ?? '';
+
+      if (title.isNotEmpty || body.isNotEmpty) {
+        showNotification(id: message.hashCode, title: title, body: body);
       }
     });
   }
