@@ -214,7 +214,7 @@ class BookingCubit extends Cubit<BookingState> {
   }) {
     final peopleAhead = ticketNumber - currentInService;
     final estimatedStartTime = _estimatedServiceStartTime(
-      ticketNumber,
+      peopleAhead,
       avgServiceTime,
     );
     final formattedTime = DateFormat('h:mm a').format(estimatedStartTime);
@@ -222,9 +222,14 @@ class BookingCubit extends Cubit<BookingState> {
       Duration(minutes: peopleAhead * avgServiceTime),
     );
 
+    // Determine if appointment is today or tomorrow based on 3 PM cutoff
+    final now = DateTime.now();
+    final isTomorrow = now.hour >= 15;
+    final dayLabel = isTomorrow ? "tomorrow" : "today";
+
     final String title = 'Booking confirmed for $serviceName';
     final String body =
-        'Current serving: Q-$currentInService. There are $peopleAhead people ahead of you. Your ticket Q-$ticketNumber at $businessName is confirmed. Expected around $formattedTime starting from 9:00 AM ($waitDurationText from opening).';
+        'Current serving: Q-$currentInService. There are $peopleAhead people ahead of you. Your ticket Q-$ticketNumber at $businessName is confirmed. Expected $dayLabel around $formattedTime ($waitDurationText waiting time).';
 
     NotificationService().showNotification(id: 100, title: title, body: body);
     notificationCubit.addNotification(
@@ -235,21 +240,57 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
-  DateTime _estimatedServiceStartTime(int ticketNumber, int avgServiceTime) {
-    final now = DateTime.now();
-    final workStart = DateTime(now.year, now.month, now.day, 9);
-    return workStart.add(Duration(minutes: ticketNumber * avgServiceTime));
+  /// Calculate the estimated service start time based on:
+  /// - The number of people ahead in the queue
+  /// - The average service time per person (in minutes)
+  /// - The dynamic base start time (which considers operating hours and 3 PM cutoff)
+  ///
+  /// Formula: Expected Turn Time = Base Start Time + (peopleAhead * avgServiceTime)
+  DateTime _estimatedServiceStartTime(int ahead, int avgServiceTime) {
+    final baseStartTime = _getQueueBaseStartTime();
+    // Expected service time = base time + waiting time for people ahead
+    return baseStartTime.add(Duration(minutes: ahead * avgServiceTime));
   }
 
+  /// Get the dynamic base start time for queue calculations based on:
+  /// - Operating hours: 9:00 AM to 5:00 PM
+  /// - 3:00 PM (15:00) cutoff rule
+  ///
+  /// Returns:
+  /// - Tomorrow 9:00 AM if current time is >= 3:00 PM (15:00)
+  /// - Today 9:00 AM if current time is < 9:00 AM
+  /// - Current time (DateTime.now()) if between 9:00 AM and 3:00 PM
+  DateTime _getQueueBaseStartTime() {
+    final now = DateTime.now();
+
+    // If time is 3:00 PM or later, roll over to tomorrow 9:00 AM
+    if (now.hour >= 15) {
+      final tomorrow = now.add(const Duration(days: 1));
+      return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 9, 0);
+    }
+
+    // If time is before 9:00 AM, use today 9:00 AM as base
+    final nineAMToday = DateTime(now.year, now.month, now.day, 9, 0);
+    if (now.isBefore(nineAMToday)) {
+      return nineAMToday;
+    }
+
+    // If between 9:00 AM and 3:00 PM, use current live time
+    return now;
+  }
+
+  /// Format a duration into a human-readable string
+  /// Examples: "2 hr 30 mins", "45 mins", "1 hr"
   String _formatDuration(Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
+
     if (hours > 0 && minutes > 0) {
-      return '$hours h $minutes min';
+      return '$hours hr $minutes mins';
     } else if (hours > 0) {
-      return '$hours h';
+      return '$hours hr';
     }
-    return '$minutes min';
+    return '$minutes mins';
   }
 
   void startQueueListener({
@@ -377,16 +418,19 @@ class BookingCubit extends Cubit<BookingState> {
     required String serviceName,
   }) {
     final now = DateTime.now();
-    final workStart = DateTime(now.year, now.month, now.day, 9);
-    final turnDateTime = workStart.add(
-      Duration(minutes: ticketNumber * avgServiceTime),
-    );
-    final formattedTime = DateFormat('h:mm a').format(turnDateTime);
-    final waitDurationText = _formatDuration(Duration(minutes: waitingTime));
+    final isTomorrow = now.hour >= 15;
+    final dayLabel = isTomorrow ? "tomorrow" : "today";
 
-    String title = "Queue Update - Ticket Q-$ticketNumber";
-    String body =
-        "Current turn: $currentActive. There are $ahead people ahead of you for $serviceName at $businessName. Your turn is expected in about $waitDurationText, around $formattedTime.";
+    // Calculate expected service time based on people ahead
+    final expectedTurnTime = _estimatedServiceStartTime(ahead, avgServiceTime);
+    final formattedTime = DateFormat('h:mm a').format(expectedTurnTime);
+
+    final remainingDuration = Duration(minutes: ahead * avgServiceTime);
+    final waitDurationText = _formatDuration(remainingDuration);
+
+    final String title = "Queue Update - Ticket Q-$ticketNumber";
+    final String body =
+        "Current serving: Q-$currentActive. There are $ahead people ahead of you. Your turn for $serviceName at $businessName is expected $dayLabel around $formattedTime ($waitDurationText waiting time).";
 
     NotificationService().showNotification(id: 101, title: title, body: body);
     notificationCubit.addNotification(
