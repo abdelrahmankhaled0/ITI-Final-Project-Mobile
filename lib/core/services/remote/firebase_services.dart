@@ -31,14 +31,37 @@ class FirebaseServices {
     required String ticketId,
     required String queuesId,
     required String servicesId,
-  }) {
-    return FirebaseFirestore.instance
+  }) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    final serviceRef = firestore
         .collection("Queues")
         .doc(queuesId)
         .collection("services")
-        .doc(servicesId)
-        .collection("tickets")
-        .doc(ticketId)
-        .delete();
+        .doc(servicesId);
+
+    final ticketRef = serviceRef.collection("tickets").doc(ticketId);
+
+    // 🎯 استخدام Transaction لتعديل الـ Counter وحذف التذكرة معاً بأمان
+    return await firestore.runTransaction((transaction) async {
+      // 1. جلب بيانات السيرفس الحالية
+      DocumentSnapshot serviceSnapshot = await transaction.get(serviceRef);
+
+      if (serviceSnapshot.exists) {
+        Map<String, dynamic> serviceData =
+            serviceSnapshot.data() as Map<String, dynamic>;
+        int currentLastTicket = serviceData['lastGeneratedTicket'] ?? 0;
+
+        // 2. تقليل الـ Counter بمقدار 1 بشرط ميكونش أصلاً صفر
+        if (currentLastTicket > 0) {
+          transaction.update(serviceRef, {
+            'lastGeneratedTicket': currentLastTicket - 1,
+          });
+        }
+      }
+
+      // 3. حذف وثيقة التذكرة نهائياً
+      transaction.delete(ticketRef);
+    });
   }
 }

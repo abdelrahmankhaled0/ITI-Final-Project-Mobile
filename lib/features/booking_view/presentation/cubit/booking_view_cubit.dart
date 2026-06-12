@@ -27,14 +27,18 @@ class BookingViewCubit extends Cubit<BookingViewStates> {
     }
   }
 
-  deleteTicketById(BookingViewModel ticket) async {
+  Future<void> deleteTicketById(BookingViewModel ticket) async {
     try {
       emit(BookingViewLoadingState());
+
+      // استدعاء دالة الحذف المحدثة بالـ Transaction
       await FirebaseServices.deleteQueueById(
         ticketId: ticket.ticId,
         queuesId: ticket.businessId,
         servicesId: ticket.serviceId,
       );
+
+      // تحديث القائمة محلياً في الذاكرة بعد نجاح الحذف من السيرفر
       tickets.removeWhere((item) => item.ticId == ticket.ticId);
       emit(BookingViewSuccessState(tickets));
     } on Exception catch (e) {
