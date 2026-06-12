@@ -175,6 +175,17 @@ class BookingCubit extends Cubit<BookingState> {
         ticketNumber: finalTicketCode,
         avgServiceTime: avgServiceTime,
       );
+
+      // Start listening for queue updates for the newly booked ticket
+      startQueueListener(
+        businessId: businessId,
+        serviceId: serviceId,
+        userTurnNumber: finalTicketCode,
+        avgServiceTime: avgServiceTime,
+        notificationCubit: notificationCubit,
+        serviceName: serviceName,
+        businessName: businessName,
+      );
     } catch (e) {
       emit(BookingFailure(errorMessage: "Booking failed: ${e.toString()}"));
     }
@@ -254,7 +265,9 @@ class BookingCubit extends Cubit<BookingState> {
           if (snapshot.exists && snapshot.data() != null) {
             final raw = snapshot.data();
             debugPrint('Service snapshot data for $key: $raw');
-            int currentlyInService = _toInt(raw?['currentlyInService']);
+            int currentlyInService = _toInt(
+              raw?['currentTicket'] ?? raw?['currentlyInService'],
+            );
             int peopleAhead = userTurnNumber - currentlyInService;
             int estimatedWaitingTime = peopleAhead * avgServiceTime;
 

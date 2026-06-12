@@ -16,7 +16,6 @@ import 'package:taborq/features/business_datails/screens/business_details_screen
 import 'package:taborq/features/home/presentation/widgets/bottom_nav.dart';
 import 'package:taborq/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:taborq/features/home/presentation/screens/home_screen.dart';
-import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:taborq/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:taborq/features/profile/presentation/screens/profile_screen.dart';
 import 'package:taborq/features/welcome/presentation/cubit/welcome_cubit.dart';
@@ -146,11 +145,8 @@ class AppRoutes {
                           BlocProvider<BusinessDetailsCubit>(
                             create: (context) => BusinessDetailsCubit(),
                           ),
-                          BlocProvider<BookingCubit>(
-                            create: (context) => BookingCubit(
-                              notificationCubit: context
-                                  .read<NotificationCubit>(),
-                            ),
+                          BlocProvider.value(
+                            value: context.read<BookingCubit>(),
                           ),
                         ],
                         child: SubServicesScreen(
