@@ -839,6 +839,8 @@ class ClinicCard extends StatelessWidget {
                 'category': clinic.category,
                 'waitTime': clinic.waitTime,
                 'rating': clinic.rating,
+                'lat': clinic.lat,
+                'lng': clinic.lng,
               },
             );
           },

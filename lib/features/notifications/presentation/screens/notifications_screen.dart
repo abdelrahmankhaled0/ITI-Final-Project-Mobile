@@ -26,26 +26,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text(
+        backgroundColor: AppColors.primaryColor,
+        elevation: 0,
+        title: Text(
           'Notifications',
-          style: TextStyle(
-            fontFamily: 'Cairo',
+          style: AppTextStyles.textStyle18.copyWith(
+            color: AppColors.lightColor,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.notifications),
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        ],
       ),
+
       body: BlocBuilder<NotificationCubit, NotificationStates>(
         builder: (context, state) {
           if (state is NotificationLoadingState) {
