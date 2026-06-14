@@ -33,7 +33,12 @@ class BookingViewScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              centerTitle: true,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(Icons.calendar_month),
+                ),
+              ],
             ),
             body: _buildBody(context, state, cubit),
           );

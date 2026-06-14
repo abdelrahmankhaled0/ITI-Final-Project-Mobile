@@ -486,21 +486,39 @@ class _BusinessDetailsContent extends StatelessWidget {
                       var serviceData =
                           serviceDoc.data() as Map<String, dynamic>;
 
+                      final String serviceName =
+                          serviceData['serviceName']?.toString() ?? 'Service';
+                      final bool isActive = serviceData['isActive'] == true;
+                      final int currentTicket =
+                          (serviceData['currentTicket'] as num?)?.toInt() ??
+                          (serviceData['currentlyInService'] as num?)
+                              ?.toInt() ??
+                          0;
+                      final String nextAvailableTime =
+                          (serviceData['nextAvailableTime'] ??
+                                  serviceData['nextTime'] ??
+                                  serviceData['nextServiceAt'] ??
+                                  '')
+                              .toString();
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: ServiceCard(
-                          serviceName: serviceData['serviceName'],
-                          isActive: serviceData['isActive'],
-                          currentTicket: serviceData['currentTicket'],
-                          onBookTap: () => {
+                          serviceName: serviceName,
+                          isActive: isActive,
+                          currentTicket: currentTicket,
+                          nextAvailableTime: nextAvailableTime,
+                          onBookTap: () {
                             context.push(
                               '${AppRoutes.businessDetails}/${AppRoutes.subServices}',
                               extra: {
                                 'businessId': businessId,
                                 'serviceId': serviceDoc.id,
-                                'serviceName': serviceData['serviceName'],
+                                'serviceName': serviceName,
+                                'lat': (business['lat'] ?? '0').toString(),
+                                'lng': (business['lng'] ?? '0').toString(),
                               },
-                            ),
+                            );
                           },
                         ),
                       );
