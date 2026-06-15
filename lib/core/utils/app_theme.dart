@@ -16,8 +16,8 @@ class AppTheme {
         cursorColor: AppColors.primaryColor,
       ),
       appBarTheme: AppBarThemeData(
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: AppColors.lightColor,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.darkColor,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,

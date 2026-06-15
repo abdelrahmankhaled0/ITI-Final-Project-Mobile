@@ -24,14 +24,13 @@ class BookingViewScreen extends StatelessWidget {
           // 🚀 خلينا الـ Scaffold هو الأساس دايماً عشان الـ AppBar يفضل ثابت وشكل الأبلكيشن احترافي
           return Scaffold(
             appBar: AppBar(
-              backgroundColor: AppColors.primaryColor,
+              // backgroundColor: AppColors.primaryColor,
               elevation: 0,
               title: Text(
                 'My Bookings',
-                style: AppTextStyles.textStyle18.copyWith(
-                  color: AppColors.lightColor,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               actions: [
                 Padding(

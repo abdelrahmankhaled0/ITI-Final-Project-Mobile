@@ -98,7 +98,6 @@ class SubServicesScreen extends StatelessWidget {
             },
             builder: (context, state) {
               return Container(
-                color: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 18.0,
                   vertical: 12.0,
@@ -159,29 +158,22 @@ class SubServicesScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
-                backgroundColor: AppColors.primaryColor,
                 elevation: 0,
                 pinned: true,
                 leading: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: AppColors.neutralColor,
-                  ),
+                  icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
                   serviceName,
-                  style: Theme.of(context).textTheme.headlineLarge,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 centerTitle: true,
                 actions: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.search,
-                      color: AppColors.neutralColor,
-                    ),
-                    onPressed: () {},
-                  ),
+                  IconButton(icon: const Icon(Icons.search), onPressed: () {}),
                 ],
               ),
               SliverToBoxAdapter(
