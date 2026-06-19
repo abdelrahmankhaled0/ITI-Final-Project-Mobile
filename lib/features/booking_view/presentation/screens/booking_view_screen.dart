@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/utils/app_colors.dart';
-import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/booking_view/presentation/cubit/booking_view_cubit.dart';
 import 'package:taborq/features/booking_view/presentation/cubit/booking_view_states.dart';
 

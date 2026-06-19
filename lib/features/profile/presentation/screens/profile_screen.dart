@@ -26,7 +26,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? user = FirebaseAuth.instance.currentUser;
   bool _isUploading = false;
-  bool _isDarkMode = false; // حالة افتراضية لتغيير الثيم
 
   String get joinedDate {
     if (user?.metadata.creationTime != null) {
