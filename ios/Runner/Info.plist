@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+      <string>نحتاج للوصول للميكروفون لتسجيل الرسائل الصوتية ومشاركتها مع المساعد الذكي.</string>
+      <key>NSPhotoLibraryUsageDescription</key>
+      <string>نحتاج للوصول لمعرض الصور لتتمكن من إرسال صور الروشتات أو العيادات.</string>
+      <key>NSCameraUsageDescription</key>
+      <string>نحتاج للوصول للكاميرا لتصوير الروشتات والوثائق مباشرة للشات بوت.</string>
 </dict>
 </plist>
