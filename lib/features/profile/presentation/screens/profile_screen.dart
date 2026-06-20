@@ -26,7 +26,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? user = FirebaseAuth.instance.currentUser;
   bool _isUploading = false;
-  bool _isDarkMode = false; // حالة افتراضية لتغيير الثيم
 
   String get joinedDate {
     if (user?.metadata.creationTime != null) {
@@ -221,29 +220,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final bookingCubit = context.read<BookingViewCubit>();
     return Scaffold(
-      backgroundColor: AppColors.lightColor,
+      // backgroundColor: AppColors.lightColor,
       appBar: AppBar(
-        foregroundColor: AppColors.lightColor,
-        backgroundColor: AppColors.lightColor,
+        // foregroundColor: AppColors.lightColor,
+        // backgroundColor: AppColors.lightColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.darkColor),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Profile",
-          style: AppTextStyles.textStyle18.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryColor,
-          ),
+          style: Theme.of(context).textTheme.headlineLarge,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.darkColor),
-            onPressed: () {},
-          ),
-        ],
+        actions: [IconButton(icon: const Icon(Icons.search), onPressed: () {})],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance

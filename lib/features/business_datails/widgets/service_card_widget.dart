@@ -6,6 +6,7 @@ class ServiceCard extends StatelessWidget {
   final String serviceName;
   final bool isActive;
   final int currentTicket;
+  final String nextAvailableTime;
   final VoidCallback onBookTap;
 
   const ServiceCard({
@@ -13,6 +14,7 @@ class ServiceCard extends StatelessWidget {
     required this.serviceName,
     required this.isActive,
     required this.currentTicket,
+    required this.nextAvailableTime,
     required this.onBookTap,
   });
 
@@ -84,12 +86,13 @@ class ServiceCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    isActive ? 'Next: 10:30 AM' : "",
-                    style: AppTextStyles.textStyle10.copyWith(
-                      color: Colors.grey,
+                  if (nextAvailableTime.isNotEmpty)
+                    Text(
+                      'Next: $nextAvailableTime',
+                      style: AppTextStyles.textStyle10.copyWith(
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
                 ],
               ),
               ElevatedButton(

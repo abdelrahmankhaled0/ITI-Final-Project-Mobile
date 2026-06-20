@@ -814,7 +814,9 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                         final String sId = service['serviceId'] ?? '';
                         final String sName = service['serviceName'] ?? 'Service Details';
 
-                        // استخدام Navigator العادي لتخطي مشاكل الـ ShellRoute
+                        final String lat = service['lat']?.toString() ?? '';
+                        final String lng = service['lng']?.toString() ?? '';
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -823,7 +825,6 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                                 BlocProvider<BusinessDetailsCubit>(
                                   create: (context) => BusinessDetailsCubit(),
                                 ),
-                                // تمرير الـ BookingCubit عشان الشاشة تقدر تحجز الخدمة
                                 BlocProvider.value(
                                   value: context.read<BookingCubit>(),
                                 ),
@@ -832,6 +833,8 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                                 businessId: bId,
                                 serviceId: sId,
                                 serviceName: sName,
+                                lat: lat,
+                                lng: lng,
                               ),
                             ),
                           ),

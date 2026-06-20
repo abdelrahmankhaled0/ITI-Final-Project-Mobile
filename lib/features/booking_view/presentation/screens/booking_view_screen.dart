@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:taborq/core/routes/navigations.dart';
 import 'package:taborq/core/utils/app_colors.dart';
-import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/booking_view/presentation/cubit/booking_view_cubit.dart';
 import 'package:taborq/features/booking_view/presentation/cubit/booking_view_states.dart';
 
@@ -24,16 +23,20 @@ class BookingViewScreen extends StatelessWidget {
           // 🚀 خلينا الـ Scaffold هو الأساس دايماً عشان الـ AppBar يفضل ثابت وشكل الأبلكيشن احترافي
           return Scaffold(
             appBar: AppBar(
-              backgroundColor: AppColors.primaryColor,
+              // backgroundColor: AppColors.primaryColor,
               elevation: 0,
               title: Text(
                 'My Bookings',
-                style: AppTextStyles.textStyle18.copyWith(
-                  color: AppColors.lightColor,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              centerTitle: true,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(Icons.calendar_month),
+                ),
+              ],
             ),
             body: _buildBody(context, state, cubit),
           );

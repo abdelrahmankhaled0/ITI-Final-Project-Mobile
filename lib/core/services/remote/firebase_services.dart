@@ -42,26 +42,14 @@ class FirebaseServices {
 
     final ticketRef = serviceRef.collection("tickets").doc(ticketId);
 
-    // 🎯 استخدام Transaction لتعديل الـ Counter وحذف التذكرة معاً بأمان
+    // Removing decrement of `lastGeneratedTicket` entirely per recent change.
+    // We keep the delete atomic in a transaction but do not modify the service counter.
     return await firestore.runTransaction((transaction) async {
-      // 1. جلب بيانات السيرفس الحالية
-      DocumentSnapshot serviceSnapshot = await transaction.get(serviceRef);
-
-      if (serviceSnapshot.exists) {
-        Map<String, dynamic> serviceData =
-            serviceSnapshot.data() as Map<String, dynamic>;
-        int currentLastTicket = serviceData['lastGeneratedTicket'] ?? 0;
-
-        // 2. تقليل الـ Counter بمقدار 1 بشرط ميكونش أصلاً صفر
-        if (currentLastTicket > 0) {
-          transaction.update(serviceRef, {
-            'lastGeneratedTicket': currentLastTicket - 1,
-          });
-        }
+      // Ensure ticket exists then delete it within transaction for atomicity.
+      DocumentSnapshot ticketSnapshot = await transaction.get(ticketRef);
+      if (ticketSnapshot.exists) {
+        transaction.delete(ticketRef);
       }
-
-      // 3. حذف وثيقة التذكرة نهائياً
-      transaction.delete(ticketRef);
     });
   }
 }

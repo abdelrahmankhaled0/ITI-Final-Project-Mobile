@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:taborq/core/utils/app_colors.dart';
-import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:taborq/features/notifications/presentation/cubit/notification_state.dart';
 
@@ -24,28 +23,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      // backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text(
-          'Notifications',
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+        // backgroundColor: AppColors.primaryColor,
+        elevation: 0,
+        title: Text('Notifications'),
+
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.notifications),
           ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        ],
       ),
+
       body: BlocBuilder<NotificationCubit, NotificationStates>(
         builder: (context, state) {
           if (state is NotificationLoadingState) {
@@ -93,7 +84,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -129,60 +120,62 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 children: [
                   Text(
                     item.title,
-                    style: AppTextStyles.textStyle14.copyWith(
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Cairo',
-                      color: AppColors.darkColor,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 4),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if ((item.serviceName ?? '').isNotEmpty)
+                        Text(
+                          'Service: ${item.serviceName}',
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: AppColors.grayColor,
+                              ),
+                        ),
+                      if ((item.businessName ?? '').isNotEmpty)
+                        Text(
+                          'Business: ${item.businessName}',
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: AppColors.grayColor,
+                              ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
                   Text(
                     item.body,
-                    style: AppTextStyles.textStyle12.copyWith(
-                      fontFamily: 'Cairo',
-                      color: Colors.grey.shade600,
-                      height: 1.4,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(),
                   ),
                   const SizedBox(height: 8),
                   if ((item.serviceName ?? '').isNotEmpty ||
                       (item.businessName ?? '').isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if ((item.serviceName ?? '').isNotEmpty)
-                          Text(
-                            'Service: ${item.serviceName}',
-                            style: AppTextStyles.textStyle12.copyWith(
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        if ((item.businessName ?? '').isNotEmpty)
-                          Text(
-                            'Business: ${item.businessName}',
-                            style: AppTextStyles.textStyle12.copyWith(
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    key: const Key('time_align'),
-                    child: Text(
-                      item.dateTime is String
-                          ? item.dateTime
-                          : DateFormat(
-                              'EEE, MMM d • hh:mm a',
-                            ).format(item.dateTime),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey.shade400,
-                        fontWeight: FontWeight.w500,
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      key: const Key('time_align'),
+                      child: Text(
+                        item.dateTime is String
+                            ? item.dateTime
+                            : DateFormat(
+                                'EEE, MMM d • hh:mm a',
+                              ).format(item.dateTime),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -200,7 +193,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
             ),
             child: Icon(

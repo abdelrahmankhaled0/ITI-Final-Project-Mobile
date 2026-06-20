@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:taborq/core/services/remote/location_helper.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
+import 'package:taborq/features/business_datails/cubit/business_details_state.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_state.dart';
 import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
@@ -13,12 +15,16 @@ class SubServicesScreen extends StatelessWidget {
   final String businessId;
   final String serviceId;
   final String serviceName;
+  final String lat;
+  final String lng;
 
   const SubServicesScreen({
     super.key,
     required this.businessId,
     required this.serviceId,
     required this.serviceName,
+    required this.lat,
+    required this.lng,
   });
 
   void _showStatusToast({
@@ -92,7 +98,6 @@ class SubServicesScreen extends StatelessWidget {
             },
             builder: (context, state) {
               return Container(
-                color: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 18.0,
                   vertical: 12.0,
@@ -153,29 +158,22 @@ class SubServicesScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
-                backgroundColor: AppColors.primaryColor,
                 elevation: 0,
                 pinned: true,
                 leading: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: AppColors.neutralColor,
-                  ),
+                  icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: Text(
                   serviceName,
-                  style: Theme.of(context).textTheme.headlineLarge,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 centerTitle: true,
                 actions: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.search,
-                      color: AppColors.neutralColor,
-                    ),
-                    onPressed: () {},
-                  ),
+                  IconButton(icon: const Icon(Icons.search), onPressed: () {}),
                 ],
               ),
               SliverToBoxAdapter(
@@ -305,7 +303,7 @@ class SubServicesScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _buildStaticMapCard(),
+                      _buildStaticMapCard(lat, lng, context),
                       const SizedBox(height: 90),
                     ],
                   ),
@@ -429,26 +427,56 @@ class SubServicesScreen extends StatelessWidget {
     return Icons.check_circle_outline;
   }
 
-  Widget _buildStaticMapCard() {
-    return Container(
-      height: 160,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.neutralColor6.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-          ),
-          child: const Icon(
-            Icons.location_on,
-            color: AppColors.primaryColor,
-            size: 28,
+  Widget _buildStaticMapCard(String lat, String lng, BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // Prefer live coordinates from BusinessDetailsCubit if available
+        final state = context.read<BusinessDetailsCubit>().state;
+        double? latitude;
+        double? longitude;
+
+        if (state is BusinessDetailsLoaded) {
+          latitude = state.latitude;
+          longitude = state.longitude;
+        }
+
+        // If cubit didn't provide coordinates, fall back to provided route args
+        if (latitude == null || longitude == null) {
+          if (lat.isNotEmpty && lng.isNotEmpty) {
+            latitude = double.tryParse(lat);
+            longitude = double.tryParse(lng);
+          }
+        }
+
+        if (latitude != null && longitude != null) {
+          confirmOpenLocationOnMap(context, latitude, longitude);
+        } else {
+          _showStatusToast(
+            message: 'Location coordinates not available',
+            backgroundColor: Colors.red.shade700,
+          );
+        }
+      },
+      child: Container(
+        height: 160,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.neutralColor6.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+            ),
+            child: const Icon(
+              Icons.location_on,
+              color: AppColors.primaryColor,
+              size: 28,
+            ),
           ),
         ),
       ),

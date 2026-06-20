@@ -355,21 +355,37 @@ class AppRoutes {
                           body: Center(child: Text("Error: No Data")),
                         );
                       }
-                      final data = state.extra as Map<String, dynamic>;
+                      final data = state.extra as Map<String, dynamic>?;
+
+                      if (data == null) {
+                        return const Scaffold(
+                          body: Center(child: Text("Error: Invalid Data")),
+                        );
+                      }
+
+                      // Safely extract latitude and longitude with fallback values
+                      final String lat = (data['lat'] ?? '0').toString();
+                      final String lng = (data['lng'] ?? '0').toString();
 
                       return MultiBlocProvider(
                         providers: [
                           BlocProvider<BusinessDetailsCubit>(
-                            create: (context) => BusinessDetailsCubit(),
+                            create: (context) => BusinessDetailsCubit()
+                              ..listenToBusiness(
+                                data['businessId'] as String? ?? '',
+                              ),
                           ),
                           BlocProvider.value(
                             value: context.read<BookingCubit>(),
                           ),
                         ],
                         child: SubServicesScreen(
-                          businessId: data['businessId'],
-                          serviceId: data['serviceId'],
-                          serviceName: data['serviceName'],
+                          businessId: data['businessId'] as String? ?? '',
+                          serviceId: data['serviceId'] as String? ?? '',
+                          serviceName:
+                              data['serviceName'] as String? ?? 'Service',
+                          lat: lat,
+                          lng: lng,
                         ),
                       );
                     },
