@@ -330,3 +330,130 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Taborq Backend running on port ${PORT}`);
 });
+
+
+//import express from 'express';
+//import cors from 'cors';
+//import dotenv from 'dotenv';
+//import multer from 'multer';
+//import fs from 'fs';
+//import { initializeApp, cert } from 'firebase-admin/app';
+//import { getFirestore } from 'firebase-admin/firestore';
+//import { GoogleGenerativeAI } from '@google/generative-ai';
+//
+//dotenv.config();
+//
+//const serviceAccount = JSON.parse(fs.readFileSync('./serviceAccountKey.json', 'utf8'));
+//initializeApp({ credential: cert(serviceAccount) });
+//const db = getFirestore();
+//
+//const app = express();
+//app.use(cors());
+//app.use(express.json());
+//
+//const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+//const upload = multer({ dest: 'uploads/' });
+//
+//// تنظيف الملفات المرفوعة بعد الاستخدام لضمان عدم امتلاء السيرفر
+//function cleanupFiles(files) {
+//  if (!files) return;
+//  Object.values(files).forEach(fileArray => {
+//    fileArray.forEach(file => {
+//      try {
+//        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+//      } catch (err) {
+//        console.error(`Error cleaning up file ${file.path}:`, err);
+//      }
+//    });
+//  });
+//}
+//
+//// دالة ذكية لإعادة المحاولة عند حدوث ضغط (503) أو تجاوز للحد (429)
+//async function generateWithRetry(model, contents, retries = 3) {
+//  for (let i = 0; i < retries; i++) {
+//    try {
+//      return await model.generateContent({ contents });
+//    } catch (error) {
+//      const isRetryable = error.status === 503 || error.status === 429;
+//      if (isRetryable && i < retries - 1) {
+//        const delay = Math.pow(2, i) * 1000;
+//        console.warn(`Gemini busy/quota exceeded. Retrying in ${delay}ms... (Attempt ${i + 1}/${retries})`);
+//        await new Promise(res => setTimeout(res, delay));
+//        continue;
+//      }
+//      throw error;
+//    }
+//  }
+//}
+//
+//function detectLanguage(text) {
+//  if (!text || !text.trim()) return null;
+//  const arabicPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
+//  return arabicPattern.test(text) ? 'ar' : 'en';
+//}
+//
+//app.post('/api/chat', upload.fields([{ name: 'voice', maxCount: 1 }, { name: 'image', maxCount: 1 }]), async (req, res) => {
+//  try {
+//    const { userId, userName, message, history } = req.body;
+//    let chatHistory = history ? JSON.parse(history) : [];
+//    const isFirstMessage = chatHistory.length === 0;
+//
+//    // 1. جلب بيانات البيزنس (Firestore)
+//    const businessSnapshot = await db.collection('businesses').where('isOperational', '==', true).get();
+//    const realBusinesses = await Promise.all(businessSnapshot.docs.map(async (doc) => {
+//      const data = doc.data();
+//      const servicesSnapshot = await doc.ref.collection('services').get();
+//      return {
+//        businessId: doc.id,
+//        businessName: data.name,
+//        services: servicesSnapshot.docs.map(s => ({
+//            serviceId: s.id,
+//            serviceName: s.data().name || s.data().serviceName || "خدمة عامة",
+//            serviceImage: s.data().imageURI || s.data().imageUrl || "https://placedog.net/500"
+//        }))
+//      };
+//    }));
+//
+//    // 2. إعداد الموديل
+//    const model = genAI.getGenerativeModel({
+//      model: "gemini-2.5-flash",
+//      systemInstruction: `
+//        You are Taborq's Professional AI Assistant.
+//        - STRICT RULE: Greet ONLY on the first message. Never greet or introduce yourself again in continued turns.
+//        - BUSINESS FILTER: If the user names a specific business, show ONLY its services. Do not suggest services from other businesses.
+//        - LANGUAGE: Detect user language (Arabic/English) and reply exclusively in that language.
+//        - DATABASE CONTEXT: ${JSON.stringify(realBusinesses)}
+//      `,
+//      generationConfig: { responseMimeType: "application/json" }
+//    });
+//
+//    // 3. إعداد المحتوى للإرسال
+//    let contents = [
+//        { text: isFirstMessage ? "GREETING: Welcome the user and introduce Taborq." : "CONTINUATION: Respond directly. Do not greet." },
+//        { text: `User Message: ${message}` }
+//    ];
+//
+//    // 4. استدعاء الموديل مع Retry Logic
+//    const result = await generateWithRetry(model, contents);
+//    let responseText = result.response.text();
+//
+//    // تنظيف JSON
+//    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+//    const aiOutput = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+//
+//    return res.status(200).json(aiOutput);
+//
+//  } catch (error) {
+//    console.error('Final Backend Error:', error);
+//    return res.status(200).json({
+//      is_booking_proposal: false,
+//      reply: 'عذراً، النظام مشغول حالياً. من فضلك حاول مرة أخرى بعد لحظات. (Error: ' + (error.status || 'Unknown') + ')'
+//    });
+//  } finally {
+//    // 5. التنظيف الاحترافي
+//    cleanupFiles(req.files);
+//  }
+//});
+//
+//const PORT = process.env.PORT || 5000;
+//app.listen(PORT, () => console.log(`Taborq Backend running on ${PORT}`));
