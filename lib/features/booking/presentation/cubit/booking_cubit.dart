@@ -203,6 +203,7 @@ class BookingCubit extends Cubit<BookingState> {
   final Map<String, bool> _movementNotifiedMap = {};
   final Map<String, bool> _completedNotifiedMap = {};
   final Map<String, int> _lastNotifiedActiveTurnMap = {};
+  final Map<String, bool> _hasReachedYourTurnMap = {};
 
   void _triggerBookingCreatedNotification({
     required NotificationCubit notificationCubit,
@@ -212,7 +213,7 @@ class BookingCubit extends Cubit<BookingState> {
     required int avgServiceTime,
     required int currentInService,
   }) {
-    final peopleAhead = ticketNumber - currentInService;
+    final peopleAhead = ticketNumber - currentInService - 1;
     final estimatedStartTime = _estimatedServiceStartTime(
       peopleAhead,
       avgServiceTime,
@@ -305,6 +306,7 @@ class BookingCubit extends Cubit<BookingState> {
     final key = '${businessId}_$serviceId';
     _movementNotifiedMap[key] = false;
     _completedNotifiedMap[key] = false;
+    _hasReachedYourTurnMap[key] = false;
     _lastNotifiedActiveTurnMap[key] = -1;
     // cancel existing subscription for this service if any
     _queueSubscriptions[key]?.cancel();
@@ -332,7 +334,12 @@ class BookingCubit extends Cubit<BookingState> {
             int estimatedWaitingTime = peopleAhead * avgServiceTime;
             final isInitialSnapshot = _lastNotifiedActiveTurnMap[key] == -1;
 
-            if (peopleAhead < 0) {
+            if (peopleAhead == 0) {
+              _hasReachedYourTurnMap[key] = true;
+            }
+
+            if (peopleAhead < 0 &&
+                (isInitialSnapshot || (_hasReachedYourTurnMap[key] ?? false))) {
               _triggerCompletedNotification(
                 notificationCubit: notificationCubit,
                 businessName: businessName,
@@ -525,11 +532,11 @@ class BookingCubit extends Cubit<BookingState> {
       final querySnapshot = await _firestore
           .collectionGroup('tickets')
           .where('userId', isEqualTo: uid)
-          .where('status', isEqualTo: 'pending')
+          .where('status', whereIn: ['pending', 'completed'])
           .get();
 
       debugPrint(
-        'initListenersForUserActiveTickets: found ${querySnapshot.docs.length} active tickets for user $uid',
+        'initListenersForUserActiveTickets: found ${querySnapshot.docs.length} tickets for user $uid',
       );
 
       for (final doc in querySnapshot.docs) {
@@ -540,6 +547,7 @@ class BookingCubit extends Cubit<BookingState> {
         final String serviceName = data['serviceName'] ?? '';
         final String businessName =
             data['bussinessName'] ?? data['businessName'] ?? '';
+        final String ticketStatus = data['status'] ?? 'pending';
 
         debugPrint(
           'initListenersForUserActiveTickets: ticket Q-$ticketNumber for service $serviceId at business $businessId (serviceName=$serviceName)',
@@ -559,6 +567,19 @@ class BookingCubit extends Cubit<BookingState> {
                 serviceDoc.data()?['avgServiceTime'] ?? avgServiceTime;
           }
         } catch (_) {}
+
+        if (ticketStatus == 'completed') {
+          debugPrint(
+            'initListenersForUserActiveTickets: ticket Q-$ticketNumber already completed for service $serviceId at business $businessId',
+          );
+          _triggerCompletedNotification(
+            notificationCubit: notificationCubit,
+            businessName: businessName,
+            serviceName: serviceName,
+            key: '${businessId}_$serviceId',
+          );
+          continue;
+        }
 
         // Start listener for this active ticket
         startQueueListener(
