@@ -17,7 +17,10 @@ class HomeCubit extends Cubit<HomeState> {
     FirebaseFirestore.instance.collection('businesses').snapshots().listen((event) {
       _allClinics = event.docs
           .map((doc) => ClinicModel.fromFirestore(doc.data(), doc.id))
+      // 👈 تمت إضافة الفلترة هنا لاستبعاد الاشتراكات المنتهية فوراً
+          .where((clinic) => clinic.subscriptionStatus.toLowerCase() != 'expired')
           .toList();
+
       _applyFilter();
     }).onError((error) {
       emit(HomeError(error.toString()));
@@ -25,8 +28,8 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void _applyFilter() {
-
     List<String> dynamicCategories = ['All Care'];
+
     final uniqueCategories = _allClinics
         .map((e) => e.category)
         .where((cat) => cat.isNotEmpty)
@@ -37,19 +40,16 @@ class HomeCubit extends Cubit<HomeState> {
 
     List<ClinicModel> filtered = _allClinics;
 
-
     if (_currentCategory != "All Care") {
       filtered = filtered.where((clinic) =>
       clinic.category.toLowerCase() == _currentCategory.toLowerCase()).toList();
     }
-
 
     if (_currentQuery.isNotEmpty) {
       filtered = filtered.where((clinic) =>
       clinic.name.toLowerCase().contains(_currentQuery.toLowerCase()) ||
           clinic.address.toLowerCase().contains(_currentQuery.toLowerCase())).toList();
     }
-
 
     emit(HomeSuccess(
       clinics: List.from(filtered),

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/home/presentation/cubit/home_cubit.dart';
@@ -65,19 +66,22 @@ class HomeScreen extends StatelessWidget {
                       title: isCollapsed
                           ? Row(
                               children: [
-                                CircleAvatar(
-                                  backgroundColor: AppColors.primaryColor5,
-                                  radius: 18,
-                                  backgroundImage: image != null
-                                      ? NetworkImage(image)
-                                      : null,
-                                  child: image == null
-                                      ? const Icon(
-                                          Icons.person,
-                                          size: 18,
-                                          color: AppColors.lightColor,
-                                        )
-                                      : null,
+                                InkWell(
+                                  onTap: (){context.go('/profile');},
+                                  child: CircleAvatar(
+                                    backgroundColor: AppColors.primaryColor5,
+                                    radius: 18,
+                                    backgroundImage: image != null
+                                        ? NetworkImage(image)
+                                        : null,
+                                    child: image == null
+                                        ? const Icon(
+                                            Icons.person,
+                                            size: 18,
+                                            color: AppColors.lightColor,
+                                          )
+                                        : null,
+                                  ),
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -88,11 +92,14 @@ class HomeScreen extends StatelessWidget {
                                 ),
                                 const Spacer(),
 
-                                const Padding(
+                                 Padding(
                                   padding: EdgeInsets.only(right: 20),
-                                  child: Icon(
-                                    Icons.notifications_none_rounded,
-                                    color: AppColors.lightColor,
+                                  child: InkWell(
+                                    onTap: (){ context.go('/notifications');},
+                                    child: Icon(
+                                      Icons.notifications_none_rounded,
+                                      color: AppColors.lightColor,
+                                    ),
                                   ),
                                 ),
                               ],
