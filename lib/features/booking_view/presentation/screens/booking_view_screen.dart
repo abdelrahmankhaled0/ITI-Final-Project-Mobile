@@ -19,26 +19,39 @@ class BookingViewScreen extends StatelessWidget {
         listener: (context, state) {},
         builder: (context, state) {
           var cubit = BookingViewCubit.get(context);
+          final theme = Theme.of(context);
 
-          // 🚀 خلينا الـ Scaffold هو الأساس دايماً عشان الـ AppBar يفضل ثابت وشكل الأبلكيشن احترافي
           return Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
             appBar: AppBar(
-              // backgroundColor: AppColors.primaryColor,
+              backgroundColor: theme.scaffoldBackgroundColor,
               elevation: 0,
+              scrolledUnderElevation: 0,
+              surfaceTintColor: Colors.transparent,
+              centerTitle: false,
               title: Text(
-                'My Bookings',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                'Bookings',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontSize: 24,
+                  // fontWeight: FontWeight.bold,
+                ),
               ),
               actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Icon(Icons.calendar_month),
+                // تصميم Modern لأيقونة الـ AppBar
+                Container(
+                  margin: const EdgeInsets.only(right: 16.0),
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.calendar_month, color: theme.primaryColor),
+                    onPressed: () {},
+                  ),
                 ),
               ],
             ),
-            body: _buildBody(context, state, cubit),
+            body: _buildBody(context, state, cubit, theme),
           );
         },
       ),
@@ -47,12 +60,15 @@ class BookingViewScreen extends StatelessWidget {
 
   // 🛠️ دالة بناء محتوى الشاشة بناءً على الحالة
   Widget _buildBody(
-    BuildContext context,
-    BookingViewStates state,
-    BookingViewCubit cubit,
-  ) {
+      BuildContext context,
+      BookingViewStates state,
+      BookingViewCubit cubit,
+      ThemeData theme, // تمرير الثيم للدالة
+      ) {
     if (state is BookingViewLoadingState) {
-      return Center(child: CircularProgressIndicator(strokeWidth: 3));
+      return Center(
+          child: CircularProgressIndicator(
+              strokeWidth: 3, color: theme.primaryColor));
     }
 
     if (cubit.tickets.isEmpty) {
@@ -65,29 +81,28 @@ class BookingViewScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
+                  color: theme.cardColor,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.confirmation_number_outlined,
                   size: 70,
-                  color: AppColors.primaryColor,
+                  color: theme.primaryColor,
                 ),
               ),
               const Gap(24),
               Text(
                 "No Tickets Found",
-                style: TextStyle(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
                 ),
               ),
               const Gap(8),
               Text(
                 "Your booked tickets will appear here",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                style: theme.textTheme.bodyMedium,
               ),
             ],
           ),
@@ -98,7 +113,7 @@ class BookingViewScreen extends StatelessWidget {
     // 🚀 عرض التذاكر بتصميم الـ List الاحترافي
     return ListView.builder(
       itemCount: cubit.tickets.length,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+      padding: const EdgeInsets.only(left: 16.0, top: 12 , right: 16.0 , bottom: 80),
       physics: const BouncingScrollPhysics(),
       itemBuilder: (context, index) {
         var ticket = cubit.tickets[index];
@@ -107,40 +122,41 @@ class BookingViewScreen extends StatelessWidget {
 
         // لون الـ Status ديناميكي حسب الحالة
         final statusColor = ticket.status.toLowerCase() == 'pending'
-            ? Colors.orange.shade600
-            : AppColors.primaryColor;
+            ? Colors.orange
+            : theme.primaryColor;
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
+          padding: const EdgeInsets.only(bottom: 20.0),
           child: GestureDetector(
-            onTap: () => _showDeleteDialog(context, cubit, ticket),
+            onTap: () => _showDeleteDialog(context, cubit, ticket, theme),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(48),
                 boxShadow: [
-                  BoxShadow(
-                    color: AppColors.darkColor.withAlpha(40),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
+                  // إظهار الظل في اللايت مود فقط عشان الدارك مود يكون Clean
+                  if (theme.brightness == Brightness.light)
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(48),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. الصورة الخاصة بالخدمة مع الـ Badges فوقها بشكل شيك
+                    // 1. الصورة الخاصة بالخدمة مع الـ Badges
                     Stack(
                       children: [
                         Image(
-                          height: 140,
+                          height: 150,
                           width: double.infinity,
                           image: NetworkImage(ticket.uri),
                           fit: BoxFit.cover,
                         ),
-                        // تظليل خفيف فوق الصورة عشان الكلام والـ Badges تبان
                         Positioned.fill(
                           child: Container(
                             decoration: BoxDecoration(
@@ -157,8 +173,8 @@ class BookingViewScreen extends StatelessWidget {
                         ),
                         // رقم التذكرة (Top Left)
                         Positioned(
-                          top: 12,
-                          left: 12,
+                          top: 16,
+                          left: 16,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -166,7 +182,7 @@ class BookingViewScreen extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
@@ -190,21 +206,21 @@ class BookingViewScreen extends StatelessWidget {
                         ),
                         // حالة التذكرة (Top Right)
                         Positioned(
-                          top: 12,
-                          right: 12,
+                          top: 16,
+                          right: 16,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: statusColor,
-                              borderRadius: BorderRadius.circular(8),
+                              color: statusColor.withAlpha(180),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              ticket.status.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
+                              ticket.status,
+                              style:  TextStyle(
+                                color: Colors.white.withAlpha(200),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
                                 letterSpacing: 0.5,
@@ -217,15 +233,14 @@ class BookingViewScreen extends StatelessWidget {
 
                     // 2. تفاصيل التذكرة بالأسفل
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // اسم المكان والخدمة
                           Text(
                             ticket.bussinessName,
                             style: TextStyle(
-                              color: AppColors.primaryColor,
+                              color: theme.primaryColor,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -233,17 +248,16 @@ class BookingViewScreen extends StatelessWidget {
                           const Gap(4),
                           Text(
                             ticket.serviceName,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade700,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           const Gap(12),
-                          // خط فاصل منقط أو خفيف بين الداتا
-                          Divider(color: Colors.grey.shade200, height: 1),
+                          // خط فاصل يعتمد على الثيم
+                          Divider(
+                              color: theme.dividerColor.withOpacity(0.3),
+                              height: 1),
                           const Gap(12),
-                          // التاريخ والوقت بشكل منظم جداً في Row
                           Row(
                             children: [
                               Expanded(
@@ -252,15 +266,15 @@ class BookingViewScreen extends StatelessWidget {
                                     Icon(
                                       Icons.calendar_today_rounded,
                                       size: 16,
-                                      color: Colors.grey.shade500,
+                                      color: AppColors.grayColor
                                     ),
                                     const Gap(8),
                                     Text(
                                       formattedDate,
-                                      style: TextStyle(
+                                      style: theme.textTheme.bodyMedium?.copyWith(
                                         fontSize: 13,
-                                        color: Colors.grey.shade600,
                                         fontWeight: FontWeight.w500,
+                                        color: AppColors.grayColor
                                       ),
                                     ),
                                   ],
@@ -271,15 +285,15 @@ class BookingViewScreen extends StatelessWidget {
                                   Icon(
                                     Icons.access_time_rounded,
                                     size: 16,
-                                    color: Colors.grey.shade500,
+                                    color: AppColors.grayColor,
                                   ),
                                   const Gap(8),
                                   Text(
                                     formattedTime,
-                                    style: TextStyle(
+                                    style: theme.textTheme.bodyMedium?.copyWith(
                                       fontSize: 13,
-                                      color: Colors.grey.shade600,
                                       fontWeight: FontWeight.w500,
+                                      color: AppColors.grayColor
                                     ),
                                   ),
                                 ],
@@ -301,59 +315,55 @@ class BookingViewScreen extends StatelessWidget {
 
   // 🛠️ دالة الدايلوج الاحترافية المحدثة
   void _showDeleteDialog(
-    BuildContext context,
-    BookingViewCubit cubit,
-    var ticket,
-  ) {
+      BuildContext context,
+      BookingViewCubit cubit,
+      var ticket,
+      ThemeData theme, // استقبال الثيم لضبط ألوان الدايلوج
+      ) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
-          backgroundColor: AppColors.lightColor,
-          contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          backgroundColor: theme.scaffoldBackgroundColor, // يتغير حسب المود
+          elevation: 10,
+          contentPadding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: Colors.redAccent.withOpacity(0.1), // شفافية تناسب الدارك واللايت
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.delete_forever_rounded,
-                  color: Colors.redAccent,
-                  size: 40,
+                  Icons.delete_outline_rounded, // أيقونة أرق وأكثر عصرية
+                  color: Colors.red,
+                  size: 30,
                 ),
               ),
-              const Gap(20),
+              const Gap(24),
               Text(
                 "Delete Booking?",
-                style: TextStyle(
-                  fontSize: 18,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
                 ),
               ),
-              const Gap(8),
+              const Gap(12),
               Text(
                 "Are you sure you want to cancel this booking? This action cannot be undone.",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
-                  height: 1.4,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
               ),
             ],
           ),
           actionsPadding: const EdgeInsets.symmetric(
             horizontal: 24,
-            vertical: 12,
+            vertical: 20,
           ),
           actions: [
             Row(
@@ -361,17 +371,17 @@ class BookingViewScreen extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: theme.dividerColor),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     onPressed: () => AppNavigations.pop(context),
                     child: Text(
                       "Cancel",
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: theme.textTheme.bodyLarge?.color,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -381,12 +391,12 @@ class BookingViewScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     onPressed: () {
@@ -395,13 +405,13 @@ class BookingViewScreen extends StatelessWidget {
 
                       Fluttertoast.showToast(
                         msg: "Deleted Successfully",
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: theme.primaryColor,
                         textColor: Colors.white,
                       );
                     },
                     child: const Text(
                       "Delete",
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -413,3 +423,4 @@ class BookingViewScreen extends StatelessWidget {
     );
   }
 }
+

@@ -28,6 +28,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+
   void _scrollToBottom() {
 
     if (!mounted) return;
@@ -50,6 +51,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocProvider(
@@ -64,7 +66,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
           var cubit = BlocProvider.of<ChatBotCubit>(context);
 
           return Scaffold(
-            backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
+            backgroundColor: isDark ? const Color(0xFF0B0F14) : const Color(0xFFF8F9FA),
             appBar: AppBar(
               backgroundColor: isDark ? Colors.transparent : Colors.white,
               elevation: 0,
@@ -117,7 +119,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   if (state is ChatBotLoadingState)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5))),
+                      child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5 , color: AppColors.primaryColor,))),
                     ),
                   _buildInputBar(cubit, state, isDark),
                 ],
@@ -159,7 +161,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                 if (!msg.isUser) ...[
                   CircleAvatar(
                     radius: 12,
-                    backgroundColor: isDark ? Colors.grey.shade800 : AppColors.neutralColor10,
+                    backgroundColor: isDark ? Color(0xFF172026).withAlpha(200) : AppColors.neutralColor10,
                     child: const Icon(Icons.smart_toy_outlined, size: 14, color: AppColors.primaryColor),
                   ),
                   const SizedBox(width: 6),
@@ -170,7 +172,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                     decoration: BoxDecoration(
                       color: msg.isUser
                           ? AppColors.primaryColor
-                          : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+                          : (isDark ? const Color(0xFF172026) : Colors.white),
                       borderRadius: dynamicRadius,
                       boxShadow: msg.isUser
                           ? []
@@ -231,6 +233,8 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
 
   // 🌟 كروت اقتراحات الخدمات (صورة + اسم + زر تفاصيل وشو مور)
   Widget _buildSuggestedServicesList(List<dynamic> services) {
+    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 190,
       margin: const EdgeInsets.only(top: 8, bottom: 4),
@@ -243,7 +247,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             width: 140,
             margin: const EdgeInsets.only(right: 10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -279,7 +283,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.textStyle14.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppColors.darkColor,
+                      color: isDark? AppColors.lightColor: AppColors.darkColor,
                     ),
                   ),
                 ),
@@ -346,7 +350,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        color: isDark ? const Color(0xFF172026) : Colors.white,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -651,7 +655,7 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
                           shape: const StadiumBorder(),
                         ),
                         onPressed: isLoading ? null : () => widget.chatCubit.sendTextMessage("Cancel booking and change the schedule"),
-                        child: Text("Edit / Cancel", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.w600)),
+                        child: Text("Cancel", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],

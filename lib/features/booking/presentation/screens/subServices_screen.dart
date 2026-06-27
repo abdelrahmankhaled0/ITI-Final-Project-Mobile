@@ -97,59 +97,62 @@ class SubServicesScreen extends StatelessWidget {
               }
             },
             builder: (context, state) {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18.0,
-                  vertical: 12.0,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 56,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
+              return SafeArea(
+                child: Container(
+                  color: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18.0,
+                    vertical: 12.0,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 56,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                              elevation: 6,
+                              shadowColor: AppColors.darkColor.withOpacity(0.25),
                             ),
-                            elevation: 6,
-                            shadowColor: AppColors.darkColor.withOpacity(0.25),
+                            onPressed: state is BookingLoading
+                                ? null
+                                : () {
+                                    if (serviceData.isNotEmpty) {
+                                      context.read<BookingCubit>().bookQueuePlace(
+                                        businessId: businessId,
+                                        serviceId: serviceId,
+                                        serviceName: serviceName,
+                                        avgServiceTime: waitTime,
+                                        notificationCubit: context
+                                            .read<NotificationCubit>(),
+                                      );
+                                    }
+                                  },
+                            child: state is BookingLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : Text(
+                                    "Book Now",
+                                    style: AppTextStyles.textStyle16.copyWith(
+                                      color: AppColors.lightColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
-                          onPressed: state is BookingLoading
-                              ? null
-                              : () {
-                                  if (serviceData.isNotEmpty) {
-                                    context.read<BookingCubit>().bookQueuePlace(
-                                      businessId: businessId,
-                                      serviceId: serviceId,
-                                      serviceName: serviceName,
-                                      avgServiceTime: waitTime,
-                                      notificationCubit: context
-                                          .read<NotificationCubit>(),
-                                    );
-                                  }
-                                },
-                          child: state is BookingLoading
-                              ? const SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
-                              : Text(
-                                  "Book Now",
-                                  style: AppTextStyles.textStyle16.copyWith(
-                                    color: AppColors.lightColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
@@ -158,7 +161,10 @@ class SubServicesScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
+                scrolledUnderElevation: 0,
+                surfaceTintColor: Colors.transparent,
                 elevation: 0,
+                backgroundColor: Colors.transparent,
                 pinned: true,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
@@ -172,9 +178,9 @@ class SubServicesScreen extends StatelessWidget {
                   ),
                 ),
                 centerTitle: true,
-                actions: [
-                  IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-                ],
+                // actions: [
+                //   IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+                // ],
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -283,7 +289,7 @@ class SubServicesScreen extends StatelessWidget {
                       ],
                       if (aboutText.isNotEmpty) ...[
                         Text(
-                          "About the Clinic",
+                          "About ",
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -304,7 +310,7 @@ class SubServicesScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       _buildStaticMapCard(lat, lng, context),
-                      const SizedBox(height: 90),
+                      const SizedBox(height: 50),
                     ],
                   ),
                 ),

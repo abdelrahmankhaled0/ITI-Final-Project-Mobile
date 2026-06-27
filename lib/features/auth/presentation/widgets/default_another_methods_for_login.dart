@@ -10,49 +10,52 @@ class DefaultAnthorMethodsForLogin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      spacing: 10,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 1,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              fixedSize: const Size(0, 50),
-              backgroundColor: AppColors.neutralColor9,
-              overlayColor: AppColors.lightColor,
-            ),
-            onPressed: () {
-              cubit.signInWithGoogle();
-            },
-            child: Text(
-              "Google",
-              style: AppTextStyles.textStyle16.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor1,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        spacing: 15,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 1,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(0, 50),
+                backgroundColor: AppColors.neutralColor9,
+                overlayColor: AppColors.lightColor,
+              ),
+              onPressed: () {
+                cubit.signInWithGoogle();
+              },
+              child: Text(
+                "Google",
+                style: AppTextStyles.textStyle16.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor1,
+                ),
               ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 1,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              fixedSize: const Size(0, 50),
-              backgroundColor: AppColors.neutralColor9,
-              overlayColor: AppColors.primaryColor4,
-            ),
-            onPressed: () {},
-            child: Text(
-              "Apple",
-              style: AppTextStyles.textStyle16.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor1,
+          Expanded(
+            flex: 1,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(0, 50),
+                backgroundColor: AppColors.neutralColor9,
+                overlayColor: AppColors.primaryColor4,
+              ),
+              onPressed: () {},
+              child: Text(
+                "Apple",
+                style: AppTextStyles.textStyle16.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor1,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

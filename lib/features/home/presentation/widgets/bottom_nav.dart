@@ -38,7 +38,7 @@ class BottomNav extends StatelessWidget {
     final int selectedIndex = _calculateSelectedIndex(context);
 
     return Scaffold(
-      // backgroundColor: AppColors.lightColor,
+      extendBody: true,
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
