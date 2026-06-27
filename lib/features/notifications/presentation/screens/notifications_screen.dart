@@ -23,20 +23,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        // backgroundColor: AppColors.primaryColor,
         elevation: 0,
-        title: Text('Notifications'),
-
-        actions: [
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
+        title: const Text('Notifications'), // 🌟 رجع زي ما كان بالظبط
+        actions: const [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Icon(Icons.notifications),
+            padding: EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.notifications), // 🌟 رجع زي ما كان بالظبط
           ),
         ],
       ),
-
       body: BlocBuilder<NotificationCubit, NotificationStates>(
         builder: (context, state) {
           if (state is NotificationLoadingState) {
@@ -54,11 +53,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
             return ListView.builder(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.only(left: 16.0, top: 12 , right: 16.0 , bottom: 80),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final item = notifications[index];
-                return _buildNotificationCard(item);
+                return _buildNotificationCard(item, context);
               },
             );
           }
@@ -69,36 +68,44 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _buildNotificationCard(dynamic item) {
-    final bool isSuccess =
-        item.title.contains('Successfully') ||
+  Widget _buildNotificationCard(dynamic item, BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
+    // الحفاظ على لوجيك الألوان الخاص بكِ
+    final bool isSuccess = item.title.contains('Successfully') ||
         item.title.contains('turn') ||
         item.title.contains('Completed');
+
     final Color iconBgColor = isSuccess
         ? const Color(0xE3E8FFF3)
         : AppColors.primaryColor.withOpacity(0.1);
+
     final Color iconColor = isSuccess
         ? Colors.green.shade700
         : AppColors.primaryColor;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        color: theme.cardColor, // يأخذ لون الكارت من الثيم تلقائياً
+        borderRadius: BorderRadius.circular(48),
+        boxShadow: isLight
+            ? [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: AppColors.darkColor.withAlpha(30), // شادو ناعم جداً للعين
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
-        ],
+        ]
+            : null, // مفيش شادو في الدارك مود ليكون مريح للعين
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 🌟 الأيقونة
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -114,72 +121,86 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
             ),
             const SizedBox(width: 14),
+            // 🌟 تفاصيل الإشعار
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // العنوان
                   Text(
                     item.title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if ((item.serviceName ?? '').isNotEmpty)
-                        Text(
-                          'Service: ${item.serviceName}',
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: AppColors.grayColor,
-                              ),
-                        ),
-                      if ((item.businessName ?? '').isNotEmpty)
-                        Text(
-                          'Business: ${item.businessName}',
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: AppColors.grayColor,
-                              ),
-                        ),
-                    ],
-                  ),
+                  const SizedBox(height: 8),
 
-                  const SizedBox(height: 8),
-                  Text(
-                    item.body,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(),
-                  ),
-                  const SizedBox(height: 8),
-                  if ((item.serviceName ?? '').isNotEmpty ||
-                      (item.businessName ?? '').isNotEmpty)
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      key: const Key('time_align'),
-                      child: Text(
-                        item.dateTime is String
-                            ? item.dateTime
-                            : DateFormat(
-                                'EEE, MMM d • hh:mm a',
-                              ).format(item.dateTime),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
+                  // 🌟 اسم الخدمة واسم المكان (تم تنسيقهم كـ Tags مريحة للعين)
+                  if ((item.serviceName ?? '').isNotEmpty || (item.businessName ?? '').isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Wrap(
+                        spacing: 8, // المسافة الأفقية بين التاجز
+                        runSpacing: 6, // المسافة الرأسية لو نزلوا سطر جديد
+                        children: [
+                          if ((item.serviceName ?? '').isNotEmpty)
+                            _buildBadge('Service: ${item.serviceName}', isLight),
+                          if ((item.businessName ?? '').isNotEmpty)
+                            _buildBadge('Business: ${item.businessName}', isLight),
+                        ],
                       ),
                     ),
+
+                  // الرسالة الأساسية
+                  Text(
+                    item.body,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isLight ? Colors.grey.shade700 : Colors.grey.shade400,
+                      height: 1.4, // تباعد الأسطر المريح للقراءة
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // الوقت والتاريخ
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    key: const Key('time_align'),
+                    child: Text(
+                      item.dateTime is String
+                          ? item.dateTime
+                          : DateFormat('EEE, MMM d • hh:mm a').format(item.dateTime),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // 🌟 ويدجت صغيرة بتعمل تصميم الـ Badge (التاج) عشان تفصل بيانات الخدمة عن نص الرسالة
+  Widget _buildBadge(String text, bool isLight) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isLight ? Colors.grey.shade100 : const Color(0xFF232E37), // لون رمادي خفيف جداً
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: isLight ? Colors.grey.shade600 : Colors.grey.shade400,
         ),
       ),
     );
@@ -206,7 +227,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           const Text(
             'No notifications yet',
             style: TextStyle(
-              fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.grey,
@@ -216,7 +236,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Text(
             'Active queue updates will appear here.',
             style: TextStyle(
-              fontFamily: 'Cairo',
               fontSize: 12,
               color: Colors.grey.shade400,
             ),

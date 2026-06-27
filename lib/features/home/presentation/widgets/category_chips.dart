@@ -16,6 +16,9 @@ class CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // 🌟 تعريف الثيم
+    final isDark = theme.brightness == Brightness.dark;
+
     return SizedBox(
       height: 38,
       child: ListView.separated(
@@ -24,6 +27,17 @@ class CategoryChips extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final isSelected = categories[index] == selectedCategory;
+
+          // 🌟 تحديد الألوان ديناميكياً
+          final backgroundColor = isSelected
+              ? AppColors.primaryColor
+              : (isDark ? theme.cardColor : AppColors
+              .lightgrey); // لون الدارك مود هو لون الكارد
+
+          final textColor = isSelected
+              ? Colors.white
+              : (isDark ? Colors.white70 : AppColors.neutralColor3);
+
           return GestureDetector(
             onTap: () {
               context.read<HomeCubit>().filterByCategory(categories[index]);
@@ -32,17 +46,14 @@ class CategoryChips extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primaryColor : AppColors.lightgrey,
+                color: backgroundColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? AppColors.primaryColor : AppColors.lightgrey,
-                  width: 1.5,
-                ),
               ),
               child: Text(
                 categories[index],
                 style: AppTextStyles.textStyle14.copyWith(
-                  color: isSelected ? AppColors.lightColor : AppColors.neutralColor3,
+                  color: textColor,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
             ),

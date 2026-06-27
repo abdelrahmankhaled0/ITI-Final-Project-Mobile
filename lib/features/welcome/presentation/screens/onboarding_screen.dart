@@ -81,7 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             const Gap(20),
                             Text(
                               item.title,
-                              style: Theme.of(context).textTheme.headlineLarge,
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(color:AppColors.primaryColor ),
                             ),
                             const Gap(10),
                             Text(

@@ -140,31 +140,31 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         // Title "Near you"
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Near you",
-                                  style: Theme.of(context).textTheme.bodyLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 24,
-                                      ),
-                                ),
-                                const Spacer(),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.location_on_outlined,
-                                    color: AppColors.neutralColor5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        // SliverToBoxAdapter(
+                        //   child: Padding(
+                        //     padding: const EdgeInsets.symmetric(horizontal: 20),
+                        //     child: Row(
+                        //       children: [
+                        //         Text(
+                        //           "Near you",
+                        //           style: Theme.of(context).textTheme.bodyLarge
+                        //               ?.copyWith(
+                        //                 fontWeight: FontWeight.bold,
+                        //                 fontSize: 24,
+                        //               ),
+                        //         ),
+                        //         const Spacer(),
+                        //         IconButton(
+                        //           onPressed: () {},
+                        //           icon: Icon(
+                        //             Icons.location_on_outlined,
+                        //             color: AppColors.neutralColor5,
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
                           sliver: SliverList.builder(
@@ -176,6 +176,9 @@ class HomeScreen extends StatelessWidget {
                               );
                             },
                           ),
+                        ),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 90), // ارتفاع يغطي مساحة البار السفلي
                         ),
                       ],
                     );
