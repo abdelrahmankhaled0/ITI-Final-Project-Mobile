@@ -17,15 +17,18 @@ class HomeHeader extends StatelessWidget {
       color: Colors.transparent,
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.primaryColor5,
-            backgroundImage: profileImage != null
-                ? NetworkImage(profileImage!)
-                : null,
-            child: profileImage == null
-                ? const Icon(Icons.person, color: AppColors.lightColor)
-                : null,
+          InkWell(
+             onTap: (){context.go('/profile');},
+            child: CircleAvatar(
+              radius: 25,
+              backgroundColor: AppColors.primaryColor5,
+              backgroundImage: profileImage != null
+                  ? NetworkImage(profileImage!)
+                  : null,
+              child: profileImage == null
+                  ? const Icon(Icons.person, color: AppColors.lightColor)
+                  : null,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
