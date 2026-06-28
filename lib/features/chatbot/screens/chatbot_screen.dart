@@ -28,9 +28,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-
   void _scrollToBottom() {
-
     if (!mounted) return;
 
     if (_scrollController.hasClients) {
@@ -51,7 +49,6 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocProvider(
@@ -59,20 +56,28 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       child: BlocConsumer<ChatBotCubit, ChatBotState>(
         listener: (context, state) {
           if (state is ChatBotSuccessState) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _scrollToBottom(),
+            );
           }
         },
         builder: (context, state) {
           var cubit = BlocProvider.of<ChatBotCubit>(context);
 
           return Scaffold(
-            backgroundColor: isDark ? const Color(0xFF0B0F14) : const Color(0xFFF8F9FA),
+            backgroundColor: isDark
+                ? const Color(0xFF0B0F14)
+                : const Color(0xFFF8F9FA),
             appBar: AppBar(
               backgroundColor: isDark ? Colors.transparent : Colors.white,
               elevation: 0,
               scrolledUnderElevation: 1,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded, color: isDark ? Colors.white : AppColors.darkColor, size: 20),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: isDark ? Colors.white : AppColors.darkColor,
+                  size: 20,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
               title: Row(
@@ -81,14 +86,20 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   CircleAvatar(
                     radius: 16,
                     backgroundColor: AppColors.primaryColor.withOpacity(0.15),
-                    child: const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryColor, size: 18),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: AppColors.primaryColor,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Text(
                     "Tabourq AI",
                     style: AppTextStyles.textStyle16.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.lightColor : AppColors.darkColor,
+                      color: isDark
+                          ? AppColors.lightColor
+                          : AppColors.darkColor,
                     ),
                   ),
                 ],
@@ -101,7 +112,10 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   Expanded(
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       itemCount: cubit.messages.length,
                       itemBuilder: (context, index) {
                         final msg = cubit.messages[index];
@@ -119,7 +133,16 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   if (state is ChatBotLoadingState)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5 , color: AppColors.primaryColor,))),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
                     ),
                   _buildInputBar(cubit, state, isDark),
                 ],
@@ -134,17 +157,17 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   Widget _buildMessageBubble(ChatMessageModel msg, bool isDark) {
     final dynamicRadius = msg.isUser
         ? const BorderRadius.only(
-      topLeft: Radius.circular(20),
-      bottomLeft: Radius.circular(20),
-      topRight: Radius.circular(20),
-      bottomRight: Radius.circular(4),
-    )
+            topLeft: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(4),
+          )
         : const BorderRadius.only(
-      topRight: Radius.circular(20),
-      bottomRight: Radius.circular(20),
-      topLeft: Radius.circular(20),
-      bottomLeft: Radius.circular(4),
-    );
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+            bottomLeft: Radius.circular(4),
+          );
 
     return Align(
       alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -161,14 +184,23 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                 if (!msg.isUser) ...[
                   CircleAvatar(
                     radius: 12,
-                    backgroundColor: isDark ? Color(0xFF172026).withAlpha(200) : AppColors.neutralColor10,
-                    child: const Icon(Icons.smart_toy_outlined, size: 14, color: AppColors.primaryColor),
+                    backgroundColor: isDark
+                        ? Color(0xFF172026).withAlpha(200)
+                        : AppColors.neutralColor10,
+                    child: const Icon(
+                      Icons.smart_toy_outlined,
+                      size: 14,
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                   const SizedBox(width: 6),
                 ],
                 Flexible(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: msg.isUser
                           ? AppColors.primaryColor
@@ -176,51 +208,76 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                       borderRadius: dynamicRadius,
                       boxShadow: msg.isUser
                           ? []
-                          : [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2))],
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: msg.type == MessageType.image
                         ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(File(msg.mediaPath!), width: 220, height: 220, fit: BoxFit.cover),
-                    )
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              File(msg.mediaPath!),
+                              width: 220,
+                              height: 220,
+                              fit: BoxFit.cover,
+                            ),
+                          )
                         : msg.type == MessageType.voice
                         ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.play_circle_filled_rounded,
-                          color: msg.isUser ? AppColors.lightColor : AppColors.primaryColor,
-                          size: 28,
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 80,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: msg.isUser ? Colors.white54 : Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Voice",
-                          style: AppTextStyles.textStyle14.copyWith(color: msg.isUser ? AppColors.lightColor : AppColors.darkColor),
-                        )
-                      ],
-                    )
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.play_circle_filled_rounded,
+                                color: msg.isUser
+                                    ? AppColors.lightColor
+                                    : AppColors.primaryColor,
+                                size: 28,
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 80,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: msg.isUser
+                                      ? Colors.white54
+                                      : Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Voice",
+                                style: AppTextStyles.textStyle14.copyWith(
+                                  color: msg.isUser
+                                      ? AppColors.lightColor
+                                      : AppColors.darkColor,
+                                ),
+                              ),
+                            ],
+                          )
                         : Text(
-                      msg.message!,
-                      style: AppTextStyles.textStyle14.copyWith(
-                        color: msg.isUser ? AppColors.lightColor : (isDark ? AppColors.lightColor : AppColors.darkColor),
-                        height: 1.3,
-                      ),
-                    ),
+                            msg.message!,
+                            style: AppTextStyles.textStyle14.copyWith(
+                              color: msg.isUser
+                                  ? AppColors.lightColor
+                                  : (isDark
+                                        ? AppColors.lightColor
+                                        : AppColors.darkColor),
+                              height: 1.3,
+                            ),
+                          ),
                   ),
                 ),
               ],
             ),
             // 🌟 عرض كروت الخدمات المقترحة أسفل بالونة الرسالة النصية للبوت مباشرة
-            if (!msg.isUser && msg.suggestedServices != null && msg.suggestedServices!.isNotEmpty)
+            if (!msg.isUser &&
+                msg.suggestedServices != null &&
+                msg.suggestedServices!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(left: 30),
                 child: _buildSuggestedServicesList(msg.suggestedServices!),
@@ -254,7 +311,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   color: Colors.black.withOpacity(0.04),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
-                )
+                ),
               ],
               border: Border.all(color: Colors.grey.withOpacity(0.15)),
             ),
@@ -262,7 +319,9 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Image.network(
                     service['serviceImage'] ?? 'https://placedog.net/500',
                     height: 85,
@@ -271,7 +330,10 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                     errorBuilder: (context, error, stackTrace) => Container(
                       height: 85,
                       color: Colors.grey.shade200,
-                      child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                      child: const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
@@ -283,26 +345,34 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.textStyle14.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isDark? AppColors.lightColor: AppColors.darkColor,
+                      color: isDark
+                          ? AppColors.lightColor
+                          : AppColors.darkColor,
                     ),
                   ),
                 ),
                 const Spacer(),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
                   child: SizedBox(
                     width: double.infinity,
                     height: 28,
-                    child:ElevatedButton(
+                    child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
                       onPressed: () {
                         final String bId = service['businessId'] ?? '';
                         final String sId = service['serviceId'] ?? '';
-                        final String sName = service['serviceName'] ?? 'Service Details';
+                        final String sName =
+                            service['serviceName'] ?? 'Service Details';
 
                         final String lat = service['lat']?.toString() ?? '';
                         final String lng = service['lng']?.toString() ?? '';
@@ -332,11 +402,14 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                       },
                       child: Text(
                         "Show More",
-                        style: AppTextStyles.textStyle14.copyWith(color: Colors.white, fontSize: 11),
+                        style: AppTextStyles.textStyle14.copyWith(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           );
@@ -363,7 +436,11 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.image_outlined, color: AppColors.primaryColor, size: 22),
+            icon: const Icon(
+              Icons.image_outlined,
+              color: AppColors.primaryColor,
+              size: 22,
+            ),
             onPressed: () => cubit.sendImage(ImageSource.gallery),
           ),
           GestureDetector(
@@ -378,12 +455,18 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: state is ChatBotRecordingState ? Colors.red.withOpacity(0.2) : Colors.transparent,
+                color: state is ChatBotRecordingState
+                    ? Colors.red.withOpacity(0.2)
+                    : Colors.transparent,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                state is ChatBotRecordingState ? Icons.mic_rounded : Icons.mic_none_rounded,
-                color: state is ChatBotRecordingState ? Colors.red : AppColors.primaryColor,
+                state is ChatBotRecordingState
+                    ? Icons.mic_rounded
+                    : Icons.mic_none_rounded,
+                color: state is ChatBotRecordingState
+                    ? Colors.red
+                    : AppColors.primaryColor,
                 size: 24,
               ),
             ),
@@ -399,9 +482,16 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
                 filled: false,
-                hintText: state is ChatBotRecordingState ? "Listening..." : "Ask about a booking...",
-                hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                hintText: state is ChatBotRecordingState
+                    ? "Listening..."
+                    : "Ask about a booking...",
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 8,
+                ),
                 border: InputBorder.none,
               ),
             ),
@@ -417,7 +507,11 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             child: const CircleAvatar(
               radius: 18,
               backgroundColor: AppColors.primaryColor,
-              child: Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 20),
+              child: Icon(
+                Icons.arrow_upward_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -446,7 +540,8 @@ class _BookingConfirmationCard extends StatefulWidget {
   });
 
   @override
-  State<_BookingConfirmationCard> createState() => _BookingConfirmationCardState();
+  State<_BookingConfirmationCard> createState() =>
+      _BookingConfirmationCardState();
 }
 
 class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
@@ -454,7 +549,10 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
   // takes over and BookingCubit's own BookingLoading state drives the UI.
   bool _isFetchingService = false;
 
-  void _showStatusToast({required String message, required Color backgroundColor}) {
+  void _showStatusToast({
+    required String message,
+    required Color backgroundColor,
+  }) {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
@@ -519,11 +617,18 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
       children: [
         Icon(icon, size: 16, color: isDark ? Colors.white60 : Colors.black45),
         const SizedBox(width: 8),
-        Text("$label: ", style: AppTextStyles.textStyle14.copyWith(color: isDark ? Colors.white60 : Colors.black54)),
+        Text(
+          "$label: ",
+          style: AppTextStyles.textStyle14.copyWith(
+            color: isDark ? Colors.white60 : Colors.black54,
+          ),
+        ),
         Expanded(
           child: Text(
             value,
-            style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold),
+            style: AppTextStyles.textStyle14.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -540,7 +645,8 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
       listener: (context, state) {
         if (state is BookingSuccess) {
           _showStatusToast(
-            message: "Successfully booked! Your number is: Q-${state.ticketCode}",
+            message:
+                "Successfully booked! Your number is: Q-${state.ticketCode}",
             backgroundColor: Colors.green.shade700,
           );
           widget.chatCubit.addAssistantMessage(
@@ -551,20 +657,25 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
             businessId: data['businessId'] ?? '',
             serviceId: data['serviceId'] ?? '',
             userTurnNumber: state.ticketCode,
+            ticketId: state.ticketId,
             avgServiceTime: state.avgServiceTime,
             notificationCubit: context.read<NotificationCubit>(),
             serviceName: state.serviceName,
             businessName: state.businessName,
           );
           _showStatusToast(
-            message: "You already have an active booking. Your ticket is Q-${state.ticketCode}.",
+            message:
+                "You already have an active booking. Your ticket is Q-${state.ticketCode}.",
             backgroundColor: Colors.orange.shade800,
           );
           widget.chatCubit.addAssistantMessage(
             "You already have an active ticket Q-${state.ticketCode} for ${state.serviceName} at ${state.businessName}.",
           );
         } else if (state is BookingFailure) {
-          _showStatusToast(message: state.errorMessage, backgroundColor: Colors.red.shade700);
+          _showStatusToast(
+            message: state.errorMessage,
+            backgroundColor: Colors.red.shade700,
+          );
         }
       },
       child: BlocBuilder<BookingCubit, BookingState>(
@@ -577,9 +688,16 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E2923) : const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.statusGreen.withOpacity(0.3), width: 1.5),
+              border: Border.all(
+                color: AppColors.statusGreen.withOpacity(0.3),
+                width: 1.5,
+              ),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), blurRadius: 12, offset: const Offset(0, 6))
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
               ],
             ),
             child: Column(
@@ -593,35 +711,60 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
                         color: AppColors.statusGreen.withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.check_circle_rounded, color: AppColors.statusGreen, size: 20),
+                      child: const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.statusGreen,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Text(
                       "Booking Match Found!",
-                      style: AppTextStyles.textStyle16.copyWith(fontWeight: FontWeight.bold, color: AppColors.statusGreen),
+                      style: AppTextStyles.textStyle16.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.statusGreen,
+                      ),
                     ),
                   ],
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1, thickness: 1, color: Color(0x1A000000)),
+                  child: Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: Color(0x1A000000),
+                  ),
                 ),
-                _buildCardRow(Icons.business_rounded, "Clinic", data['bussinessName'] ?? 'Unknown', isDark),
+                _buildCardRow(
+                  Icons.business_rounded,
+                  "Clinic",
+                  data['bussinessName'] ?? 'Unknown',
+                  isDark,
+                ),
                 const SizedBox(height: 10),
-                _buildCardRow(Icons.medical_services_rounded, "Service", data['serviceName'] ?? 'General Consultation', isDark),
+                _buildCardRow(
+                  Icons.medical_services_rounded,
+                  "Service",
+                  data['serviceName'] ?? 'General Consultation',
+                  isDark,
+                ),
                 const SizedBox(height: 10),
                 _buildCardRow(
                   Icons.access_time_filled_rounded,
                   "Requested Time",
                   data['bookingTime'] != null
-                      ? DateFormat('EEEE, MMM d - hh:mm a').format(DateTime.parse(data['bookingTime']))
+                      ? DateFormat(
+                          'EEEE, MMM d - hh:mm a',
+                        ).format(DateTime.parse(data['bookingTime']))
                       : 'As soon as possible',
                   isDark,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "You'll join the live queue — your actual turn depends on how many people are ahead of you when you confirm.",
-                  style: AppTextStyles.textStyle12.copyWith(color: isDark ? Colors.white38 : Colors.black38),
+                  style: AppTextStyles.textStyle12.copyWith(
+                    color: isDark ? Colors.white38 : Colors.black38,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -635,14 +778,25 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: const StadiumBorder(),
                         ),
-                        onPressed: isLoading ? null : () => _confirmBooking(context),
+                        onPressed: isLoading
+                            ? null
+                            : () => _confirmBooking(context),
                         child: isLoading
                             ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                        )
-                            : Text("Confirm Appointment", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : Text(
+                                "Confirm Appointment",
+                                style: AppTextStyles.textStyle14.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -654,8 +808,17 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: const StadiumBorder(),
                         ),
-                        onPressed: isLoading ? null : () => widget.chatCubit.sendTextMessage("Cancel booking and change the schedule"),
-                        child: Text("Cancel", style: AppTextStyles.textStyle14.copyWith(fontWeight: FontWeight.w600)),
+                        onPressed: isLoading
+                            ? null
+                            : () => widget.chatCubit.sendTextMessage(
+                                "Cancel booking and change the schedule",
+                              ),
+                        child: Text(
+                          "Cancel",
+                          style: AppTextStyles.textStyle14.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   ],

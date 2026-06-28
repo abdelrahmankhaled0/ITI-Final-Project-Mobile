@@ -31,10 +31,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<WelcomeCubit, WelcomeStates>(
       builder: (context, state) {
-        return SafeArea(
-          child: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
+        return Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SafeArea(
               child: Column(
                 children: [
                   Row(
@@ -81,7 +81,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             const Gap(20),
                             Text(
                               item.title,
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(color:AppColors.primaryColor ),
+                              style: Theme.of(context).textTheme.headlineLarge
+                                  ?.copyWith(color: AppColors.primaryColor),
                             ),
                             const Gap(10),
                             Text(

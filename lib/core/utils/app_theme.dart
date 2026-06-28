@@ -170,10 +170,6 @@
 //   }
 // }
 
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:taborq/core/utils/app_colors.dart';
@@ -187,8 +183,11 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.lightColor, // #FFFFFF
       primaryColor: AppColors.primaryColor,
       cardColor: Colors.white,
-
-
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.primaryColor,
+        selectionColor: AppColors.primaryColor.withOpacity(0.6),
+        selectionHandleColor: AppColors.primaryColor,
+      ),
 
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -205,14 +204,18 @@ class AppTheme {
           borderRadius: BorderRadius.circular(50),
           borderSide: BorderSide.none,
         ),
-        hintStyle: AppTextStyles.textStyle12.copyWith(color: AppColors.neutralColor4),
+        hintStyle: AppTextStyles.textStyle12.copyWith(
+          color: AppColors.neutralColor4,
+        ),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryColor,
           foregroundColor: AppColors.lightColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
         ),
       ),
     );
@@ -224,8 +227,13 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: const Color(0xFF0B0F14),
       primaryColor: AppColors.primaryColor,
-      cardColor:  const Color(0xFF172026),
+      cardColor: const Color(0xFF172026),
 
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.primaryColor,
+        selectionColor: AppColors.primaryColor.withOpacity(0.6),
+        selectionHandleColor: AppColors.primaryColor,
+      ),
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -243,11 +251,11 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryColor,
           foregroundColor: AppColors.lightColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
         ),
       ),
     );
   }
 }
-
-

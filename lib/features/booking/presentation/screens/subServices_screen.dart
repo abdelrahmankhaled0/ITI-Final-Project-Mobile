@@ -83,6 +83,7 @@ class SubServicesScreen extends StatelessWidget {
                   businessId: businessId,
                   serviceId: serviceId,
                   userTurnNumber: state.ticketCode,
+                  ticketId: state.ticketId,
                   avgServiceTime: state.avgServiceTime,
                   notificationCubit: context.read<NotificationCubit>(),
                   serviceName: state.serviceName,
@@ -116,20 +117,24 @@ class SubServicesScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(28),
                               ),
                               elevation: 6,
-                              shadowColor: AppColors.darkColor.withOpacity(0.25),
+                              shadowColor: AppColors.darkColor.withOpacity(
+                                0.25,
+                              ),
                             ),
                             onPressed: state is BookingLoading
                                 ? null
                                 : () {
                                     if (serviceData.isNotEmpty) {
-                                      context.read<BookingCubit>().bookQueuePlace(
-                                        businessId: businessId,
-                                        serviceId: serviceId,
-                                        serviceName: serviceName,
-                                        avgServiceTime: waitTime,
-                                        notificationCubit: context
-                                            .read<NotificationCubit>(),
-                                      );
+                                      context
+                                          .read<BookingCubit>()
+                                          .bookQueuePlace(
+                                            businessId: businessId,
+                                            serviceId: serviceId,
+                                            serviceName: serviceName,
+                                            avgServiceTime: waitTime,
+                                            notificationCubit: context
+                                                .read<NotificationCubit>(),
+                                          );
                                     }
                                   },
                             child: state is BookingLoading

@@ -6,12 +6,14 @@ class BookingLoading extends BookingState {}
 
 class BookingAlreadyBookedState extends BookingState {
   final int ticketCode;
+  final String ticketId;
   final String businessName;
   final String serviceName;
   final int avgServiceTime;
 
   BookingAlreadyBookedState({
     required this.ticketCode,
+    required this.ticketId,
     required this.businessName,
     required this.serviceName,
     required this.avgServiceTime,

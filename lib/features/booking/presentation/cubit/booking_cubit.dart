@@ -112,6 +112,7 @@ class BookingCubit extends Cubit<BookingState> {
         emit(
           BookingAlreadyBookedState(
             ticketCode: activeTicketNum,
+            ticketId: ticketDocId,
             businessName: businessName,
             serviceName: serviceName,
             avgServiceTime: avgServiceTime,
@@ -186,6 +187,7 @@ class BookingCubit extends Cubit<BookingState> {
         businessId: businessId,
         serviceId: serviceId,
         userTurnNumber: finalTicketCode,
+        ticketId: ticketDocId,
         avgServiceTime: avgServiceTime,
         notificationCubit: notificationCubit,
         serviceName: serviceName,
@@ -200,10 +202,47 @@ class BookingCubit extends Cubit<BookingState> {
 
   // Support multiple active ticket listeners (user may have tickets across services)
   final Map<String, StreamSubscription> _queueSubscriptions = {};
+  final Map<String, StreamSubscription> _ticketStatusSubscriptions = {};
+  final Map<String, bool> _isQueueListenerPrimed = {};
   final Map<String, bool> _movementNotifiedMap = {};
-  final Map<String, bool> _completedNotifiedMap = {};
+  final Map<String, bool> _yourTurnNotifiedMap = {};
+  final Map<String, bool> _serviceCompletedNotifiedMap = {};
   final Map<String, int> _lastNotifiedActiveTurnMap = {};
-  final Map<String, bool> _hasReachedYourTurnMap = {};
+  final Map<String, String?> _lastTicketStatusMap = {};
+
+  String _queueListenerKey({
+    required String businessId,
+    required String serviceId,
+    required int userTurnNumber,
+  }) {
+    return '${businessId}_${serviceId}_$userTurnNumber';
+  }
+
+  void _cancelAndCleanQueueListenerByKey(String key) {
+    _queueSubscriptions[key]?.cancel();
+    _ticketStatusSubscriptions[key]?.cancel();
+    _queueSubscriptions.remove(key);
+    _ticketStatusSubscriptions.remove(key);
+    _isQueueListenerPrimed.remove(key);
+    _movementNotifiedMap.remove(key);
+    _yourTurnNotifiedMap.remove(key);
+    _serviceCompletedNotifiedMap.remove(key);
+    _lastNotifiedActiveTurnMap.remove(key);
+    _lastTicketStatusMap.remove(key);
+  }
+
+  void cancelAndCleanQueueListener({
+    required String businessId,
+    required String serviceId,
+    required int userTurnNumber,
+  }) {
+    final key = _queueListenerKey(
+      businessId: businessId,
+      serviceId: serviceId,
+      userTurnNumber: userTurnNumber,
+    );
+    _cancelAndCleanQueueListenerByKey(key);
+  }
 
   void _triggerBookingCreatedNotification({
     required NotificationCubit notificationCubit,
@@ -223,7 +262,6 @@ class BookingCubit extends Cubit<BookingState> {
       Duration(minutes: peopleAhead * avgServiceTime),
     );
 
-    // Determine if appointment is today or tomorrow based on 3 PM cutoff
     final now = DateTime.now();
     final isTomorrow = now.hour >= 15;
     final dayLabel = isTomorrow ? "tomorrow" : "today";
@@ -233,64 +271,40 @@ class BookingCubit extends Cubit<BookingState> {
         'Current serving: Q-$currentInService. There are $peopleAhead people ahead of you. Your ticket Q-$ticketNumber at $businessName is confirmed. Expected $dayLabel around $formattedTime ($waitDurationText waiting time).';
 
     NotificationService().showNotification(id: 100, title: title, body: body);
+
+    // 👈 تمرير ترو أو فولس للـ isRead لتمييز الإشعار الجديد بنقطة في الـ UI
     notificationCubit.addNotification(
       title: title,
       body: body,
       serviceName: serviceName,
       businessName: businessName,
+      isRead: false, // الإشعار لسه جديد ومنور
     );
   }
 
-  /// Calculate the estimated service start time based on:
-  /// - The number of people ahead in the queue
-  /// - The average service time per person (in minutes)
-  /// - The dynamic base start time (which considers operating hours and 3 PM cutoff)
-  ///
-  /// Formula: Expected Turn Time = Base Start Time + (peopleAhead * avgServiceTime)
   DateTime _estimatedServiceStartTime(int ahead, int avgServiceTime) {
     final baseStartTime = _getQueueBaseStartTime();
-    // Expected service time = base time + waiting time for people ahead
     return baseStartTime.add(Duration(minutes: ahead * avgServiceTime));
   }
 
-  /// Get the dynamic base start time for queue calculations based on:
-  /// - Operating hours: 9:00 AM to 5:00 PM
-  /// - 3:00 PM (15:00) cutoff rule
-  ///
-  /// Returns:
-  /// - Tomorrow 9:00 AM if current time is >= 3:00 PM (15:00)
-  /// - Today 9:00 AM if current time is < 9:00 AM
-  /// - Current time (DateTime.now()) if between 9:00 AM and 3:00 PM
   DateTime _getQueueBaseStartTime() {
     final now = DateTime.now();
-
-    // If time is 3:00 PM or later, roll over to tomorrow 9:00 AM
     if (now.hour >= 15) {
       final tomorrow = now.add(const Duration(days: 1));
       return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 9, 0);
     }
-
-    // If time is before 9:00 AM, use today 9:00 AM as base
     final nineAMToday = DateTime(now.year, now.month, now.day, 9, 0);
     if (now.isBefore(nineAMToday)) {
       return nineAMToday;
     }
-
-    // If between 9:00 AM and 3:00 PM, use current live time
     return now;
   }
 
-  /// Format a duration into a human-readable string
-  /// Examples: "2 hr 30 mins", "45 mins", "1 hr"
   String _formatDuration(Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
-
-    if (hours > 0 && minutes > 0) {
-      return '$hours hr $minutes mins';
-    } else if (hours > 0) {
-      return '$hours hr';
-    }
+    if (hours > 0 && minutes > 0) return '$hours hr $minutes mins';
+    if (hours > 0) return '$hours hr';
     return '$minutes mins';
   }
 
@@ -298,21 +312,33 @@ class BookingCubit extends Cubit<BookingState> {
     required String businessId,
     required String serviceId,
     required int userTurnNumber,
+    required String ticketId,
     required int avgServiceTime,
     required NotificationCubit notificationCubit,
     required String serviceName,
     required String businessName,
   }) {
-    final key = '${businessId}_$serviceId';
-    _movementNotifiedMap[key] = false;
-    _completedNotifiedMap[key] = false;
-    _hasReachedYourTurnMap[key] = false;
-    _lastNotifiedActiveTurnMap[key] = -1;
-    // cancel existing subscription for this service if any
-    _queueSubscriptions[key]?.cancel();
+    final key = '${businessId}_${serviceId}_$userTurnNumber';
 
-    debugPrint(
-      "🎯 startQueueListener Started for Ticket Q-$userTurnNumber (key=$key)",
+    // الحماية الأمنية الأولى: التأكد من إغلاق أي بقايا للاستماع القديم قبل فتح الجديد
+    _cancelAndCleanQueueListenerByKey(key);
+
+    // تهيئة الـ Maps للمستخدم الحالي
+    _isQueueListenerPrimed[key] = false;
+    _movementNotifiedMap[key] = false;
+    _yourTurnNotifiedMap[key] = false;
+    _serviceCompletedNotifiedMap[key] = false;
+    _lastNotifiedActiveTurnMap[key] = -1;
+
+    _listenForTicketStatusChanges(
+      key: key,
+      businessId: businessId,
+      serviceId: serviceId,
+      ticketId: ticketId,
+      userTurnNumber: userTurnNumber,
+      notificationCubit: notificationCubit,
+      serviceName: serviceName,
+      businessName: businessName,
     );
 
     final sub = _firestore
@@ -322,66 +348,46 @@ class BookingCubit extends Cubit<BookingState> {
         .doc(serviceId)
         .snapshots()
         .listen((snapshot) {
-          debugPrint("⚡ Stream triggered! Snapshot exists: ${snapshot.exists}");
+          if (!snapshot.exists || snapshot.data() == null) return;
+          if (snapshot.metadata.isFromCache) return;
 
-          if (snapshot.exists && snapshot.data() != null) {
-            final raw = snapshot.data();
-            debugPrint('Service snapshot data for $key: $raw');
-            int currentlyInService = _toInt(
-              raw?['currentTicket'] ?? raw?['currentlyInService'],
-            );
-            int peopleAhead = userTurnNumber - currentlyInService;
-            int estimatedWaitingTime = peopleAhead * avgServiceTime;
-            final isInitialSnapshot = _lastNotifiedActiveTurnMap[key] == -1;
+          final raw = snapshot.data();
+          final int currentlyInService = _toInt(
+            raw?['currentTicket'] ?? raw?['currentlyInService'],
+          );
+          final int peopleAhead = userTurnNumber - currentlyInService;
+          final int estimatedWaitingTime = peopleAhead * avgServiceTime;
 
-            if (peopleAhead == 0) {
-              _hasReachedYourTurnMap[key] = true;
-            }
+          emit(
+            BookingQueueUpdated(
+              currentlyInService: currentlyInService,
+              peopleAhead: peopleAhead,
+              estimatedWaitingTime: estimatedWaitingTime,
+            ),
+          );
 
-            if (peopleAhead < 0 &&
-                (isInitialSnapshot || (_hasReachedYourTurnMap[key] ?? false))) {
-              _triggerCompletedNotification(
+          final bool isWarmup = !(_isQueueListenerPrimed[key] ?? false);
+          if (isWarmup) {
+            _isQueueListenerPrimed[key] = true;
+            _lastNotifiedActiveTurnMap[key] = currentlyInService;
+            return;
+          }
+
+          if (currentlyInService == _lastNotifiedActiveTurnMap[key]) {
+            return;
+          }
+
+          if (peopleAhead <= 0) {
+            if (!(_yourTurnNotifiedMap[key] ?? false)) {
+              _triggerYourTurnNotification(
                 notificationCubit: notificationCubit,
                 businessName: businessName,
                 serviceName: serviceName,
-                key: key,
               );
-              emit(BookingQueueCompleted());
-              _queueSubscriptions[key]?.cancel();
-              return;
+              _yourTurnNotifiedMap[key] = true;
             }
-
-            emit(
-              BookingQueueUpdated(
-                currentlyInService: currentlyInService,
-                peopleAhead: peopleAhead,
-                estimatedWaitingTime: estimatedWaitingTime,
-              ),
-            );
-
-            if (isInitialSnapshot) {
-              _lastNotifiedActiveTurnMap[key] = currentlyInService;
-            } else if (currentlyInService !=
-                (_lastNotifiedActiveTurnMap[key] ?? -1)) {
-              debugPrint(
-                "🔔 Triggering notification for Ticket Q-$userTurnNumber (key=$key)",
-              );
-              _triggerQueueUpdateNotification(
-                businessName: businessName,
-                serviceName: serviceName,
-                ticketNumber: userTurnNumber,
-                currentActive: currentlyInService,
-                ahead: peopleAhead,
-                waitingTime: estimatedWaitingTime,
-                notificationCubit: notificationCubit,
-                avgServiceTime: avgServiceTime,
-              );
-              _lastNotifiedActiveTurnMap[key] = currentlyInService;
-            }
-
-            if (estimatedWaitingTime <= 60 &&
-                estimatedWaitingTime > 30 &&
-                !_movementNotifiedMap[key]!) {
+          } else if (estimatedWaitingTime <= 60 && estimatedWaitingTime >= 30) {
+            if (!(_movementNotifiedMap[key] ?? false)) {
               _triggerMovementAlertNotification(
                 waitingTime: estimatedWaitingTime,
                 notificationCubit: notificationCubit,
@@ -390,20 +396,89 @@ class BookingCubit extends Cubit<BookingState> {
               );
               _movementNotifiedMap[key] = true;
             }
-
-            if (peopleAhead == 0 && !_completedNotifiedMap[key]!) {
-              _triggerYourTurnNotification(
-                notificationCubit: notificationCubit,
-                businessName: businessName,
-                serviceName: serviceName,
-              );
-              _completedNotifiedMap[key] = true;
-            }
+          } else {
+            _triggerQueueUpdateNotification(
+              businessName: businessName,
+              serviceName: serviceName,
+              ticketNumber: userTurnNumber,
+              currentActive: currentlyInService,
+              ahead: peopleAhead,
+              waitingTime: estimatedWaitingTime,
+              notificationCubit: notificationCubit,
+              avgServiceTime: avgServiceTime,
+            );
           }
+
+          _lastNotifiedActiveTurnMap[key] = currentlyInService;
         });
 
     _queueSubscriptions[key] = sub;
-    _lastNotifiedActiveTurnMap[key] = _lastNotifiedActiveTurnMap[key] ?? -1;
+  }
+
+  // 👈 دالة مراقبة حالة التذكرة - تم تعديلها لتمنع تماماً إشعار الاكتمال عند بداية التشغيل الخاطئ
+  void _listenForTicketStatusChanges({
+    required String key,
+    required String businessId,
+    required String serviceId,
+    required String ticketId,
+    required int userTurnNumber,
+    required NotificationCubit notificationCubit,
+    required String serviceName,
+    required String businessName,
+  }) {
+    final String? uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final sub = _firestore
+        .collection('Queues')
+        .doc(businessId)
+        .collection('services')
+        .doc(serviceId)
+        .collection('tickets')
+        .where('userId', isEqualTo: uid)
+        .snapshots()
+        .listen((snapshot) {
+          for (var change in snapshot.docChanges) {
+            if (change.type == DocumentChangeType.removed &&
+                change.doc.id == ticketId) {
+              _cancelAndCleanQueueListenerByKey(key);
+              return;
+            }
+
+            final data = change.doc.data();
+            if (data == null) continue;
+
+            final currentStatus = (data['status'] ?? 'pending')
+                .toString()
+                .toLowerCase();
+            final bool isInitial = !_lastTicketStatusMap.containsKey(key);
+
+            if (isInitial) {
+              // حفظ الحالة المبدئية فقط دون إطلاق أي إشعارات مزعجة
+              _lastTicketStatusMap[key] = currentStatus;
+              continue;
+            }
+
+            // ⚡ إشعار الاكتمال لا ينطلق إلا إذا تغيرت الحالة فعلياً وبشكل حقيقي إلى completed
+            if (currentStatus == 'completed' &&
+                _lastTicketStatusMap[key] != 'completed') {
+              _triggerCompletedNotification(
+                notificationCubit: notificationCubit,
+                businessName: businessName,
+                serviceName: serviceName,
+                key: key,
+              );
+            }
+
+            if (currentStatus == 'canceled' || currentStatus == 'deleted') {
+              _cancelAndCleanQueueListenerByKey(key);
+            }
+
+            _lastTicketStatusMap[key] = currentStatus;
+          }
+        });
+
+    _ticketStatusSubscriptions[key] = sub;
   }
 
   int _toInt(dynamic v) {
@@ -428,10 +503,8 @@ class BookingCubit extends Cubit<BookingState> {
     final isTomorrow = now.hour >= 15;
     final dayLabel = isTomorrow ? "tomorrow" : "today";
 
-    // Calculate expected service time based on people ahead
     final expectedTurnTime = _estimatedServiceStartTime(ahead, avgServiceTime);
     final formattedTime = DateFormat('h:mm a').format(expectedTurnTime);
-
     final remainingDuration = Duration(minutes: ahead * avgServiceTime);
     final waitDurationText = _formatDuration(remainingDuration);
 
@@ -445,6 +518,7 @@ class BookingCubit extends Cubit<BookingState> {
       body: body,
       serviceName: serviceName,
       businessName: businessName,
+      isRead: false,
     );
   }
 
@@ -464,6 +538,7 @@ class BookingCubit extends Cubit<BookingState> {
       body: body,
       serviceName: serviceName,
       businessName: businessName,
+      isRead: false,
     );
   }
 
@@ -482,6 +557,7 @@ class BookingCubit extends Cubit<BookingState> {
       body: body,
       serviceName: serviceName,
       businessName: businessName,
+      isRead: false,
     );
   }
 
@@ -492,8 +568,9 @@ class BookingCubit extends Cubit<BookingState> {
     String? key,
   }) {
     final alreadyNotified = key != null
-        ? (_completedNotifiedMap[key] ?? false)
+        ? (_serviceCompletedNotifiedMap[key] ?? false)
         : false;
+
     if (!alreadyNotified) {
       String title = "Service Completed! 🎉";
       String body =
@@ -505,23 +582,13 @@ class BookingCubit extends Cubit<BookingState> {
         body: body,
         serviceName: serviceName,
         businessName: businessName,
+        isRead: false, // إشعار اكتمال جديد غير مقروء ومميز
       );
-      if (key != null) _completedNotifiedMap[key] = true;
+      if (key != null) _serviceCompletedNotifiedMap[key] = true;
     }
   }
 
-  @override
-  Future<void> close() {
-    for (final s in _queueSubscriptions.values) {
-      s.cancel();
-    }
-    _authStateSub?.cancel();
-    return super.close();
-  }
-
-  /// Query user's active pending tickets and start queue listeners for them so
-  /// notifications are delivered even if the user didn't manually open the
-  /// related service screen or press "Book Now" in this session.
+  // 👈 دالة بدء التشغيل عند فتح التطبيق: تم تعديلها لتبحث فقط عن التذاكر الفعالة والـ pending وتتجاهل المنتهية تماماً لتجنب استدعاء إشعار الاكتمال فوراً
   Future<void> initListenersForUserActiveTickets(
     NotificationCubit notificationCubit,
   ) async {
@@ -532,11 +599,14 @@ class BookingCubit extends Cubit<BookingState> {
       final querySnapshot = await _firestore
           .collectionGroup('tickets')
           .where('userId', isEqualTo: uid)
-          .where('status', whereIn: ['pending', 'completed'])
+          .where(
+            'status',
+            isEqualTo: 'pending',
+          ) // 👈 تم التعديل هنا: نبحث عن الـ pending فقط
           .get();
 
       debugPrint(
-        'initListenersForUserActiveTickets: found ${querySnapshot.docs.length} tickets for user $uid',
+        'initListenersForUserActiveTickets: found ${querySnapshot.docs.length} active pending tickets for user $uid',
       );
 
       for (final doc in querySnapshot.docs) {
@@ -547,13 +617,7 @@ class BookingCubit extends Cubit<BookingState> {
         final String serviceName = data['serviceName'] ?? '';
         final String businessName =
             data['bussinessName'] ?? data['businessName'] ?? '';
-        final String ticketStatus = data['status'] ?? 'pending';
 
-        debugPrint(
-          'initListenersForUserActiveTickets: ticket Q-$ticketNumber for service $serviceId at business $businessId (serviceName=$serviceName)',
-        );
-
-        // try to read avgServiceTime from the service doc
         int avgServiceTime = 10;
         try {
           final serviceDoc = await _firestore
@@ -568,24 +632,13 @@ class BookingCubit extends Cubit<BookingState> {
           }
         } catch (_) {}
 
-        if (ticketStatus == 'completed') {
-          debugPrint(
-            'initListenersForUserActiveTickets: ticket Q-$ticketNumber already completed for service $serviceId at business $businessId',
-          );
-          _triggerCompletedNotification(
-            notificationCubit: notificationCubit,
-            businessName: businessName,
-            serviceName: serviceName,
-            key: '${businessId}_$serviceId',
-          );
-          continue;
-        }
-
-        // Start listener for this active ticket
+        // تشغيل الـ Listener للتذاكر الـ Pending فقط لتحديث حركة الطابور الحية
+        final String ticketId = doc.id;
         startQueueListener(
           businessId: businessId,
           serviceId: serviceId,
           userTurnNumber: ticketNumber,
+          ticketId: ticketId,
           avgServiceTime: avgServiceTime,
           notificationCubit: notificationCubit,
           serviceName: serviceName,
@@ -595,5 +648,16 @@ class BookingCubit extends Cubit<BookingState> {
     } catch (e) {
       debugPrint('Error initializing active ticket listeners: ${e.toString()}');
     }
+  }
+
+  @override
+  Future<void> close() {
+    for (final s in _queueSubscriptions.values) {
+      s.cancel();
+    }
+    for (final s in _ticketStatusSubscriptions.values) {
+      s.cancel();
+    }
+    return super.close();
   }
 }

@@ -25,7 +25,12 @@ class NotificationCubit extends Cubit<NotificationStates> {
         .listen(
           (snapshot) {
             final loadedNotifications = snapshot.docs
-                .map((doc) => NotificationModel.fromJson(doc.data()))
+                .map(
+                  (doc) => NotificationModel.fromJson(
+                    doc.data(),
+                    id: doc.id,
+                  ),
+                )
                 .toList();
 
             notificationsList
@@ -45,6 +50,7 @@ class NotificationCubit extends Cubit<NotificationStates> {
     required String body,
     required String serviceName,
     required String businessName,
+    required bool isRead,
   }) async {
     final newNotification = NotificationModel(
       title: title,
@@ -52,6 +58,7 @@ class NotificationCubit extends Cubit<NotificationStates> {
       serviceName: serviceName,
       businessName: businessName,
       dateTime: DateTime.now(),
+      isRead: false,
     );
 
     notificationsList.add(newNotification);
@@ -61,5 +68,20 @@ class NotificationCubit extends Cubit<NotificationStates> {
 
     emit(NotificationSuccessState(List.from(notificationsList)));
     await NotificationFirebaseService.saveNotification(newNotification);
+  }
+
+  Future<void> markAsRead(String notificationId) async {
+    if (notificationId.isEmpty) return;
+    await NotificationFirebaseService.markAsRead(notificationId);
+  }
+
+  Future<void> markAllAsRead() async {
+    await NotificationFirebaseService.markAllAsRead();
+  }
+
+  @override
+  Future<void> close() {
+    _notificationsSubscription?.cancel();
+    return super.close();
   }
 }

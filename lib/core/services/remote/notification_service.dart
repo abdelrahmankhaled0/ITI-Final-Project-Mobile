@@ -89,12 +89,35 @@ class NotificationFirebaseService {
   }
 
   static Future<void> markAsRead(String notificationId) async {
+    final uid = userId;
+    if (uid == null || notificationId.isEmpty) return;
+
     await _firestore
         .collection("users")
-        .doc(userId)
+        .doc(uid)
         .collection("notifications")
         .doc(notificationId)
         .update({"isRead": true});
+  }
+
+  static Future<void> markAllAsRead() async {
+    final uid = userId;
+    if (uid == null) return;
+
+    final unreadSnapshot = await _firestore
+        .collection("users")
+        .doc(uid)
+        .collection("notifications")
+        .where("isRead", isEqualTo: false)
+        .get();
+
+    if (unreadSnapshot.docs.isEmpty) return;
+
+    final batch = _firestore.batch();
+    for (final doc in unreadSnapshot.docs) {
+      batch.update(doc.reference, {"isRead": true});
+    }
+    await batch.commit();
   }
 }
 
