@@ -8,6 +8,7 @@ class ClinicModel {
   final String category;
   final String lat;
   final String lng;
+  final String subscriptionStatus;
 
   ClinicModel({
     required this.id,
@@ -19,6 +20,7 @@ class ClinicModel {
     required this.category,
     required this.lat,
     required this.lng,
+    required this.subscriptionStatus
   });
 
   factory ClinicModel.fromFirestore(
@@ -35,6 +37,7 @@ class ClinicModel {
       category: data['category'] ?? 'General',
       lat: (data['latitude'] ?? '0').toString(),
       lng: (data['longitude'] ?? '0').toString(),
+      subscriptionStatus: data['subscriptionStatus'] ?? '',
     );
   }
 }
