@@ -150,7 +150,7 @@ class _BusinessDetailsContent extends StatelessWidget {
                           serviceData['serviceName']?.toString() ?? 'Service';
                       final bool isActive = serviceData['isActive'] == true;
                       final int currentTicket =
-                          (serviceData['currentTicket'] as num?)?.toInt() ??
+                          (serviceData['lastGeneratedTicket'] as num?)?.toInt() ??
                           (serviceData['currentlyInService'] as num?)
                               ?.toInt() ??
                           0;
