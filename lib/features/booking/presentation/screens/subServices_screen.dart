@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:taborq/core/services/remote/location_helper.dart';
 import 'package:taborq/core/utils/app_colors.dart';
 import 'package:taborq/core/utils/app_text_styles.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_cubit.dart';
 import 'package:taborq/features/business_datails/cubit/business_details_state.dart';
+import 'package:taborq/core/services/remote/location_helper.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_cubit.dart';
 import 'package:taborq/features/booking/presentation/cubit/booking_state.dart';
 import 'package:taborq/features/notifications/presentation/cubit/notification_cubit.dart';
@@ -38,6 +38,187 @@ class SubServicesScreen extends StatelessWidget {
       backgroundColor: backgroundColor,
       textColor: Colors.white,
       fontSize: 14.0,
+    );
+  }
+
+  double? _parseCoordinate(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      final normalized = value.trim();
+      if (normalized.isEmpty ||
+          normalized.toLowerCase() == 'null' ||
+          normalized.toLowerCase() == 'false' ||
+          normalized.toLowerCase() == 'true') {
+        return null;
+      }
+      return double.tryParse(normalized);
+    }
+    return null;
+  }
+
+  ({double? lat, double? lng}) _resolveCoordinates(
+    BuildContext context,
+    Map<String, dynamic> serviceData,
+  ) {
+    double? resolvedLat;
+    double? resolvedLng;
+
+    final state = context.read<BusinessDetailsCubit>().state;
+    if (state is BusinessDetailsLoaded) {
+      resolvedLat = state.latitude;
+      resolvedLng = state.longitude;
+    }
+
+    resolvedLat ??= _parseCoordinate(this.lat);
+    resolvedLng ??= _parseCoordinate(this.lng);
+
+    if (resolvedLat == null || resolvedLng == null) {
+      final location = serviceData['location'];
+      if (location is Map) {
+        resolvedLat ??= _parseCoordinate(location['lat']);
+        resolvedLng ??= _parseCoordinate(location['lng']);
+      }
+
+      resolvedLat ??= _parseCoordinate(
+        serviceData['latitude'] ?? serviceData['lat'],
+      );
+      resolvedLng ??= _parseCoordinate(
+        serviceData['longitude'] ?? serviceData['lng'],
+      );
+    }
+
+    return (lat: resolvedLat, lng: resolvedLng);
+  }
+
+  Widget _buildLocationPreview(
+    BuildContext context,
+    Map<String, dynamic> serviceData,
+  ) {
+    final coordinates = _resolveCoordinates(context, serviceData);
+    final parsedLat = coordinates.lat ?? 0.0;
+    final parsedLng = coordinates.lng ?? 0.0;
+    final markerLeft = ((parsedLng + 180) / 360).clamp(0.0, 1.0).toDouble();
+    final markerTop = ((90 - parsedLat) / 180).clamp(0.0, 1.0).toDouble();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Destination preview",
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: () async {
+            final coordinates = _resolveCoordinates(context, serviceData);
+            if (coordinates.lat != null && coordinates.lng != null) {
+              await confirmOpenLocationOnMap(
+                context,
+                coordinates.lat!,
+                coordinates.lng!,
+              );
+            } else {
+              _showStatusToast(
+                message: 'Location coordinates not available',
+                backgroundColor: Colors.red.shade700,
+              );
+            }
+          },
+          child: SizedBox(
+            height: 190,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primaryColor.withOpacity(0.18),
+                            AppColors.primaryColor.withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: CustomPaint(painter: _MapPreviewPainter()),
+                    ),
+                  ),
+                  Positioned(
+                    left: MediaQuery.of(context).size.width * markerLeft * 0.8,
+                    top: 56 + (markerTop * 70),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.redAccent,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 14,
+                    right: 14,
+                    bottom: 14,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.94),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.directions,
+                            size: 18,
+                            color: AppColors.primaryColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Tap to open in Google Maps",
+                              style: AppTextStyles.textStyle12.copyWith(
+                                color: AppColors.neutralColor4,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -88,6 +269,7 @@ class SubServicesScreen extends StatelessWidget {
                   notificationCubit: context.read<NotificationCubit>(),
                   serviceName: state.serviceName,
                   businessName: state.businessName,
+                  bookingTime: state.bookingTime,
                 );
 
                 _showStatusToast(
@@ -221,26 +403,7 @@ class SubServicesScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 16,
-                            color: AppColors.neutralColor4,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              "1221 Serenity Blvd, North District, Floor 4, Suite 200",
-                              style: AppTextStyles.textStyle12.copyWith(
-                                color: AppColors.neutralColor4,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildLocationPreview(context, serviceData),
                       const SizedBox(height: 24),
                       _buildDesignInfoCards(waitTime.toString()),
                       const SizedBox(height: 28),
@@ -307,15 +470,7 @@ class SubServicesScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                       ],
-                      Text(
-                        "Location Map",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildStaticMapCard(lat, lng, context),
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -437,60 +592,50 @@ class SubServicesScreen extends StatelessWidget {
     if (lower.contains('vaccin')) return Icons.vaccines_outlined;
     return Icons.check_circle_outline;
   }
+}
 
-  Widget _buildStaticMapCard(String lat, String lng, BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Prefer live coordinates from BusinessDetailsCubit if available
-        final state = context.read<BusinessDetailsCubit>().state;
-        double? latitude;
-        double? longitude;
+class _MapPreviewPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final backgroundPaint = Paint()
+      ..color = Colors.white.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(Offset.zero & size, backgroundPaint);
 
-        if (state is BusinessDetailsLoaded) {
-          latitude = state.latitude;
-          longitude = state.longitude;
-        }
+    final gridPaint = Paint()
+      ..color = AppColors.primaryColor.withOpacity(0.12)
+      ..strokeWidth = 1;
 
-        // If cubit didn't provide coordinates, fall back to provided route args
-        if (latitude == null || longitude == null) {
-          if (lat.isNotEmpty && lng.isNotEmpty) {
-            latitude = double.tryParse(lat);
-            longitude = double.tryParse(lng);
-          }
-        }
+    for (double x = 0; x <= size.width; x += 24) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
+    }
+    for (double y = 0; y <= size.height; y += 24) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    }
 
-        if (latitude != null && longitude != null) {
-          confirmOpenLocationOnMap(context, latitude, longitude);
-        } else {
-          _showStatusToast(
-            message: 'Location coordinates not available',
-            backgroundColor: Colors.red.shade700,
-          );
-        }
-      },
-      child: Container(
-        height: 160,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.neutralColor6.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(28),
-        ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-            ),
-            child: const Icon(
-              Icons.location_on,
-              color: AppColors.primaryColor,
-              size: 28,
-            ),
-          ),
-        ),
-      ),
-    );
+    final pathPaint = Paint()
+      ..color = AppColors.primaryColor.withOpacity(0.2)
+      ..style = PaintingStyle.fill;
+    final roadPath = Path()
+      ..moveTo(0, size.height * 0.24)
+      ..quadraticBezierTo(
+        size.width * 0.3,
+        size.height * 0.18,
+        size.width * 0.42,
+        size.height * 0.28,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.62,
+        size.height * 0.38,
+        size.width,
+        size.height * 0.2,
+      )
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(roadPath, pathPaint);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
