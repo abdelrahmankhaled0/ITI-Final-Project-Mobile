@@ -144,8 +144,9 @@ You are continuing an ONGOING conversation. The prior turns are provided to you 
 CRITICAL INSTRUCTIONS:
 1. GREETINGS: Only on the first message of the conversation (per CONVERSATION CONTEXT above), reply warmly and introduce yourself briefly and professionally, and set "is_booking_proposal" to false.
 2. SERVICE SUGGESTIONS: If the user asks for general suggestions (no specific business named), recommend the most relevant matches and include the exact service details in the "suggested_services" array so the app can display them as clickable visual cards.
-2b. BUSINESS-SPECIFIC REQUESTS (STRICT FILTER — applies to text, voice, AND image): If the user names or asks about ONE specific business — in any language, spelling, or transliteration (e.g. "EverGlow", "ايفر جلو", "إيفرجلو", "evergrow") — you must return ONLY that business's services in "suggested_services", and your "reply" must talk ONLY about that business. Do not include, mention, or mix in services from any other business, even if they seem relevant or popular. Match the name against AVAILABLE BUSINESSES leniently (typos, transliteration, partial names are fine), but once you identify the business, filter to it exclusively. If that business genuinely has no listed services, say so honestly instead of substituting services from elsewhere. If no business in AVAILABLE BUSINESSES reasonably matches the name mentioned, tell the user clearly that you couldn't find it — never guess or return unrelated businesses instead.
-3. MULTIMODAL (IMAGES/VOICE): If the user uploads an image or voice, analyze it carefully (e.g., if it's handwriting like "EverGlow", read it and suggest their services) — and remember to follow both the LANGUAGE POLICY above and the BUSINESS-SPECIFIC FILTER (2b) based on what you detect in that image or audio.
+2b. BUSINESS-SPECIFIC REQUESTS (STRICT FILTER — applies to text, voice, AND image): If the user names or asks about ONE specific business — in any language, spelling, or transliteration (e.g. "Acme Wellness", "اسم العيادة الفلاني", or any mistyped/transliterated variant of a business's actual name) — you must return ONLY that business's services in "suggested_services", and your "reply" must talk ONLY about that business. Do not include, mention, or mix in services from any other business, even if they seem relevant or popular. Match the name ONLY against the businessName values listed in AVAILABLE BUSINESSES below (typos, transliteration, partial names are fine when matching against THOSE real names) — but once you identify the business, filter to it exclusively. If that business genuinely has no listed services, say so honestly instead of substituting services from elsewhere.
+CRITICAL ANTI-GUESSING RULE: The example names above ("Acme Wellness", etc.) are illustrations of the MATCHING STYLE only — they are NOT real businesses and must never be treated as valid matches. A real business name only counts if it actually appears in AVAILABLE BUSINESSES below for THIS request. If you are not reasonably confident which real business the user meant, or if no business in AVAILABLE BUSINESSES reasonably matches what was said/written, you MUST tell the user clearly that you couldn't find it. Never substitute, guess, or default to any other business name — including ones that may have come up earlier in this conversation or in these instructions — just because it's familiar or convenient.3. MULTIMODAL (IMAGES/VOICE): If the user uploads an image or voice, analyze it carefully (e.g., if it's handwriting like "EverGlow", read it and suggest their services) — and remember to follow both the LANGUAGE POLICY above and the BUSINESS-SPECIFIC FILTER (2b) based on what you detect in that image or audio.
+NOTE: The list above is the COMPLETE and ONLY set of valid businesses for this request. Any business name not in this exact list does not exist in our system, regardless of how similar it sounds to a known brand or to anything mentioned earlier.
 4. BOOKING CONFIGURATION: When the user decides to book, output an accurate "bookingTime" based on the Current Real Time provided above.
 5. PROFESSIONAL TONE: Avoid overly casual slang in either language. Be concise, confident, and helpful — like a well-trained human receptionist, not a generic chatbot.
 
@@ -232,16 +233,39 @@ Always return valid JSON only. Do not wrap response in markdown code blocks.
       });
     }
 
-    if (req.files && req.files['voice']) {
-      const voiceFile = req.files['voice'][0];
-      let mime = voiceFile.mimetype;
-      if (!mime || mime.includes('octet-stream')) mime = 'audio/mp4';
+//    if (req.files && req.files['voice']) {
+//      const voiceFile = req.files['voice'][0];
+//      let mime = voiceFile.mimetype;
+//      if (!mime || mime.includes('octet-stream')) mime = 'audio/mp4';
+//
+//      const audioPart = fileToGenerativePart(voiceFile.path, mime);
+//      currentParts.push(audioPart);
+//      currentParts.push({ text: "Analyze this voice note, detect the language spoken (Arabic or English), and respond to the user's request fully in that same language, per the LANGUAGE POLICY. If a specific business name is mentioned in the audio, apply the BUSINESS-SPECIFIC FILTER (rule 2b): return services for that business ONLY, ignoring all others." });
+//      fs.unlinkSync(voiceFile.path);
+//    }
 
-      const audioPart = fileToGenerativePart(voiceFile.path, mime);
-      currentParts.push(audioPart);
-      currentParts.push({ text: "Analyze this voice note, detect the language spoken (Arabic or English), and respond to the user's request fully in that same language, per the LANGUAGE POLICY. If a specific business name is mentioned in the audio, apply the BUSINESS-SPECIFIC FILTER (rule 2b): return services for that business ONLY, ignoring all others." });
-      fs.unlinkSync(voiceFile.path);
-    }
+       // معالجة الملف الصوتي
+           if (req.files && req.files['voice'] && req.files['voice'].length > 0) {
+             const voiceFile = req.files['voice'][0];
+             let mime = voiceFile.mimetype;
+
+             // 👈 هنا بنعالج مشكلة الـ octet-stream اللي جاية من فلاتر
+             // Gemini بيحتاج 'audio/mp4' عشان يقدر يحلل ملفات الـ .m4a بشكل صحيح
+             if (!mime || mime.includes('octet-stream')) {
+               mime = 'audio/mp4';
+             }
+
+             console.log(`🎤 Sending Audio to Gemini: Size = ${voiceFile.size} bytes, Mime = ${mime}`);
+
+             const audioPart = fileToGenerativePart(voiceFile.path, mime);
+             currentParts.push(audioPart);
+             currentParts.push({
+               text: "Analyze this voice note, detect the language spoken (Arabic or English), and respond to the user's request fully in that same language, per the LANGUAGE POLICY. If a specific business name is mentioned in the audio, apply the BUSINESS-SPECIFIC FILTER (rule 2b): return services for that business ONLY, ignoring all others."
+             });
+
+             // مسح الملف من السيرفر بعد ما ضفناه للـ prompt
+             fs.unlinkSync(voiceFile.path);
+           }
 
     if (req.files && req.files['image']) {
       const imageFile = req.files['image'][0];
@@ -332,128 +356,3 @@ app.listen(PORT, () => {
 });
 
 
-//import express from 'express';
-//import cors from 'cors';
-//import dotenv from 'dotenv';
-//import multer from 'multer';
-//import fs from 'fs';
-//import { initializeApp, cert } from 'firebase-admin/app';
-//import { getFirestore } from 'firebase-admin/firestore';
-//import { GoogleGenerativeAI } from '@google/generative-ai';
-//
-//dotenv.config();
-//
-//const serviceAccount = JSON.parse(fs.readFileSync('./serviceAccountKey.json', 'utf8'));
-//initializeApp({ credential: cert(serviceAccount) });
-//const db = getFirestore();
-//
-//const app = express();
-//app.use(cors());
-//app.use(express.json());
-//
-//const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-//const upload = multer({ dest: 'uploads/' });
-//
-//// تنظيف الملفات المرفوعة بعد الاستخدام لضمان عدم امتلاء السيرفر
-//function cleanupFiles(files) {
-//  if (!files) return;
-//  Object.values(files).forEach(fileArray => {
-//    fileArray.forEach(file => {
-//      try {
-//        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-//      } catch (err) {
-//        console.error(`Error cleaning up file ${file.path}:`, err);
-//      }
-//    });
-//  });
-//}
-//
-//// دالة ذكية لإعادة المحاولة عند حدوث ضغط (503) أو تجاوز للحد (429)
-//async function generateWithRetry(model, contents, retries = 3) {
-//  for (let i = 0; i < retries; i++) {
-//    try {
-//      return await model.generateContent({ contents });
-//    } catch (error) {
-//      const isRetryable = error.status === 503 || error.status === 429;
-//      if (isRetryable && i < retries - 1) {
-//        const delay = Math.pow(2, i) * 1000;
-//        console.warn(`Gemini busy/quota exceeded. Retrying in ${delay}ms... (Attempt ${i + 1}/${retries})`);
-//        await new Promise(res => setTimeout(res, delay));
-//        continue;
-//      }
-//      throw error;
-//    }
-//  }
-//}
-//
-//function detectLanguage(text) {
-//  if (!text || !text.trim()) return null;
-//  const arabicPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/;
-//  return arabicPattern.test(text) ? 'ar' : 'en';
-//}
-//
-//app.post('/api/chat', upload.fields([{ name: 'voice', maxCount: 1 }, { name: 'image', maxCount: 1 }]), async (req, res) => {
-//  try {
-//    const { userId, userName, message, history } = req.body;
-//    let chatHistory = history ? JSON.parse(history) : [];
-//    const isFirstMessage = chatHistory.length === 0;
-//
-//    // 1. جلب بيانات البيزنس (Firestore)
-//    const businessSnapshot = await db.collection('businesses').where('isOperational', '==', true).get();
-//    const realBusinesses = await Promise.all(businessSnapshot.docs.map(async (doc) => {
-//      const data = doc.data();
-//      const servicesSnapshot = await doc.ref.collection('services').get();
-//      return {
-//        businessId: doc.id,
-//        businessName: data.name,
-//        services: servicesSnapshot.docs.map(s => ({
-//            serviceId: s.id,
-//            serviceName: s.data().name || s.data().serviceName || "خدمة عامة",
-//            serviceImage: s.data().imageURI || s.data().imageUrl || "https://placedog.net/500"
-//        }))
-//      };
-//    }));
-//
-//    // 2. إعداد الموديل
-//    const model = genAI.getGenerativeModel({
-//      model: "gemini-2.5-flash",
-//      systemInstruction: `
-//        You are Taborq's Professional AI Assistant.
-//        - STRICT RULE: Greet ONLY on the first message. Never greet or introduce yourself again in continued turns.
-//        - BUSINESS FILTER: If the user names a specific business, show ONLY its services. Do not suggest services from other businesses.
-//        - LANGUAGE: Detect user language (Arabic/English) and reply exclusively in that language.
-//        - DATABASE CONTEXT: ${JSON.stringify(realBusinesses)}
-//      `,
-//      generationConfig: { responseMimeType: "application/json" }
-//    });
-//
-//    // 3. إعداد المحتوى للإرسال
-//    let contents = [
-//        { text: isFirstMessage ? "GREETING: Welcome the user and introduce Taborq." : "CONTINUATION: Respond directly. Do not greet." },
-//        { text: `User Message: ${message}` }
-//    ];
-//
-//    // 4. استدعاء الموديل مع Retry Logic
-//    const result = await generateWithRetry(model, contents);
-//    let responseText = result.response.text();
-//
-//    // تنظيف JSON
-//    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-//    const aiOutput = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
-//
-//    return res.status(200).json(aiOutput);
-//
-//  } catch (error) {
-//    console.error('Final Backend Error:', error);
-//    return res.status(200).json({
-//      is_booking_proposal: false,
-//      reply: 'عذراً، النظام مشغول حالياً. من فضلك حاول مرة أخرى بعد لحظات. (Error: ' + (error.status || 'Unknown') + ')'
-//    });
-//  } finally {
-//    // 5. التنظيف الاحترافي
-//    cleanupFiles(req.files);
-//  }
-//});
-//
-//const PORT = process.env.PORT || 5000;
-//app.listen(PORT, () => console.log(`Taborq Backend running on ${PORT}`));

@@ -748,17 +748,17 @@ class _BookingConfirmationCardState extends State<_BookingConfirmationCard> {
                   data['serviceName'] ?? 'General Consultation',
                   isDark,
                 ),
-                const SizedBox(height: 10),
-                _buildCardRow(
-                  Icons.access_time_filled_rounded,
-                  "Requested Time",
-                  data['bookingTime'] != null
-                      ? DateFormat(
-                          'EEEE, MMM d - hh:mm a',
-                        ).format(DateTime.parse(data['bookingTime']))
-                      : 'As soon as possible',
-                  isDark,
-                ),
+                // const SizedBox(height: 10),
+                // _buildCardRow(
+                //   Icons.access_time_filled_rounded,
+                //   "Requested Time",
+                //   data['bookingTime'] != null
+                //       ? DateFormat(
+                //           'EEEE, MMM d - hh:mm a',
+                //         ).format(DateTime.parse(data['bookingTime']))
+                //       : 'As soon as possible',
+                //   isDark,
+                // ),
                 const SizedBox(height: 4),
                 Text(
                   "You'll join the live queue — your actual turn depends on how many people are ahead of you when you confirm.",
