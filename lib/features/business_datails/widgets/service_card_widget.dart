@@ -63,11 +63,11 @@ class ServiceCard extends StatelessWidget {
                     fontSize: 18,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Current Ticket: $currentTicket',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                // const SizedBox(height: 4),
+                // Text(
+                //   'Current Ticket: $currentTicket',
+                //   style: Theme.of(context).textTheme.bodyMedium,
+                // ),
               ],
             ),
           ),
