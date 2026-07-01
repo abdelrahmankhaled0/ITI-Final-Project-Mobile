@@ -116,12 +116,14 @@ class BookingCubit extends Cubit<BookingState> {
             businessName: businessName,
             serviceName: serviceName,
             avgServiceTime: avgServiceTime,
+            bookingTime: _toDateTime(existingTicket.data()?['bookingTime']),
           ),
         );
         return;
       }
 
       // 4️⃣ الـ Transaction لتحديث الـ Counter وحفظ التذكرة
+      final bookingTimestamp = DateTime.now();
       int currentInService = 0;
       int finalTicketCode = await _firestore.runTransaction<int>((
         transaction,
@@ -152,7 +154,7 @@ class BookingCubit extends Cubit<BookingState> {
           serviceId: serviceId,
           serviceName: serviceName,
           ticketNumber: updatedTicket,
-          bookingTime: DateTime.now(),
+          bookingTime: bookingTimestamp,
           status: 'pending',
           phone: userPhone,
           bussinessName: businessName, // ✅ متناسق مع المتغير المعدل
@@ -180,6 +182,7 @@ class BookingCubit extends Cubit<BookingState> {
         ticketNumber: finalTicketCode,
         avgServiceTime: avgServiceTime,
         currentInService: currentInService,
+        bookingTime: bookingTimestamp,
       );
 
       // Start listening for queue updates for the newly booked ticket
@@ -192,6 +195,7 @@ class BookingCubit extends Cubit<BookingState> {
         notificationCubit: notificationCubit,
         serviceName: serviceName,
         businessName: businessName,
+        bookingTime: bookingTimestamp,
       );
     } catch (e) {
       emit(BookingFailure(errorMessage: "Booking failed: ${e.toString()}"));
@@ -251,53 +255,89 @@ class BookingCubit extends Cubit<BookingState> {
     required int ticketNumber,
     required int avgServiceTime,
     required int currentInService,
+    required DateTime bookingTime,
   }) {
     final peopleAhead = ticketNumber - currentInService - 1;
+    final isDuringWorkingHours = _isDuringWorkingHours(bookingTime);
     final estimatedStartTime = _estimatedServiceStartTime(
       peopleAhead,
       avgServiceTime,
+      bookingTime,
     );
     final formattedTime = DateFormat('h:mm a').format(estimatedStartTime);
     final waitDurationText = _formatDuration(
       Duration(minutes: peopleAhead * avgServiceTime),
     );
 
-    final now = DateTime.now();
-    final isTomorrow = now.hour >= 15;
-    final dayLabel = isTomorrow ? "tomorrow" : "today";
+    final String title;
+    final String body;
 
-    final String title = 'Booking confirmed for $serviceName';
-    final String body =
-        'Current serving: Q-$currentInService. There are $peopleAhead people ahead of you. Your ticket Q-$ticketNumber at $businessName is confirmed. Expected $dayLabel around $formattedTime ($waitDurationText waiting time).';
+    if (ticketNumber <= 1 && peopleAhead <= 0 && !isDuringWorkingHours) {
+      title = 'First in line • Opening soon';
+      body =
+          'Ticket Number: Q-$ticketNumber\nLive People Ahead: 0\nExpected Turn Time: $formattedTime\nPlease ensure your presence at the business location right at the start of opening hours, as you are the first in line.';
+    } else if (ticketNumber <= 1 && peopleAhead <= 0 && isDuringWorkingHours) {
+      title = "It's your turn right now! 🎉";
+      body =
+          'Ticket Number: Q-$ticketNumber\nLive People Ahead: 0\nExpected Turn Time: Right now\nIt\'s your turn right now! Please proceed to the service desk immediately.';
+    } else {
+      title = 'Booking confirmed for $serviceName';
+      body =
+          'Ticket Number: Q-$ticketNumber\nLive People Ahead: $peopleAhead\nExpected Turn Time: $formattedTime\nCurrent serving: Q-$currentInService. Your ticket is confirmed and you are expected around $formattedTime ($waitDurationText waiting time).';
+    }
 
     NotificationService().showNotification(id: 100, title: title, body: body);
 
-    // 👈 تمرير ترو أو فولس للـ isRead لتمييز الإشعار الجديد بنقطة في الـ UI
     notificationCubit.addNotification(
       title: title,
       body: body,
       serviceName: serviceName,
       businessName: businessName,
-      isRead: false, // الإشعار لسه جديد ومنور
+      isRead: false,
     );
   }
 
-  DateTime _estimatedServiceStartTime(int ahead, int avgServiceTime) {
-    final baseStartTime = _getQueueBaseStartTime();
-    return baseStartTime.add(Duration(minutes: ahead * avgServiceTime));
+  bool _isDuringWorkingHours(DateTime time) {
+    return time.hour >= 9 && time.hour < 17;
   }
 
-  DateTime _getQueueBaseStartTime() {
-    final now = DateTime.now();
-    if (now.hour >= 15) {
-      final tomorrow = now.add(const Duration(days: 1));
-      return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 9, 0);
+  DateTime _getQueueBaseStartTime(DateTime bookingTime) {
+    if (_isDuringWorkingHours(bookingTime)) {
+      return bookingTime;
     }
-    final nineAMToday = DateTime(now.year, now.month, now.day, 9, 0);
-    if (now.isBefore(nineAMToday)) {
-      return nineAMToday;
+
+    final openingToday = DateTime(
+      bookingTime.year,
+      bookingTime.month,
+      bookingTime.day,
+      9,
+      0,
+    );
+    if (bookingTime.isBefore(openingToday)) {
+      return openingToday;
     }
-    return now;
+
+    final nextOpeningDay = DateTime(
+      bookingTime.year,
+      bookingTime.month,
+      bookingTime.day,
+    ).add(const Duration(days: 1));
+    return DateTime(
+      nextOpeningDay.year,
+      nextOpeningDay.month,
+      nextOpeningDay.day,
+      9,
+      0,
+    );
+  }
+
+  DateTime _estimatedServiceStartTime(
+    int ahead,
+    int avgServiceTime,
+    DateTime bookingTime,
+  ) {
+    final baseStartTime = _getQueueBaseStartTime(bookingTime);
+    return baseStartTime.add(Duration(minutes: ahead * avgServiceTime));
   }
 
   String _formatDuration(Duration duration) {
@@ -317,6 +357,7 @@ class BookingCubit extends Cubit<BookingState> {
     required NotificationCubit notificationCubit,
     required String serviceName,
     required String businessName,
+    DateTime? bookingTime,
   }) {
     final key = '${businessId}_${serviceId}_$userTurnNumber';
 
@@ -373,7 +414,9 @@ class BookingCubit extends Cubit<BookingState> {
             return;
           }
 
-          if (currentlyInService == _lastNotifiedActiveTurnMap[key]) {
+          final bool turnChanged =
+              currentlyInService != (_lastNotifiedActiveTurnMap[key] ?? -1);
+          if (!turnChanged) {
             return;
           }
 
@@ -383,6 +426,8 @@ class BookingCubit extends Cubit<BookingState> {
                 notificationCubit: notificationCubit,
                 businessName: businessName,
                 serviceName: serviceName,
+                ticketNumber: userTurnNumber,
+                bookingTime: bookingTime,
               );
               _yourTurnNotifiedMap[key] = true;
             }
@@ -393,8 +438,24 @@ class BookingCubit extends Cubit<BookingState> {
                 notificationCubit: notificationCubit,
                 businessName: businessName,
                 serviceName: serviceName,
+                ticketNumber: userTurnNumber,
+                ahead: peopleAhead,
+                avgServiceTime: avgServiceTime,
+                bookingTime: bookingTime,
               );
               _movementNotifiedMap[key] = true;
+            } else {
+              _triggerQueueUpdateNotification(
+                businessName: businessName,
+                serviceName: serviceName,
+                ticketNumber: userTurnNumber,
+                currentActive: currentlyInService,
+                ahead: peopleAhead,
+                waitingTime: estimatedWaitingTime,
+                notificationCubit: notificationCubit,
+                avgServiceTime: avgServiceTime,
+                bookingTime: bookingTime,
+              );
             }
           } else {
             _triggerQueueUpdateNotification(
@@ -406,6 +467,7 @@ class BookingCubit extends Cubit<BookingState> {
               waitingTime: estimatedWaitingTime,
               notificationCubit: notificationCubit,
               avgServiceTime: avgServiceTime,
+              bookingTime: bookingTime,
             );
           }
 
@@ -489,6 +551,16 @@ class BookingCubit extends Cubit<BookingState> {
     return 0;
   }
 
+  DateTime _toDateTime(dynamic v) {
+    if (v is Timestamp) return v.toDate();
+    if (v is DateTime) return v;
+    if (v is String) {
+      final parsed = DateTime.tryParse(v);
+      if (parsed != null) return parsed;
+    }
+    return DateTime.now();
+  }
+
   void _triggerQueueUpdateNotification({
     required int ticketNumber,
     required int currentActive,
@@ -498,19 +570,20 @@ class BookingCubit extends Cubit<BookingState> {
     required NotificationCubit notificationCubit,
     required String businessName,
     required String serviceName,
+    DateTime? bookingTime,
   }) {
-    final now = DateTime.now();
-    final isTomorrow = now.hour >= 15;
-    final dayLabel = isTomorrow ? "tomorrow" : "today";
-
-    final expectedTurnTime = _estimatedServiceStartTime(ahead, avgServiceTime);
+    final effectiveBookingTime = bookingTime ?? DateTime.now();
+    final expectedTurnTime = _estimatedServiceStartTime(
+      ahead,
+      avgServiceTime,
+      effectiveBookingTime,
+    );
     final formattedTime = DateFormat('h:mm a').format(expectedTurnTime);
-    final remainingDuration = Duration(minutes: ahead * avgServiceTime);
-    final waitDurationText = _formatDuration(remainingDuration);
+    final waitDurationText = _formatDuration(Duration(minutes: waitingTime));
 
-    final String title = "Queue Update - Ticket Q-$ticketNumber";
+    final String title = "Queue Update • Ticket Q-$ticketNumber";
     final String body =
-        "Current serving: Q-$currentActive. There are $ahead people ahead of you. Your turn for $serviceName at $businessName is expected $dayLabel around $formattedTime ($waitDurationText waiting time).";
+        'Ticket Number: Q-$ticketNumber\nLive People Ahead: $ahead\nExpected Turn Time: $formattedTime\nCurrent serving: Q-$currentActive. Your estimated wait is $waitDurationText.';
 
     NotificationService().showNotification(id: 101, title: title, body: body);
     notificationCubit.addNotification(
@@ -527,10 +600,21 @@ class BookingCubit extends Cubit<BookingState> {
     required NotificationCubit notificationCubit,
     required String businessName,
     required String serviceName,
+    required int ticketNumber,
+    required int ahead,
+    required int avgServiceTime,
+    DateTime? bookingTime,
   }) {
-    String title = "Time to move! 🏃‍♂️";
-    String body =
-        "Only $waitingTime minutes left for $serviceName at $businessName. Please start moving now to arrive on time!";
+    final effectiveBookingTime = bookingTime ?? DateTime.now();
+    final expectedTurnTime = _estimatedServiceStartTime(
+      ahead,
+      avgServiceTime,
+      effectiveBookingTime,
+    );
+    final formattedTime = DateFormat('h:mm a').format(expectedTurnTime);
+    const String title = "Time to move! 🏃‍♂️";
+    final String body =
+        'Ticket Number: Q-$ticketNumber\nLive People Ahead: $ahead\nExpected Turn Time: $formattedTime\nOnly $waitingTime minutes left before your turn. Please start moving now to arrive on time.';
 
     NotificationService().showNotification(id: 102, title: title, body: body);
     notificationCubit.addNotification(
@@ -546,10 +630,12 @@ class BookingCubit extends Cubit<BookingState> {
     required NotificationCubit notificationCubit,
     required String businessName,
     required String serviceName,
+    required int ticketNumber,
+    DateTime? bookingTime,
   }) {
-    String title = "It's your turn! 🎉";
-    String body =
-        "Please proceed immediately to $serviceName at $businessName, you are being called now.";
+    const String title = "It's your turn right now! 🎉";
+    final String body =
+        'Ticket Number: Q-$ticketNumber\nLive People Ahead: 0\nExpected Turn Time: Right now\nIt\'s your turn right now! Please proceed to the service desk immediately.';
 
     NotificationService().showNotification(id: 103, title: title, body: body);
     notificationCubit.addNotification(
@@ -643,6 +729,7 @@ class BookingCubit extends Cubit<BookingState> {
           notificationCubit: notificationCubit,
           serviceName: serviceName,
           businessName: businessName,
+          bookingTime: _toDateTime(data['bookingTime']),
         );
       }
     } catch (e) {

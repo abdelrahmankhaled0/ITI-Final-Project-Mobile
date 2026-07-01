@@ -10,6 +10,7 @@ class BookingAlreadyBookedState extends BookingState {
   final String businessName;
   final String serviceName;
   final int avgServiceTime;
+  final DateTime? bookingTime;
 
   BookingAlreadyBookedState({
     required this.ticketCode,
@@ -17,6 +18,7 @@ class BookingAlreadyBookedState extends BookingState {
     required this.businessName,
     required this.serviceName,
     required this.avgServiceTime,
+    this.bookingTime,
   });
 }
 
